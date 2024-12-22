@@ -141,30 +141,6 @@ def test_start_ssh_agent(mock_run, ssh_manager, temp_dir):
     assert ssh_manager._start_ssh_agent(identity_file) is True
 
 
-@patch("subprocess.run")
-def test_setup_ssh(mock_run, ssh_manager, temp_dir):
-    """Test SSH setup for a host."""
-    # Create a mock identity file
-    identity_file = os.path.join(temp_dir, "test_key")
-    with open(identity_file, "w") as f:
-        f.write("mock key")
-
-    # Mock successful command execution
-    def mock_run_side_effect(*args, **kwargs):
-        if args[0][0] == "ssh-agent":
-            return MagicMock(
-                returncode=0,
-                stdout="SSH_AUTH_SOCK=/tmp/ssh.sock; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
-            )
-        elif args[0][0] == "ssh":
-            return MagicMock(returncode=1)  # GitHub returns 1 for successful auth
-        return MagicMock(returncode=0)
-
-    mock_run.side_effect = mock_run_side_effect
-
-    # Mock identity file resolution
-    with patch.object(ssh_manager, "_get_identity_file", return_value=identity_file):
-        assert ssh_manager.setup_ssh("github.com") is True
 
 
 @patch("subprocess.run")
@@ -205,6 +181,21 @@ def test_setup_ssh_failures(mock_run: MagicMock, ssh_manager, temp_dir):
             return MagicMock(returncode=0)
 
         mock_run.side_effect = mock_run_ssh_failure
+        assert ssh_manager.setup_ssh("github.com") is False
+
+    # Test with command execution failure (returns None)
+    with patch.object(ssh_manager, "_get_identity_file", return_value=identity_file):
+        def mock_run_none(*args, **kwargs):
+            if args[0][0] == "ssh-agent":
+                return MagicMock(
+                    returncode=0,
+                    stdout="SSH_AUTH_SOCK=/tmp/ssh.sock; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
+                )
+            elif args[0][0] == "ssh":
+                return None  # Simulate command execution failure
+            return MagicMock(returncode=0)
+
+        mock_run.side_effect = mock_run_none
         assert ssh_manager.setup_ssh("github.com") is False
 
 
@@ -355,6 +346,20 @@ def test_start_ssh_agent_errors(mock_run, ssh_manager, temp_dir):
         return MagicMock(returncode=0)
 
     mock_run.side_effect = mock_run_side_effect
+    assert ssh_manager._start_ssh_agent(identity_file) is False
+
+    # Test command execution failure (returns None)
+    def mock_run_none(*args, **kwargs):
+        if args[0][0] == "ssh-agent":
+            return MagicMock(
+                returncode=0,
+                stdout="SSH_AUTH_SOCK=/tmp/ssh.sock; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
+            )
+        elif args[0][0] == "ssh-add":
+            return None  # Simulate command execution failure
+        return MagicMock(returncode=0)
+
+    mock_run.side_effect = mock_run_none
     assert ssh_manager._start_ssh_agent(identity_file) is False
 
 
@@ -998,3 +1003,113 @@ Host example.com
 
     # Check that invalid entries are skipped
     assert "invalid.com" not in config
+
+def test_start_ssh_agent_key_already_loaded(ssh_manager, temp_dir):
+    """Test SSH agent startup when key is already loaded."""
+    identity_file = os.path.join(temp_dir, "test_key")
+    with open(identity_file, "w") as f:
+        f.write("mock key")
+
+    with patch("subprocess.run") as mock_run:
+        # Mock that agent is started and key is already loaded
+        ssh_manager._ssh_agent_started = True
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout=f"2048 SHA256:xxx {identity_file} (RSA)"
+        )
+        
+        assert ssh_manager._start_ssh_agent(identity_file) is True
+        mock_run.assert_called_once_with(
+            ["ssh-add", "-l"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+
+def test_start_ssh_agent_parse_error(ssh_manager, temp_dir):
+    """Test SSH agent startup with environment variable parsing error."""
+    identity_file = os.path.join(temp_dir, "test_key")
+    with open(identity_file, "w") as f:
+        f.write("mock key")
+
+    with patch("subprocess.run") as mock_run:
+        # Return malformed agent output
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="Invalid output format"
+        )
+        
+        assert ssh_manager._start_ssh_agent(identity_file) is False
+
+def test_ssh_setup_with_invalid_key(ssh_manager, temp_dir, monkeypatch):
+    """Test SSH setup with invalid key file."""
+    monkeypatch.setattr(ssh_manager, "_get_identity_file", 
+                       lambda x: os.path.join(temp_dir, "nonexistent_key"))
+    
+    assert ssh_manager.setup_ssh("github.com") is False
+
+def test_ssh_setup_with_agent_failure(ssh_manager, temp_dir, monkeypatch):
+    """Test SSH setup when agent fails to start."""
+    identity_file = os.path.join(temp_dir, "test_key")
+    with open(identity_file, "w") as f:
+        f.write("mock key")
+
+    monkeypatch.setattr(ssh_manager, "_get_identity_file", lambda x: identity_file)
+    monkeypatch.setattr(ssh_manager, "_start_ssh_agent", lambda x: False)
+    
+    assert ssh_manager.setup_ssh("github.com") is False
+
+def test_ssh_setup_with_key_add_failure(ssh_manager, temp_dir, monkeypatch):
+    """Test SSH setup when key addition fails."""
+    identity_file = os.path.join(temp_dir, "test_key")
+    with open(identity_file, "w") as f:
+        f.write("mock key")
+
+    monkeypatch.setattr(ssh_manager, "_get_identity_file", lambda x: identity_file)
+    monkeypatch.setattr(ssh_manager, "_start_ssh_agent", lambda x: True)
+    
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(
+            returncode=1,
+            stderr="Could not add identity"
+        )
+        assert ssh_manager.setup_ssh("github.com") is False
+
+def test_parse_ssh_config_with_empty_file(ssh_manager, temp_dir, monkeypatch):
+    """Test parsing empty SSH config file."""
+    config_file = os.path.join(temp_dir, "config")
+    with open(config_file, "w") as f:
+        f.write("")
+    
+    monkeypatch.setattr(ssh_manager, "_ssh_dir", Path(temp_dir))
+    assert ssh_manager._parse_ssh_config() == {}
+
+def test_parse_ssh_config_with_comments(ssh_manager, temp_dir, monkeypatch):
+    """Test parsing SSH config with comments."""
+    config_file = os.path.join(temp_dir, "config")
+    with open(config_file, "w") as f:
+        f.write("""
+# This is a comment
+Host github.com
+    # This is another comment
+    IdentityFile ~/.ssh/id_ed25519
+    User git
+""")
+    
+    monkeypatch.setattr(ssh_manager, "_ssh_dir", Path(temp_dir))
+    config = ssh_manager._parse_ssh_config()
+    assert "github.com" in config
+    assert config["github.com"]["identityfile"] == "~/.ssh/id_ed25519"
+
+def test_run_command_with_environment(ssh_manager):
+    """Test running command with custom environment."""
+    env = {"TEST_VAR": "test_value"}
+    
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0)
+        result = ssh_manager._run_command(["echo", "$TEST_VAR"], env=env)
+        assert result is not None
+        mock_run.assert_called_once()
+        _, kwargs = mock_run.call_args
+        assert "env" in kwargs
+        assert kwargs["env"]["TEST_VAR"] == "test_value"
