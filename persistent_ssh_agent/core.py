@@ -33,22 +33,16 @@ class PersistentSSHAgent:
         self._agent_info_file = os.path.expanduser("~/.ssh/agent_info.json")
 
     def _ensure_home_env(self) -> None:
-        """Ensure HOME environment variable is set correctly on Windows."""
-        if os.name == "nt":
-            # Set both HOME and USERPROFILE
-            home = os.environ.get("USERPROFILE", "")
-            if not home:
-                home = os.path.expanduser("~")
-            os.environ["HOME"] = home
-            os.environ["USERPROFILE"] = home
-            logger.debug("Set HOME and USERPROFILE to: %s", home)
-        else:
-            # On Unix-like systems, ensure HOME is set
-            home = os.environ.get("HOME", "")
-            if not home:
-                home = os.path.expanduser("~")
-                os.environ["HOME"] = home
-                logger.debug("Set HOME to: %s", home)
+        """Ensure HOME environment variable is set correctly.
+
+        This method ensures the HOME environment variable is set to the user's
+        home directory, which is required for SSH operations. It uses Python's
+        os.path.expanduser() which handles platform-specific differences.
+        """
+        if "HOME" not in os.environ:
+            os.environ["HOME"] = os.path.expanduser("~")
+
+        logger.debug("HOME set to: %s", os.environ.get("HOME"))
 
     def _save_agent_info(self, auth_sock: str, agent_pid: str) -> None:
         """Save SSH agent information to file.
@@ -127,22 +121,12 @@ class PersistentSSHAgent:
         Returns:
             bool: True if successful, False otherwise
         """
-        if self._ssh_agent_started:
-            # Check if key is already loaded
-            result = subprocess.run(
-                ["ssh-add", "-l"],
-                capture_output=True,
-                text=True,
-                env=os.environ.copy()
-            )
-            if result.returncode == 0 and identity_file in result.stdout:
-                return True
-
         try:
-            # Try to load existing agent info first
-            if self._load_agent_info():
-                logger.debug("Reused existing SSH agent")
-                return True
+            # Ensure identity file exists and is absolute
+            identity_file = os.path.abspath(os.path.expanduser(identity_file))
+            if not os.path.exists(identity_file):
+                logger.error("Identity file not found: %s", identity_file)
+                return False
 
             # Kill any existing SSH agents
             if os.name == "nt":
@@ -158,44 +142,51 @@ class PersistentSSHAgent:
             result = subprocess.run(
                 ["ssh-agent", "-s"] if os.name != "nt" else ["ssh-agent"],
                 capture_output=True,
-                text=True
+                text=True,
+                check=True
             )
 
             if result.returncode != 0:
+                logger.error("Failed to start SSH agent: %s", result.stderr)
                 return False
 
-            # Parse and set environment variables
-            auth_sock = None
-            agent_pid = None
-
+            # Parse agent output and set environment variables
             for line in result.stdout.splitlines():
-                if "SSH_AUTH_SOCK=" in line:
-                    auth_sock = line.split("=")[1].split(";")[0].strip().strip('"\'')
-                    os.environ["SSH_AUTH_SOCK"] = auth_sock
-                elif "SSH_AGENT_PID=" in line:
-                    agent_pid = line.split("=")[1].split(";")[0].strip().strip('"\'')
-                    os.environ["SSH_AGENT_PID"] = agent_pid
+                if "SSH_AUTH_SOCK" in line:
+                    sock_match = re.search(r"SSH_AUTH_SOCK=([^;]+)", line)
+                    if sock_match:
+                        os.environ["SSH_AUTH_SOCK"] = sock_match.group(1)
+                elif "SSH_AGENT_PID" in line:
+                    pid_match = re.search(r"SSH_AGENT_PID=(\d+)", line)
+                    if pid_match:
+                        os.environ["SSH_AGENT_PID"] = pid_match.group(1)
 
-            if auth_sock and agent_pid:
-                self._save_agent_info(auth_sock, agent_pid)
+            if "SSH_AUTH_SOCK" not in os.environ or "SSH_AGENT_PID" not in os.environ:
+                logger.error("Failed to set SSH agent environment variables")
+                return False
 
-            # Add the key
+            # Add the identity
             result = subprocess.run(
                 ["ssh-add", identity_file],
                 capture_output=True,
                 text=True,
-                env=os.environ.copy()
+                env=os.environ
             )
 
             if result.returncode != 0:
-                logger.error("Failed to add key: %s", result.stderr)
+                logger.error("Failed to add identity: %s", result.stderr)
                 return False
 
-            self._ssh_agent_started = True
+            # Save agent info for persistence
+            self._save_agent_info(
+                os.environ["SSH_AUTH_SOCK"],
+                os.environ["SSH_AGENT_PID"]
+            )
+
             return True
 
         except Exception as e:
-            logger.error("Failed to start SSH agent: %s", e)
+            logger.error("SSH agent startup failed: %s", e)
             return False
 
     def setup_ssh(self, hostname: str) -> bool:
@@ -212,6 +203,10 @@ class PersistentSSHAgent:
 
             # Get the correct identity file
             identity_file = self._get_identity_file(hostname)
+            if not identity_file:
+                logger.warning("No identity file found for host: %s", hostname)
+                return False
+
             if not os.path.exists(identity_file):
                 logger.warning("Identity file not found: %s", identity_file)
                 return False
@@ -220,21 +215,24 @@ class PersistentSSHAgent:
 
             # Start SSH agent with the specific key
             if not self._start_ssh_agent(identity_file):
+                logger.error("Failed to start SSH agent for %s", hostname)
                 return False
 
             # Test SSH connection
-            test_result = subprocess.run(
-                ["ssh", "-T", "-o", "StrictHostKeyChecking=no", f"git@{hostname}"],
-                capture_output=True,
-                text=True,
-                env=os.environ.copy()
-            )
+            test_cmd = ["ssh", "-T", f"git@{hostname}"]
+            result = self._run_command(test_cmd, check_output=False)
 
-            # Most Git servers return 1 for successful auth
-            return test_result.returncode in [0, 1]
+            # GitHub returns 1 for successful auth
+            if result and (result.returncode == 0 or
+                         (hostname == "github.com" and result.returncode == 1)):
+                logger.debug("SSH setup successful for %s", hostname)
+                return True
+
+            logger.error("SSH setup failed for %s", hostname)
+            return False
 
         except Exception as e:
-            logger.error("Error in SSH setup: %s", str(e))
+            logger.error("SSH setup failed for %s: %s", hostname, e)
             return False
 
     def _run_command(self, cmd: Union[str, List[str]], check_output: bool = True, shell: bool = False) -> Optional[
@@ -376,11 +374,12 @@ class PersistentSSHAgent:
             branch: Optional branch to clone
 
         Returns:
-            True if clone successful, False otherwise
+            bool: True if clone successful, False otherwise
         """
         try:
             hostname = self._extract_hostname(repo_url)
             if not hostname:
+                logger.error("Failed to extract hostname from URL: %s", repo_url)
                 return False
 
             cmd = ["git", "clone"]
@@ -389,7 +388,9 @@ class PersistentSSHAgent:
             cmd.extend([repo_url, target_dir])
 
             result = self._run_command(cmd)
-            return result and result.returncode == 0
+            if result is None:
+                return False
+            return result.returncode == 0
 
         except Exception as e:
             logger.error("Failed to clone repository: %s", e)
