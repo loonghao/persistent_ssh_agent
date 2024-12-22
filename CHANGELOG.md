@@ -1,3 +1,9 @@
+## v0.2.1 (2024-12-22)
+
+### Refactor
+
+- **workflows**: Update Python publishing workflow configuration
+
 ## v0.2.0 (2024-12-22)
 
 ### Feat
