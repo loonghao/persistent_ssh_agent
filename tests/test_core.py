@@ -3,8 +3,11 @@
 # Import built-in modules
 import json
 import os
+from pathlib import Path
+import subprocess
 import time
 from unittest.mock import MagicMock
+from unittest.mock import mock_open
 from unittest.mock import patch
 
 # Import third-party modules
@@ -49,7 +52,8 @@ def test_ensure_home_env(ssh_manager):
 
 def test_parse_ssh_config(ssh_manager, mock_ssh_config, monkeypatch):
     """Test SSH config parsing."""
-    monkeypatch.setenv("HOME", os.path.dirname(mock_ssh_config))
+    monkeypatch.setenv("HOME", str(mock_ssh_config.parent))
+    ssh_manager._ssh_dir = mock_ssh_config  # Update ssh_dir to use mock config
     config = ssh_manager._parse_ssh_config()
 
     assert "github.com" in config
@@ -58,11 +62,13 @@ def test_parse_ssh_config(ssh_manager, mock_ssh_config, monkeypatch):
 
     assert "*.gitlab.com" in config
     assert config["*.gitlab.com"]["identityfile"] == "~/.ssh/gitlab_key"
+    assert config["*.gitlab.com"]["user"] == "git"
 
 
 def test_get_identity_file(ssh_manager, mock_ssh_config, monkeypatch):
     """Test identity file resolution."""
-    monkeypatch.setenv("HOME", os.path.dirname(mock_ssh_config))
+    monkeypatch.setenv("HOME", str(mock_ssh_config.parent))
+    ssh_manager._ssh_dir = mock_ssh_config  # Update ssh_dir to use mock config
 
     # Test exact match
     identity = ssh_manager._get_identity_file("github.com")
@@ -264,7 +270,8 @@ def test_version():
 def test_save_agent_info_errors(ssh_manager, temp_dir, monkeypatch):
     """Test error cases for saving agent info."""
     monkeypatch.setenv("HOME", temp_dir)
-    ssh_manager._agent_info_file = os.path.join(temp_dir, ".ssh", "agent_info.json")
+    ssh_manager._ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_manager._agent_info_file = ssh_manager._ssh_dir / "agent_info.json"
 
     # Test permission error
     with patch("os.makedirs") as mock_makedirs:
@@ -282,7 +289,8 @@ def test_save_agent_info_errors(ssh_manager, temp_dir, monkeypatch):
 def test_load_agent_info_edge_cases(ssh_manager, temp_dir, monkeypatch):
     """Test edge cases for loading agent info."""
     monkeypatch.setenv("HOME", temp_dir)
-    ssh_manager._agent_info_file = os.path.join(temp_dir, ".ssh", "agent_info.json")
+    ssh_manager._ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_manager._agent_info_file = ssh_manager._ssh_dir / "agent_info.json"
 
     # Test with expired timestamp
     agent_info = {
@@ -291,7 +299,7 @@ def test_load_agent_info_edge_cases(ssh_manager, temp_dir, monkeypatch):
         "timestamp": time.time() - 90000,  # More than 24 hours old
         "platform": os.name
     }
-    os.makedirs(os.path.dirname(ssh_manager._agent_info_file), exist_ok=True)
+    ssh_manager._ssh_dir.mkdir(parents=True, exist_ok=True)
     with open(ssh_manager._agent_info_file, "w") as f:
         json.dump(agent_info, f)
 
@@ -392,3 +400,584 @@ def test_clone_repository_errors(ssh_manager, temp_dir):
             os.path.join(temp_dir, "repo")
         )
         assert result is False
+
+
+def test_load_agent_info_errors(ssh_manager, temp_dir, monkeypatch):
+    """Test error cases in load_agent_info."""
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_manager._agent_info_file = ssh_manager._ssh_dir / "agent_info.json"
+
+    # Test JSON decode error
+    ssh_manager._ssh_dir.mkdir(parents=True, exist_ok=True)
+    with open(ssh_manager._agent_info_file, "w") as f:
+        f.write("invalid json")
+    assert ssh_manager._load_agent_info() is False
+
+    # Test ssh-add command error
+    with patch("builtins.open", mock_open(read_data='{"SSH_AUTH_SOCK": "/tmp/sock", "SSH_AGENT_PID": "123", "timestamp": 9999999999, "platform": "nt"}')), \
+         patch("subprocess.run") as mock_run:
+        mock_run.side_effect = Exception("Command failed")
+        assert ssh_manager._load_agent_info() is False
+
+
+def test_start_ssh_agent_additional_errors(ssh_manager, temp_dir):
+    """Test additional error cases in start_ssh_agent."""
+    identity_file = os.path.join(temp_dir, "test_key")
+
+    # Test when identity file doesn't exist
+    assert ssh_manager._start_ssh_agent("/nonexistent/key") is False
+
+    # Test when ssh-agent fails with exception
+    with patch("subprocess.run") as mock_run:
+        mock_run.side_effect = Exception("ssh-agent failed")
+        assert ssh_manager._start_ssh_agent(identity_file) is False
+
+
+def test_run_command_additional_errors(ssh_manager):
+    """Test additional error cases in run_command."""
+    # Test subprocess.run raising exception
+    with patch("subprocess.run") as mock_run:
+        mock_run.side_effect = Exception("Command failed")
+        assert ssh_manager._run_command(["test"]) is None
+
+    # Test with shell=True
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0)
+        result = ssh_manager._run_command("echo test", shell=True)
+        assert result is not None
+        mock_run.assert_called_with(
+            "echo test",
+            capture_output=True,
+            text=True,
+            env=os.environ.copy(),
+            shell=True
+        )
+
+
+def test_get_identity_file_additional_cases(ssh_manager, temp_dir, monkeypatch):
+    """Test additional cases for get_identity_file."""
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_manager._ssh_dir.mkdir(parents=True, exist_ok=True)
+
+    # Test when no SSH config exists
+    identity = ssh_manager._get_identity_file("example.com")
+    assert identity == str(ssh_manager._ssh_dir / "id_rsa")
+
+    # Test with ed25519 key
+    key_path = ssh_manager._ssh_dir / "id_ed25519"
+    key_path.touch()
+    identity = ssh_manager._get_identity_file("example.com")
+    assert identity == str(key_path)
+
+
+def test_git_ssh_command_errors(ssh_manager):
+    """Test error cases in get_git_ssh_command."""
+    # Test with empty hostname
+    assert ssh_manager.get_git_ssh_command("") is None
+
+    # Test with setup_ssh failure
+    with patch.object(ssh_manager, "setup_ssh", return_value=False):
+        assert ssh_manager.get_git_ssh_command("github.com") is None
+
+    # Test with nonexistent identity file
+    with patch.object(ssh_manager, "setup_ssh", return_value=True):
+        with patch.object(ssh_manager, "_get_identity_file", return_value="/nonexistent/key"):
+            assert ssh_manager.get_git_ssh_command("github.com") is None
+
+
+def test_clone_repository_additional_errors(ssh_manager):
+    """Test additional error cases in clone_repository."""
+    # Test with empty URL
+    assert ssh_manager.clone_repository("", "/tmp/repo") is False
+
+    # Test with invalid URL format
+    assert ssh_manager.clone_repository("invalid_url", "/tmp/repo") is False
+
+    # Test with command execution error
+    with patch.object(ssh_manager, "_extract_hostname", return_value="github.com"):
+        with patch.object(ssh_manager, "_run_command", return_value=None):
+            assert ssh_manager.clone_repository("git@github.com:user/repo.git", "/tmp/repo") is False
+
+
+def test_extract_hostname_additional_cases(ssh_manager):
+    """Test additional cases for extract_hostname."""
+    # Test with None input
+    assert ssh_manager._extract_hostname(None) is None
+
+    # Test with empty string
+    assert ssh_manager._extract_hostname("") is None
+
+    # Test with malformed SSH URLs
+    assert ssh_manager._extract_hostname("git@") is None
+    assert ssh_manager._extract_hostname("git@:repo.git") is None
+    assert ssh_manager._extract_hostname("@host:repo.git") is None
+    assert ssh_manager._extract_hostname("git@:repo.git") is None
+
+    # Test with special characters in hostname
+    assert ssh_manager._extract_hostname("git@host_name.com:user/repo.git") == "host_name.com"
+    assert ssh_manager._extract_hostname("git@host-name.com:user/repo.git") == "host-name.com"
+    assert ssh_manager._extract_hostname("git@host.name.com:user/repo.git") == "host.name.com"
+
+    # Test with invalid URL formats
+    assert ssh_manager._extract_hostname("") is None
+    assert ssh_manager._extract_hostname("invalid_url") is None
+    assert ssh_manager._extract_hostname("git@") is None
+    assert ssh_manager._extract_hostname("git@:repo.git") is None
+    assert ssh_manager._extract_hostname("@host.com:repo.git") is None
+    assert ssh_manager._extract_hostname("git@host.com") is None  # Missing :repo.git part
+
+
+def test_parse_ssh_config_malformed(ssh_manager, temp_dir, monkeypatch):
+    """Test parsing malformed SSH config."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Test malformed config
+    config_path = ssh_dir / "config"
+    config_path.write_text("""
+Host github.com
+    # Missing value
+    IdentityFile
+    User
+Host *.gitlab.com
+    BadKey Value
+Host "quoted.host"
+    IdentityFile "~/.ssh/quoted_key"
+    User 'quoted_user'
+""")
+
+    config = ssh_manager._parse_ssh_config()
+    assert "github.com" in config
+    assert not config["github.com"]  # Should be empty dict due to missing values
+    assert "*.gitlab.com" in config
+    assert not config["*.gitlab.com"]  # Should be empty dict due to invalid key
+    assert "quoted.host" not in config  # Quoted hosts are not valid
+
+
+def test_parse_ssh_config_with_syntax_error(ssh_manager, temp_dir, monkeypatch):
+    """Test parse_ssh_config with syntax errors in config."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Create config with various syntax errors
+    config_path = ssh_dir / "config"
+    config_path.write_text("""
+# Invalid syntax with = and :
+Host github.com
+    IdentityFile=~/.ssh/id_ed25519
+    User:git
+    IdentityFile = ~/.ssh/another_key
+    User = another_user
+
+# Empty host values
+Host
+Host =
+Host
+    IdentityFile ~/.ssh/default_key
+
+# Missing values
+Host gitlab.com
+    IdentityFile
+    User
+    IdentityFile =
+    User =
+
+# Invalid syntax
+Host = example.com
+    IdentityFile: ~/.ssh/example_key
+    User = git
+
+# Valid host with comments
+Host valid.com  # This is a comment
+    # This is a comment
+    IdentityFile ~/.ssh/valid_key  # This is another comment
+    User git  # Comment after value
+
+# Invalid quotes
+Host "invalid.host"
+    IdentityFile "~/.ssh/invalid_key"
+    User 'invalid_user'
+""")
+
+    config = ssh_manager._parse_ssh_config()
+
+    # github.com should be parsed but without invalid values
+    assert "github.com" in config
+    assert not config["github.com"]  # Should be empty dict due to invalid syntax
+
+    # Empty hosts should be ignored
+    assert "" not in config
+    assert "=" not in config
+
+    # gitlab.com should be parsed but without empty values
+    assert "gitlab.com" in config
+    assert not config["gitlab.com"]  # Should be empty dict due to missing values
+
+    # Invalid host syntax should be ignored
+    assert "example.com" not in config
+    assert "invalid.host" not in config
+
+    # Valid host should be parsed correctly despite comments
+    assert "valid.com" in config
+    assert config["valid.com"]["identityfile"] == "~/.ssh/valid_key"
+    assert config["valid.com"]["user"] == "git"
+
+
+def test_setup_ssh_additional_errors(ssh_manager, temp_dir, monkeypatch):
+    """Test additional error cases in setup_ssh."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Test with non-existent identity file
+    with patch.object(ssh_manager, "_get_identity_file", return_value="/nonexistent/key"):
+        assert ssh_manager.setup_ssh("github.com") is False
+
+    # Test with SSH command error
+    key_path = ssh_dir / "id_ed25519"
+    key_path.touch()
+    with patch.object(ssh_manager, "_get_identity_file", return_value=str(key_path)):
+        with patch.object(ssh_manager, "_run_command", side_effect=Exception("SSH error")):
+            assert ssh_manager.setup_ssh("github.com") is False
+
+
+def test_run_command_additional_errors(ssh_manager):
+    """Test additional error cases in run_command."""
+    # Test with None command
+    assert ssh_manager._run_command(None) is None
+
+    # Test with empty command list
+    assert ssh_manager._run_command([]) is None
+
+    # Test with command execution error
+    with patch("subprocess.run", side_effect=Exception("Command failed")):
+        assert ssh_manager._run_command(["test"]) is None
+
+
+def test_get_git_ssh_command_additional_errors(ssh_manager):
+    """Test additional error cases in get_git_ssh_command."""
+    # Test with None hostname
+    assert ssh_manager.get_git_ssh_command(None) is None
+
+    # Test with empty hostname
+    assert ssh_manager.get_git_ssh_command("") is None
+
+    # Test with setup_ssh failure
+    with patch.object(ssh_manager, "setup_ssh", return_value=False):
+        assert ssh_manager.get_git_ssh_command("github.com") is None
+
+
+def test_clone_repository_additional_errors(ssh_manager):
+    """Test additional error cases in clone_repository."""
+    # Test with None URL
+    assert ssh_manager.clone_repository(None, "/tmp/repo") is False
+
+    # Test with None target path
+    assert ssh_manager.clone_repository("git@github.com:user/repo.git", None) is False
+
+    # Test with empty target path
+    assert ssh_manager.clone_repository("git@github.com:user/repo.git", "") is False
+
+    # Test with invalid URL format
+    assert ssh_manager.clone_repository("invalid_url", "/tmp/repo") is False
+
+    # Test with command execution error
+    with patch.object(ssh_manager, "_run_command", return_value=None):
+        assert ssh_manager.clone_repository("git@github.com:user/repo.git", "/tmp/repo") is False
+
+
+def test_setup_ssh_with_ssh_add_error(ssh_manager, temp_dir, monkeypatch):
+    """Test setup_ssh with ssh-add error."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Create a valid key file
+    key_path = ssh_dir / "id_ed25519"
+    key_path.touch()
+
+    # Mock ssh-add to fail
+    def mock_run(*args, **kwargs):
+        if "ssh-add" in args[0]:
+            raise subprocess.CalledProcessError(1, args[0], "ssh-add failed")
+        return subprocess.CompletedProcess(args[0], 0)
+
+    with patch("subprocess.run", side_effect=mock_run):
+        assert ssh_manager.setup_ssh("github.com") is False
+
+
+def test_parse_ssh_config_with_file_error(ssh_manager, temp_dir, monkeypatch):
+    """Test parse_ssh_config with file read error."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    config_path = ssh_dir / "config"
+    config_path.touch()
+
+    # Make file unreadable
+    with patch("builtins.open", side_effect=IOError("Permission denied")):
+        config = ssh_manager._parse_ssh_config()
+        assert config == {}
+
+
+def test_extract_hostname_invalid_formats(ssh_manager):
+    """Test _extract_hostname with invalid formats."""
+    # Test with invalid URL formats
+    assert ssh_manager._extract_hostname("") is None
+    assert ssh_manager._extract_hostname("invalid_url") is None
+    assert ssh_manager._extract_hostname("git@") is None
+    assert ssh_manager._extract_hostname("git@:repo.git") is None
+    assert ssh_manager._extract_hostname("@host.com:repo.git") is None
+    assert ssh_manager._extract_hostname("git@host.com") is None  # Missing :repo.git part
+
+
+def test_run_command_with_invalid_input(ssh_manager):
+    """Test _run_command with invalid input."""
+    # Test with invalid command types
+    assert ssh_manager._run_command(123) is None  # Non-list/str input
+    assert ssh_manager._run_command("") is None   # Empty string
+    assert ssh_manager._run_command([""]) is None # Empty command in list
+
+    # Test with command that raises CalledProcessError
+    with patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, ["test"], "Error")):
+        assert ssh_manager._run_command(["test"]) is None
+
+
+def test_setup_ssh_with_permission_error(ssh_manager, temp_dir, monkeypatch):
+    """Test setup_ssh with permission error."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Create a valid key file
+    key_path = ssh_dir / "id_ed25519"
+    key_path.touch()
+
+    def mock_run(*args, **kwargs):
+        if "ssh-add" in args[0]:
+            raise PermissionError("Permission denied")
+        return subprocess.CompletedProcess(args[0], 0)
+
+    with patch("subprocess.run", side_effect=mock_run):
+        assert ssh_manager.setup_ssh("github.com") is False
+
+
+def test_run_command_with_various_errors(ssh_manager):
+    """Test _run_command with various error types."""
+    # Test with PermissionError
+    with patch("subprocess.run", side_effect=PermissionError("Permission denied")):
+        assert ssh_manager._run_command(["test"]) is None
+
+    # Test with FileNotFoundError
+    with patch("subprocess.run", side_effect=FileNotFoundError("Command not found")):
+        assert ssh_manager._run_command(["test"]) is None
+
+    # Test with generic OSError
+    with patch("subprocess.run", side_effect=OSError("Generic OS error")):
+        assert ssh_manager._run_command(["test"]) is None
+
+
+def test_get_identity_file_with_invalid_config(ssh_manager, temp_dir, monkeypatch):
+    """Test _get_identity_file with invalid config."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Create config with invalid patterns
+    config_path = ssh_dir / "config"
+    config_path.write_text("""
+Host [invalid.pattern
+    IdentityFile ~/.ssh/invalid_key
+Host *.[
+    IdentityFile ~/.ssh/another_key
+""")
+
+    # Test with invalid patterns
+    identity = ssh_manager._get_identity_file("example.com")
+    assert identity == str(ssh_dir / "id_rsa")  # Should fall back to default
+
+
+def test_parse_ssh_config_with_syntax_error(ssh_manager, temp_dir, monkeypatch):
+    """Test parse_ssh_config with syntax errors in config."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("HOME", temp_dir)
+    ssh_manager._ssh_dir = ssh_dir
+
+    # Create config with various syntax errors
+    config_path = ssh_dir / "config"
+    config_path.write_text("""
+# Invalid syntax with = and :
+Host github.com
+    IdentityFile = ~/.ssh/id_ed25519
+    User: git
+
+# Empty host values
+Host
+Host =
+Host
+    IdentityFile ~/.ssh/default_key
+
+# Missing values
+Host gitlab.com
+    IdentityFile
+    User
+    IdentityFile =
+    User =
+
+# Invalid syntax
+Host = example.com
+    IdentityFile: ~/.ssh/example_key
+    User = git
+
+# Valid host with comments
+Host valid.com  # This is a comment
+    # This is a comment
+    IdentityFile ~/.ssh/valid_key  # This is another comment
+    User git  # Comment after value
+
+# Invalid quotes
+Host "invalid.host"
+    IdentityFile "~/.ssh/invalid_key"
+    User 'invalid_user'
+""")
+
+    config = ssh_manager._parse_ssh_config()
+
+    # github.com should be parsed but without invalid values
+    assert "github.com" in config
+    assert not config["github.com"]  # Should be empty dict due to invalid syntax
+
+    # Empty hosts should be ignored
+    assert "" not in config
+    assert "=" not in config
+
+    # gitlab.com should be parsed but without empty values
+    assert "gitlab.com" in config
+    assert not config["gitlab.com"]  # Should be empty dict due to missing values
+
+    # Invalid host syntax should be ignored
+    assert "example.com" not in config
+    assert "invalid.host" not in config
+
+    # Valid host should be parsed correctly despite comments
+    assert "valid.com" in config
+    assert config["valid.com"]["identityfile"] == "~/.ssh/valid_key"
+    assert config["valid.com"]["user"] == "git"
+
+
+def test_clone_repository_with_git_errors(ssh_manager, temp_dir):
+    """Test clone_repository with git errors."""
+    # Test with git command failure
+    def mock_run_error(*args, **kwargs):
+        if "git" in args[0]:
+            raise subprocess.CalledProcessError(128, args[0], "fatal: repository not found")
+        return subprocess.CompletedProcess(args[0], 0)
+
+    with patch("subprocess.run", side_effect=mock_run_error):
+        assert ssh_manager.clone_repository("git@github.com:user/repo.git", temp_dir) is False
+
+    # Test with git command not found
+    with patch("subprocess.run", side_effect=FileNotFoundError("git not found")):
+        assert ssh_manager.clone_repository("git@github.com:user/repo.git", temp_dir) is False
+
+
+def test_extract_hostname_with_special_cases(ssh_manager):
+    """Test _extract_hostname with special cases."""
+    # Test with various special characters in hostname
+    assert ssh_manager._extract_hostname("git@host_name.com:user/repo.git") == "host_name.com"
+    assert ssh_manager._extract_hostname("git@host-name.com:user/repo.git") == "host-name.com"
+    assert ssh_manager._extract_hostname("git@host.name.com:user/repo.git") == "host.name.com"
+
+    # Test with invalid URL formats
+    assert ssh_manager._extract_hostname("git@host@com:repo.git") is None  # Multiple @ signs
+    assert ssh_manager._extract_hostname("git:host.com:repo.git") is None  # Wrong format
+    assert ssh_manager._extract_hostname("git@host.com:") is None  # Missing repository
+    assert ssh_manager._extract_hostname("git@host.com/repo.git") is None  # Wrong separator
+
+
+def test_run_command_additional_errors(ssh_manager):
+    """Test additional error cases in run_command."""
+    # Test with None command
+    assert ssh_manager._run_command(None) is None
+
+    # Test with empty command
+    assert ssh_manager._run_command("") is None
+
+    # Test with command list containing None
+    assert ssh_manager._run_command(["git", None, "status"]) is None
+
+    # Test with invalid command type
+    assert ssh_manager._run_command(123) is None
+
+
+def test_clone_repository_additional_errors(ssh_manager):
+    """Test additional error cases in clone_repository."""
+    # Test with None URL
+    assert ssh_manager.clone_repository(None, "/tmp/repo") is False
+
+    # Test with empty URL
+    assert ssh_manager.clone_repository("", "/tmp/repo") is False
+
+    # Test with None target directory
+    assert ssh_manager.clone_repository("git@github.com:user/repo.git", None) is False
+
+    # Test with empty target directory
+    assert ssh_manager.clone_repository("git@github.com:user/repo.git", "") is False
+
+def test_parse_ssh_config_with_syntax_error(ssh_manager, temp_dir, monkeypatch):
+    """Test parse_ssh_config with syntax errors in config."""
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir()
+    config_path = ssh_dir / "config"
+
+    # Test with empty lines and comments
+    config_content = """
+# Comment
+Host github.com
+    IdentityFile ~/.ssh/id_ed25519
+
+# Another comment
+
+Host example.com
+    User git
+    """
+    config_path.write_text(config_content)
+    monkeypatch.setattr(ssh_manager, "_ssh_dir", ssh_dir)
+    config = ssh_manager._parse_ssh_config()
+    assert "github.com" in config
+    assert "example.com" in config
+
+    # Test with invalid syntax
+    config_content = """
+Host
+Host =
+Host
+    IdentityFile ~/.ssh/default_key
+
+Host example.com
+    IdentityFile
+    User
+    IdentityFile =
+    User =
+
+# Invalid syntax
+Host invalid.com
+    IdentityFile = ~/.ssh/invalid_key
+    User = git
+    """
+    config_path.write_text(config_content)
+    config = ssh_manager._parse_ssh_config()
+    assert not config
