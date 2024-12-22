@@ -1,3 +1,13 @@
+## v0.2.0 (2024-12-22)
+
+### Feat
+
+- **persistent_ssh_agent**: Improve SSH config parsing and add tests for invalid syntax
+
+### Refactor
+
+- Update tests and core module to use pathlib for path handling - Replace os.path with pathlib for better readability and cross-platform compatibility - Add new SSHError exception class for SSH-related errors - Update _run_command method to handle command output and exceptions more gracefully
+
 ## v0.1.0 (2024-12-22)
 
 ### Feat
