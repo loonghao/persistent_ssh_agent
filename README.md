@@ -63,21 +63,21 @@ import os
 def clone_with_gitpython(repo_url: str, local_path: str, branch: str = None) -> Repo:
     """Clone a repository using GitPython with persistent SSH authentication."""
     ssh_agent = PersistentSSHAgent()
-    
+
     # Extract hostname and set up SSH
     hostname = ssh_agent._extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("Failed to set up SSH authentication")
-    
+
     # Get SSH command and configure environment
     ssh_command = ssh_agent.get_git_ssh_command(hostname)
     if not ssh_command:
         raise RuntimeError("Failed to get SSH command")
-    
+
     # Set up Git environment
     env = os.environ.copy()
     env['GIT_SSH_COMMAND'] = ssh_command
-    
+
     # Clone with GitPython
     return Repo.clone_from(
         repo_url,
@@ -94,7 +94,7 @@ try:
         branch='main'
     )
     print(f"✅ Repository cloned: {repo.working_dir}")
-    
+
     # Perform Git operations
     repo.remotes.origin.pull()
     repo.remotes.origin.push()
@@ -109,14 +109,14 @@ def setup_git_operations():
     """Set up environment for Git operations."""
     ssh_agent = PersistentSSHAgent()
     hostname = "github.com"
-    
+
     if not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("SSH setup failed")
-    
+
     ssh_command = ssh_agent.get_git_ssh_command(hostname)
     if not ssh_command:
         raise RuntimeError("Failed to get SSH command")
-    
+
     os.environ['GIT_SSH_COMMAND'] = ssh_command
     return True
 
@@ -124,21 +124,21 @@ def setup_git_operations():
 def manage_git_workflow(repo_path: str):
     if not setup_git_operations():
         return False
-    
+
     repo = Repo(repo_path)
-    
+
     # Create and checkout new branch
     new_branch = repo.create_head('feature/new-feature')
     new_branch.checkout()
-    
+
     # Make changes
     with open(os.path.join(repo_path, 'new_file.txt'), 'w') as f:
         f.write('New content')
-    
+
     # Stage and commit
     repo.index.add(['new_file.txt'])
     repo.index.commit('Add new file')
-    
+
     # Push to remote
     repo.remotes.origin.push(new_branch)
 ```
@@ -154,16 +154,16 @@ from persistent_ssh_agent import PersistentSSHAgent
 def setup_ci_ssh():
     """Set up SSH for CI environment."""
     ssh_agent = PersistentSSHAgent()
-    
+
     # Set up SSH key from environment
     key_path = os.environ.get('SSH_PRIVATE_KEY_PATH')
     if not key_path:
         raise ValueError("SSH key path not provided")
-    
+
     if ssh_agent._start_ssh_agent(key_path):
         print("✅ SSH agent started successfully")
         return True
-    
+
     raise RuntimeError("Failed to start SSH agent")
 ```
 
@@ -174,10 +174,10 @@ async def setup_multiple_hosts(hosts: list[str]) -> dict[str, bool]:
     """Set up SSH for multiple hosts concurrently."""
     ssh_agent = PersistentSSHAgent()
     results = {}
-    
+
     for host in hosts:
         results[host] = ssh_agent.setup_ssh(host)
-    
+
     return results
 
 # Usage
@@ -206,10 +206,10 @@ def safe_git_operation(repo_url: str, local_path: Path) -> Optional[Repo]:
         hostname = ssh_agent._extract_hostname(repo_url)
         if not hostname:
             raise ValueError("Invalid repository URL")
-        
+
         if not ssh_agent.setup_ssh(hostname):
             raise RuntimeError("SSH setup failed")
-        
+
         return Repo.clone_from(repo_url, local_path)
     except Exception as e:
         logger.error(f"Git operation failed: {e}")
@@ -224,7 +224,7 @@ def safe_git_operation(repo_url: str, local_path: Path) -> Optional[Repo]:
    ```bash
    # Check SSH agent status
    ssh-add -l
-   
+
    # Start SSH agent manually
    eval $(ssh-agent -s)
    ```
@@ -233,7 +233,7 @@ def safe_git_operation(repo_url: str, local_path: Path) -> Optional[Repo]:
    ```bash
    # Fix key permissions
    chmod 600 ~/.ssh/id_ed25519
-   
+
    # Test SSH connection
    ssh -T git@github.com
    ```
