@@ -153,7 +153,6 @@ class PersistentSSHAgent:
             if self._load_agent_info():
                 logger.debug("Reused existing SSH agent")
                 return True
-            print(os.name == "nt")
             # Kill any existing SSH agents
             if os.name == "nt":
                 self._run_command(["taskkill", "/F", "/IM", "ssh-agent.exe"])
@@ -297,7 +296,7 @@ class PersistentSSHAgent:
         cmd: Union[str, List[str]],
         check_output: bool = True,
         shell: bool = False,
-            env: Optional[Dict[str, str]] = None
+        env: Optional[Dict[str, str]] = None
     ) -> Optional[subprocess.CompletedProcess]:
         """Run a command and handle its output.
 
@@ -404,6 +403,13 @@ class PersistentSSHAgent:
             # Check for invalid syntax in value
             return not any(c in value for c in ("=", ":"))
 
+        def is_valid_host_pattern(pattern: str) -> bool:
+            """Check if a host pattern is valid."""
+            if not pattern:
+                return False
+            # Check for invalid characters
+            return not any(c in pattern for c in ("[", "]", "{", "}", "\\", "|", ";"))
+
         try:
             with open(ssh_config_path) as f:
                 for line in f:
@@ -427,7 +433,7 @@ class PersistentSSHAgent:
                         current_host = None  # Reset current host
                         if len(parts) > 1:
                             host_value = parts[1].strip()
-                            if is_valid_value(host_value):
+                            if is_valid_host_pattern(host_value):
                                 current_host = host_value
                                 if current_host not in config:
                                     config[current_host] = {}
