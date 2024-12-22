@@ -1,3 +1,10 @@
+## v0.3.0 (2024-12-22)
+
+### Feat
+
+- **persistent_ssh_agent**: Add expiration time for SSH agent info and improve error handling
+- **persistent_ssh_agent**: Add expiration time for SSH agent info and improve error handling
+
 ## v0.2.1 (2024-12-22)
 
 ### Refactor
