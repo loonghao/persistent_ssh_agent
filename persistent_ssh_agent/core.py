@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 class SSHError(Exception):
     """Base exception for SSH-related errors."""
-    pass
 
 
 class PersistentSSHAgent:
