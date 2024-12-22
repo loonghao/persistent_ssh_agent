@@ -1,12 +1,18 @@
 """SSH management module for repository updater."""
 
+# Import built-in modules
+from contextlib import suppress
+import json
 import logging
 import os
 import re
 import subprocess
 import time
-import json
-from typing import Dict, Optional, List, Union
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,20 +34,20 @@ class PersistentSSHAgent:
 
     def _ensure_home_env(self) -> None:
         """Ensure HOME environment variable is set correctly on Windows."""
-        if os.name == 'nt':
+        if os.name == "nt":
             # Set both HOME and USERPROFILE
-            home = os.environ.get('USERPROFILE', '')
+            home = os.environ.get("USERPROFILE", "")
             if not home:
-                home = os.path.expanduser('~')
-            os.environ['HOME'] = home
-            os.environ['USERPROFILE'] = home
+                home = os.path.expanduser("~")
+            os.environ["HOME"] = home
+            os.environ["USERPROFILE"] = home
             logger.debug("Set HOME and USERPROFILE to: %s", home)
         else:
             # On Unix-like systems, ensure HOME is set
-            home = os.environ.get('HOME', '')
+            home = os.environ.get("HOME", "")
             if not home:
-                home = os.path.expanduser('~')
-                os.environ['HOME'] = home
+                home = os.path.expanduser("~")
+                os.environ["HOME"] = home
                 logger.debug("Set HOME to: %s", home)
 
     def _save_agent_info(self, auth_sock: str, agent_pid: str) -> None:
@@ -53,13 +59,13 @@ class PersistentSSHAgent:
         """
         try:
             agent_info = {
-                'SSH_AUTH_SOCK': auth_sock,
-                'SSH_AGENT_PID': agent_pid,
-                'timestamp': time.time(),
-                'platform': os.name
+                "SSH_AUTH_SOCK": auth_sock,
+                "SSH_AGENT_PID": agent_pid,
+                "timestamp": time.time(),
+                "platform": os.name
             }
             os.makedirs(os.path.dirname(self._agent_info_file), exist_ok=True)
-            with open(self._agent_info_file, 'w') as f:
+            with open(self._agent_info_file, "w") as f:
                 json.dump(agent_info, f)
             logger.debug("Saved agent info to %s", self._agent_info_file)
         except Exception as e:
@@ -75,31 +81,31 @@ class PersistentSSHAgent:
             if not os.path.exists(self._agent_info_file):
                 return False
 
-            with open(self._agent_info_file, 'r') as f:
+            with open(self._agent_info_file, "r") as f:
                 agent_info = json.load(f)
 
             # Check if the agent info is recent (less than 24 hours old)
-            if time.time() - agent_info.get('timestamp', 0) > 86400:
+            if time.time() - agent_info.get("timestamp", 0) > 86400:
                 return False
 
             # Check platform compatibility
-            if agent_info.get('platform') != os.name:
+            if agent_info.get("platform") != os.name:
                 logger.debug("Agent info platform mismatch")
                 return False
 
             # Set environment variables
-            auth_sock = agent_info.get('SSH_AUTH_SOCK')
-            agent_pid = agent_info.get('SSH_AGENT_PID')
+            auth_sock = agent_info.get("SSH_AUTH_SOCK")
+            agent_pid = agent_info.get("SSH_AGENT_PID")
             if not auth_sock or not agent_pid:
                 return False
 
-            os.environ['SSH_AUTH_SOCK'] = auth_sock
-            os.environ['SSH_AGENT_PID'] = agent_pid
+            os.environ["SSH_AUTH_SOCK"] = auth_sock
+            os.environ["SSH_AGENT_PID"] = agent_pid
 
             # Verify agent is running
             try:
                 result = subprocess.run(
-                    ['ssh-add', '-l'],
+                    ["ssh-add", "-l"],
                     capture_output=True,
                     text=True,
                     env=os.environ.copy()
@@ -124,7 +130,7 @@ class PersistentSSHAgent:
         if self._ssh_agent_started:
             # Check if key is already loaded
             result = subprocess.run(
-                ['ssh-add', '-l'],
+                ["ssh-add", "-l"],
                 capture_output=True,
                 text=True,
                 env=os.environ.copy()
@@ -139,22 +145,18 @@ class PersistentSSHAgent:
                 return True
 
             # Kill any existing SSH agents
-            if os.name == 'nt':
-                try:
-                    subprocess.run(['taskkill', '/F', '/IM', 'ssh-agent.exe'],
-                                 capture_output=True, text=True)
-                except Exception:
-                    pass  # Ignore errors if no agent is running
+            if os.name == "nt":
+                with suppress(Exception):  # Ignore errors if no agent is running
+                    subprocess.run(["taskkill", "/F", "/IM", "ssh-agent.exe"],
+                                capture_output=True, text=True)
             else:
-                try:
-                    subprocess.run(['pkill', 'ssh-agent'],
-                                 capture_output=True, text=True)
-                except Exception:
-                    pass  # Ignore errors if no agent is running or pkill not found
+                with suppress(Exception):  # Ignore errors if no agent is running or pkill not found
+                    subprocess.run(["pkill", "ssh-agent"],
+                                capture_output=True, text=True)
 
             # Start the SSH agent
             result = subprocess.run(
-                ['ssh-agent', '-s'] if os.name != 'nt' else ['ssh-agent'],
+                ["ssh-agent", "-s"] if os.name != "nt" else ["ssh-agent"],
                 capture_output=True,
                 text=True
             )
@@ -167,19 +169,19 @@ class PersistentSSHAgent:
             agent_pid = None
 
             for line in result.stdout.splitlines():
-                if 'SSH_AUTH_SOCK=' in line:
-                    auth_sock = line.split('=')[1].split(';')[0].strip().strip('"\'')
-                    os.environ['SSH_AUTH_SOCK'] = auth_sock
-                elif 'SSH_AGENT_PID=' in line:
-                    agent_pid = line.split('=')[1].split(';')[0].strip().strip('"\'')
-                    os.environ['SSH_AGENT_PID'] = agent_pid
+                if "SSH_AUTH_SOCK=" in line:
+                    auth_sock = line.split("=")[1].split(";")[0].strip().strip('"\'')
+                    os.environ["SSH_AUTH_SOCK"] = auth_sock
+                elif "SSH_AGENT_PID=" in line:
+                    agent_pid = line.split("=")[1].split(";")[0].strip().strip('"\'')
+                    os.environ["SSH_AGENT_PID"] = agent_pid
 
             if auth_sock and agent_pid:
                 self._save_agent_info(auth_sock, agent_pid)
 
             # Add the key
             result = subprocess.run(
-                ['ssh-add', identity_file],
+                ["ssh-add", identity_file],
                 capture_output=True,
                 text=True,
                 env=os.environ.copy()
@@ -222,7 +224,7 @@ class PersistentSSHAgent:
 
             # Test SSH connection
             test_result = subprocess.run(
-                ['ssh', '-T', '-o', 'StrictHostKeyChecking=no', f'git@{hostname}'],
+                ["ssh", "-T", "-o", "StrictHostKeyChecking=no", f"git@{hostname}"],
                 capture_output=True,
                 text=True,
                 env=os.environ.copy()
@@ -278,21 +280,21 @@ class PersistentSSHAgent:
         config = self._parse_ssh_config()
 
         # Try exact hostname match
-        if hostname in config and 'identityfile' in config[hostname]:
-            return config[hostname]['identityfile']
+        if hostname in config and "identityfile" in config[hostname]:
+            return config[hostname]["identityfile"]
 
         # Try pattern matching
         for host_pattern, host_config in config.items():
             # Convert glob patterns to regex
-            pattern = host_pattern.replace('.', '\\.').replace('*', '.*')
-            if re.match(pattern, hostname) and 'identityfile' in host_config:
-                return host_config['identityfile']
+            pattern = host_pattern.replace(".", "\\.").replace("*", ".*")
+            if re.match(pattern, hostname) and "identityfile" in host_config:
+                return host_config["identityfile"]
 
         # Default to ed25519 if exists, otherwise id_rsa
-        ssh_dir = os.path.join(os.environ.get('HOME', ''), '.ssh')
-        if os.path.exists(os.path.join(ssh_dir, 'id_ed25519')):
-            return os.path.join(ssh_dir, 'id_ed25519')
-        return os.path.join(ssh_dir, 'id_rsa')
+        ssh_dir = os.path.join(os.environ.get("HOME", ""), ".ssh")
+        if os.path.exists(os.path.join(ssh_dir, "id_ed25519")):
+            return os.path.join(ssh_dir, "id_ed25519")
+        return os.path.join(ssh_dir, "id_rsa")
 
     def _parse_ssh_config(self) -> Dict[str, Dict[str, str]]:
         """Parse SSH config file to get host-specific configurations.
@@ -303,7 +305,7 @@ class PersistentSSHAgent:
         if self._ssh_config_cache:
             return self._ssh_config_cache
 
-        ssh_config_path = os.path.join(os.environ.get('HOME', ''), '.ssh', 'config')
+        ssh_config_path = os.path.join(os.environ.get("HOME", ""), ".ssh", "config")
         if not os.path.exists(ssh_config_path):
             logger.debug("No SSH config file found at: %s", ssh_config_path)
             return {}
@@ -312,10 +314,10 @@ class PersistentSSHAgent:
         config = {}
 
         try:
-            with open(ssh_config_path, 'r', encoding='utf-8') as f:
+            with open(ssh_config_path, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
-                    if not line or line.startswith('#'):
+                    if not line or line.startswith("#"):
                         continue
 
                     parts = line.split(None, 1)
@@ -325,14 +327,14 @@ class PersistentSSHAgent:
                     key, value = parts
                     key = key.lower()
 
-                    if key == 'host':
+                    if key == "host":
                         current_host = value
                         if current_host not in config:
                             config[current_host] = {}
-                    elif current_host and key == 'identityfile':
-                        config[current_host]['identityfile'] = value.strip('"\'')
-                    elif current_host and key == 'user':
-                        config[current_host]['user'] = value
+                    elif current_host and key == "identityfile":
+                        config[current_host]["identityfile"] = value.strip('"\'')
+                    elif current_host and key == "user":
+                        config[current_host]["user"] = value
 
             logger.debug("Parsed SSH config: %s", config)
             self._ssh_config_cache = config
@@ -360,8 +362,8 @@ class PersistentSSHAgent:
         identity_file = self._get_identity_file(hostname)
         if os.path.exists(identity_file):
             # Use forward slashes even on Windows
-            identity_file = identity_file.replace('\\', '/')
-            return f'ssh -i {identity_file} -o StrictHostKeyChecking=no'
+            identity_file = identity_file.replace("\\", "/")
+            return f"ssh -i {identity_file} -o StrictHostKeyChecking=no"
 
         return None
 
@@ -381,9 +383,9 @@ class PersistentSSHAgent:
             if not hostname:
                 return False
 
-            cmd = ['git', 'clone']
+            cmd = ["git", "clone"]
             if branch:
-                cmd.extend(['-b', branch])
+                cmd.extend(["-b", branch])
             cmd.extend([repo_url, target_dir])
 
             result = self._run_command(cmd)
@@ -404,9 +406,9 @@ class PersistentSSHAgent:
         """
         try:
             # Handle SSH URLs like git@github.com:user/repo.git
-            if '@' in repo_url:
+            if "@" in repo_url:
                 # Split after @ and before :
-                return repo_url.split('@')[1].split(':')[0]
+                return repo_url.split("@")[1].split(":")[0]
             return None
         except Exception as e:
             logger.error("Failed to extract hostname: %s", e)
