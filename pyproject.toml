@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "persistent-ssh-agent"
+version = "0.0.1"
+description = "A Python library for persistent SSH agent management with automatic key handling, focusing on Windows compatibility and seamless Git integration."
+authors = ["longhao <hal.long@outlook.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

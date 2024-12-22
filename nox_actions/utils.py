@@ -2,7 +2,7 @@
 from pathlib import Path
 
 
-PACKAGE_NAME = ""
+PACKAGE_NAME = "persistent_ssh_agent"
 THIS_ROOT = Path(__file__).parent.parent
 PROJECT_ROOT = THIS_ROOT.parent
 
