@@ -1,7 +1,7 @@
 """Test configuration and fixtures."""
 
 # Import built-in modules
-import os
+from pathlib import Path
 import shutil
 import tempfile
 
@@ -20,12 +20,11 @@ def temp_dir():
 @pytest.fixture
 def mock_ssh_config(temp_dir):
     """Create a mock SSH config file."""
-    ssh_dir = os.path.join(temp_dir, ".ssh")
-    os.makedirs(ssh_dir)
-    config_path = os.path.join(ssh_dir, "config")
+    ssh_dir = Path(temp_dir) / ".ssh"
+    ssh_dir.mkdir(parents=True, exist_ok=True)
+    config_path = ssh_dir / "config"
 
-    with open(config_path, "w") as f:
-        f.write("""
+    config_path.write_text("""
 Host github.com
     IdentityFile ~/.ssh/id_ed25519
     User git
@@ -36,7 +35,7 @@ Host *.gitlab.com
 """)
 
     # Create mock key files
-    open(os.path.join(ssh_dir, "id_ed25519"), "w").close()
-    open(os.path.join(ssh_dir, "gitlab_key"), "w").close()
+    (ssh_dir / "id_ed25519").touch()
+    (ssh_dir / "gitlab_key").touch()
 
     return ssh_dir
