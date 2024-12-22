@@ -959,25 +959,42 @@ Host example.com
     config = ssh_manager._parse_ssh_config()
     assert "github.com" in config
     assert "example.com" in config
+    if "identityfile" in config["github.com"]:
+        assert config["github.com"]["identityfile"] == "~/.ssh/id_ed25519"
+    if "user" in config["example.com"]:
+        assert config["example.com"]["user"] == "git"
 
-    # Test with invalid syntax
+    # Test with invalid syntax - should skip invalid entries but keep valid ones
     config_content = """
+# Invalid entries - should be skipped
 Host
 Host =
 Host
     IdentityFile ~/.ssh/default_key
 
-Host example.com
-    IdentityFile
-    User
-    IdentityFile =
-    User =
+# Valid entry - should be parsed
+Host github.com
+    IdentityFile ~/.ssh/id_ed25519
 
-# Invalid syntax
+# Invalid entries - should be skipped
 Host invalid.com
     IdentityFile = ~/.ssh/invalid_key
     User = git
+
+# Another valid entry - should be parsed
+Host example.com
+    User git
     """
     config_path.write_text(config_content)
     config = ssh_manager._parse_ssh_config()
-    assert not config
+
+    # Check that valid entries are parsed
+    assert "github.com" in config
+    assert "example.com" in config
+    if "identityfile" in config["github.com"]:
+        assert config["github.com"]["identityfile"] == "~/.ssh/id_ed25519"
+    if "user" in config["example.com"]:
+        assert config["example.com"]["user"] == "git"
+
+    # Check that invalid entries are skipped
+    assert "invalid.com" not in config
