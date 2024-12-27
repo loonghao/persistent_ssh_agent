@@ -1,8 +1,7 @@
 """Test configuration module."""
 # Import built-in modules
-import pytest
 
-# Import local modules
+# Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
 
 
