@@ -5,15 +5,18 @@ import fnmatch
 import json
 import logging
 import os
-from pathlib import Path
 import re
 import subprocess
 import time
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
+
+from .config import SSHConfig
 
 
 logger = logging.getLogger(__name__)
@@ -31,14 +34,20 @@ class PersistentSSHAgent:
     authentication for various operations including Git.
     """
 
-    def __init__(self, expiration_time: int = 86400):
-        """Initialize SSH manager."""
+    def __init__(self, expiration_time: int = 86400, config: Optional[SSHConfig] = None):
+        """Initialize SSH manager.
+        
+        Args:
+            expiration_time: Time in seconds before agent info expires
+            config: Optional SSH configuration
+        """
         self._ensure_home_env()
         self._ssh_dir = Path.home() / ".ssh"
         self._agent_info_file = self._ssh_dir / "agent_info.json"
         self._ssh_config_cache: Dict[str, Dict[str, Any]] = {}
         self._ssh_agent_started = False
         self._expiration_time = expiration_time
+        self._config = config
 
     def _ensure_home_env(self) -> None:
         """Ensure HOME environment variable is set correctly.
@@ -153,6 +162,7 @@ class PersistentSSHAgent:
             if self._load_agent_info():
                 logger.debug("Reused existing SSH agent")
                 return True
+
             # Kill any existing SSH agents
             if os.name == "nt":
                 self._run_command(["taskkill", "/F", "/IM", "ssh-agent.exe"])
@@ -182,10 +192,25 @@ class PersistentSSHAgent:
             if auth_sock and agent_pid:
                 self._save_agent_info(auth_sock, agent_pid)
 
+            # Get passphrase from config or environment
+            passphrase = None
+            if self._config and self._config.identity_passphrase:
+                passphrase = self._config.identity_passphrase
+            elif "SSH_KEY_PASSPHRASE" in os.environ:
+                passphrase = os.environ["SSH_KEY_PASSPHRASE"]
+
             # Add the key
-            result = self._run_command(
-                ["ssh-add", identity_file],
-            )
+            if passphrase:
+                # Use sshpass for keys with passphrase
+                result = self._run_command(
+                    ["ssh-add", identity_file],
+                    input=passphrase.encode()
+                )
+            else:
+                # Try without passphrase
+                result = self._run_command(
+                    ["ssh-add", identity_file],
+                )
 
             if result is None or result.returncode != 0:
                 logger.error("Failed to add key: %s", result.stderr if result else "Command failed")
@@ -292,11 +317,12 @@ class PersistentSSHAgent:
             return False
 
     def _run_command(
-        self,
-        cmd: Union[str, List[str]],
-        check_output: bool = True,
-        shell: bool = False,
-        env: Optional[Dict[str, str]] = None
+            self,
+            cmd: Union[str, List[str]],
+            check_output: bool = True,
+            shell: bool = False,
+            env: Optional[Dict[str, str]] = None,
+            input: Optional[bytes] = None
     ) -> Optional[subprocess.CompletedProcess]:
         """Run a command and handle its output.
 
@@ -305,6 +331,7 @@ class PersistentSSHAgent:
             check_output: Whether to check command output
             shell: Whether to run command through shell
             env: Environment variables to use
+            input: Input to pass to the command
 
         Returns:
             CompletedProcess instance or None if command failed
@@ -314,22 +341,37 @@ class PersistentSSHAgent:
             If check_output is False, command result is returned regardless of exit code
         """
         try:
-            logger.debug("Running command: %s", cmd)
+            if isinstance(cmd, str):
+                cmd = cmd.split()
+
+            logger.debug("Running command: %s", " ".join(cmd))
+
+            # Merge current environment with provided environment
+            merged_env = os.environ.copy()
+            if env:
+                merged_env.update(env)
+
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                env= env or os.environ.copy(),
-                shell=shell
+                shell=shell,
+                env=merged_env,
+                input=input
             )
+
             if check_output and result.returncode != 0:
-                logger.debug("Command failed with code %d", result.returncode)
-                logger.debug("stdout: %s", result.stdout)
-                logger.debug("stderr: %s", result.stderr)
+                logger.error(
+                    "Command failed with exit code %d: %s",
+                    result.returncode,
+                    result.stderr.strip()
+                )
                 return None
+
             return result
+
         except Exception as e:
-            logger.error("Command execution failed: %s", e)
+            logger.error("Failed to run command: %s", e)
             return None
 
     def _get_identity_file(self, hostname: str) -> Optional[str]:
@@ -343,32 +385,71 @@ class PersistentSSHAgent:
 
         Note:
             The search order is:
-            1. Exact match in SSH config
-            2. Pattern match in SSH config (e.g. *.example.com)
-            3. Default key files (id_ed25519, id_rsa)
+            1. Config provided identity file/content
+            2. Environment variable SSH_IDENTITY_FILE
+            3. Environment variable SSH_IDENTITY_CONTENT
+            4. Exact match in SSH config
+            5. Pattern match in SSH config (e.g. *.example.com)
+            6. Default key files (id_ed25519, id_rsa)
         """
-        config = self._parse_ssh_config()
+        # Check config first
+        if self._config and (self._config.identity_file or self._config.identity_content):
+            if self._config.identity_file and os.path.exists(self._config.identity_file):
+                return self._config.identity_file
+            elif self._config.identity_content:
+                return self._write_temp_key(self._config.identity_content)
 
-        # Try exact hostname match first
-        if hostname in config and "identityfile" in config[hostname]:
-            identity_file = os.path.expanduser(config[hostname]["identityfile"])
-            return str(Path(identity_file))
+        # Check environment variables
+        env_file = os.environ.get("SSH_IDENTITY_FILE")
+        if env_file and os.path.exists(env_file):
+            return env_file
+
+        env_content = os.environ.get("SSH_IDENTITY_CONTENT")
+        if env_content:
+            return self._write_temp_key(env_content)
+
+        # Check SSH config
+        config = self._parse_ssh_config()
+        
+        # Try exact hostname match
+        if hostname in config and "IdentityFile" in config[hostname]:
+            identity_file = os.path.expanduser(config[hostname]["IdentityFile"])
+            if os.path.exists(identity_file):
+                return identity_file
 
         # Try pattern matching
         for pattern, settings in config.items():
-            if "*" in pattern and "identityfile" in settings and fnmatch.fnmatch(hostname, pattern):
-                # Convert SSH config pattern to fnmatch pattern
-                # SSH uses * and ? as wildcards, which is compatible with fnmatch
-                identity_file = os.path.expanduser(settings["identityfile"])
-                return str(Path(identity_file))
+            if "IdentityFile" in settings and fnmatch.fnmatch(hostname, pattern):
+                identity_file = os.path.expanduser(settings["IdentityFile"])
+                if os.path.exists(identity_file):
+                    return identity_file
 
-        # Default to standard key files if no match in config
+        # Try default key files
         for key_name in ["id_ed25519", "id_rsa"]:
-            key_path = self._ssh_dir / key_name
-            if key_path.exists():
-                return str(key_path)
+            identity_file = os.path.join(str(self._ssh_dir), key_name)
+            if os.path.exists(identity_file):
+                return identity_file
 
-        return str(self._ssh_dir / "id_rsa")  # Return default path even if it doesn't exist
+        return None
+
+    def _write_temp_key(self, key_content: str) -> str:
+        """Write key content to a temporary file.
+        
+        Args:
+            key_content: SSH key content to write
+            
+        Returns:
+            str: Path to temporary key file
+        """
+        try:
+            with NamedTemporaryFile(mode='w', delete=False) as temp_file:
+                temp_file.write(key_content)
+                # Set correct permissions
+                os.chmod(temp_file.name, 0o600)
+                return temp_file.name
+        except Exception as e:
+            logger.error("Failed to write temporary key file: %s", e)
+            return None
 
     def _parse_ssh_config(self) -> Dict[str, Dict[str, str]]:
         """Parse SSH config file to get host-specific configurations.
