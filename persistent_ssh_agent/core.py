@@ -650,75 +650,80 @@ class PersistentSSHAgent:
             """Check if a host pattern is valid."""
             if not pattern:
                 return False
+            # Allow wildcards and negation
+            if pattern == "*" or pattern.startswith("!"):
+                return True
             # Check for invalid characters that shouldn't be in a hostname
             invalid_chars = "|[]{}\\;"
             return not any(c in pattern for c in invalid_chars)
 
         try:
             with open(ssh_config_path) as f:
-                content = f.read()
-
-            for line in content.splitlines():
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-
-                # Handle Include directives
-                if line.lower().startswith("include "):
-                    include_path = line.split(None, 1)[1]
-                    include_path = os.path.expanduser(include_path)
-                    include_path = os.path.expandvars(include_path)
-
-                    include_files = glob.glob(include_path)
-                    for include_file in include_files:
-                        if os.path.isfile(include_file):
-                            try:
-                                with open(include_file) as inc_f:
-                                    content += "\n" + inc_f.read()
-                            except Exception as e:
-                                logger.debug(f"Failed to read include file {include_file}: {e}")
-                    continue
-
-                # Handle Match blocks
-                if line.lower().startswith("match "):
-                    current_match = line.split(None, 1)[1].lower()
-                    continue
-
-                # Handle Host blocks
-                if line.lower().startswith("host "):
-                    current_host = line.split(None, 1)[1]
-                    if is_valid_host_pattern(current_host):
-                        config[current_host] = {}
-                    current_match = None
-                    continue
-
-                # Parse key-value pairs
-                if current_host and "=" in line:
-                    key, value = [x.strip() for x in line.split("=", 1)]
-                    key = key.lower()
-                    # Skip invalid keys or values
-                    if key not in valid_keys or not valid_keys[key](value):
-                        logger.debug(f"Skipping invalid config entry: {key}={value}")
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
                         continue
-                    if current_match:
-                        # Apply match block settings
-                        if current_match == "all" or current_host in current_match:
-                            config[current_host][key] = value
-                    else:
-                        config[current_host][key] = value
-                elif current_host and len(line.split()) == 2:
-                    # Handle space-separated format
-                    key, value = line.split()
-                    key = key.lower()
-                    # Skip invalid keys or values
-                    if key not in valid_keys or not valid_keys[key](value):
-                        logger.debug(f"Skipping invalid config entry: {key} {value}")
+
+                    # Handle Include directives
+                    if line.lower().startswith("include "):
+                        include_path = line.split(None, 1)[1]
+                        include_path = os.path.expanduser(include_path)
+                        include_path = os.path.expandvars(include_path)
+                        
+                        include_files = glob.glob(include_path)
+                        for include_file in include_files:
+                            if os.path.isfile(include_file):
+                                try:
+                                    with open(include_file) as inc_f:
+                                        for inc_line in inc_f:
+                                            if inc_line.strip() and not inc_line.strip().startswith("#"):
+                                                line = inc_line.strip()
+                                except Exception as e:
+                                    logger.debug(f"Failed to read include file {include_file}: {e}")
                         continue
-                    if current_match:
-                        if current_match == "all" or current_host in current_match:
+
+                    # Handle Match blocks
+                    if line.lower().startswith("match "):
+                        current_match = line.split(None, 1)[1].lower()
+                        continue
+
+                    # Handle Host blocks
+                    if line.lower().startswith("host "):
+                        current_host = line.split(None, 1)[1]
+                        if is_valid_host_pattern(current_host):
+                            config[current_host] = {}
+                        current_match = None
+                        continue
+
+                    # Parse key-value pairs
+                    if current_host:
+                        if "=" in line:
+                            key, value = [x.strip() for x in line.split("=", 1)]
+                        else:
+                            parts = line.split(None, 1)
+                            if len(parts) < 2:
+                                continue
+                            key, value = parts[0].strip(), parts[1].strip()
+                        
+                        key = key.lower()
+                        if not value:  # Skip empty values
+                            continue
+                            
+                        # Skip invalid keys or values
+                        if key not in valid_keys:
+                            logger.debug(f"Skipping invalid config key: {key}")
+                            continue
+                            
+                        if not valid_keys[key](value):
+                            logger.debug(f"Skipping invalid config value: {key}={value}")
+                            continue
+                            
+                        if current_match:
+                            # Apply match block settings
+                            if current_match == "all" or current_host in current_match:
+                                config[current_host][key] = value
+                        else:
                             config[current_host][key] = value
-                    else:
-                        config[current_host][key] = value
 
             self._ssh_config_cache = config
             return config
