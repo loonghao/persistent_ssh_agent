@@ -97,10 +97,10 @@ async def setup_multiple_hosts(hosts: list[str]) -> dict[str, bool]:
     """并发设置多个主机的 SSH。"""
     ssh_agent = PersistentSSHAgent()
     results = {}
-    
+
     async def setup_host(host: str):
         results[host] = await ssh_agent.async_setup_ssh(host)
-    
+
     await asyncio.gather(*[setup_host(host) for host in hosts])
     return results
 
@@ -178,21 +178,21 @@ import os
 def clone_repo(repo_url: str, local_path: str, branch: str = None) -> Repo:
     """使用持久化 SSH 认证克隆仓库。"""
     ssh_agent = PersistentSSHAgent()
-    
+
     # 从 URL 提取主机名并设置 SSH
     hostname = ssh_agent.extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("SSH 认证设置失败")
-    
+
     # 获取 SSH 命令并配置环境
     ssh_command = ssh_agent.get_git_ssh_command(hostname)
     if not ssh_command:
         raise RuntimeError("获取 SSH 命令失败")
-    
+
     # 使用 GitPython 克隆
     env = os.environ.copy()
     env['GIT_SSH_COMMAND'] = ssh_command
-    
+
     return Repo.clone_from(
         repo_url,
         local_path,

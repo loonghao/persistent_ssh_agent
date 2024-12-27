@@ -114,6 +114,7 @@ class PersistentSSHAgent:
             bool: True if valid agent info was loaded and agent is running
         """
         if not self._agent_info_file.exists():
+            logger.debug("Agent info file does not exist: %s", self._agent_info_file)
             return False
 
         try:
@@ -121,14 +122,23 @@ class PersistentSSHAgent:
                 agent_info = json.load(f)
 
             # Quick validation of required fields
-            if not all(key in agent_info for key in ("SSH_AUTH_SOCK", "SSH_AGENT_PID", "timestamp", "platform")):
-                logger.debug("Missing required agent info fields")
+            required_fields = ("SSH_AUTH_SOCK", "SSH_AGENT_PID", "timestamp", "platform")
+            if not all(key in agent_info for key in required_fields):
+                logger.debug("Missing required agent info fields: %s",
+                           [f for f in required_fields if f not in agent_info])
                 return False
 
             # Validate timestamp and platform
-            if (time.time() - agent_info["timestamp"] > self._expiration_time or
-                agent_info["platform"] != os.name):
-                logger.debug("Agent info expired or platform mismatch")
+            current_time = time.time()
+            if current_time - agent_info["timestamp"] > self._expiration_time:
+                logger.debug("Agent info expired: %d seconds old",
+                           current_time - agent_info["timestamp"])
+                return False
+
+            # Platform check is only enforced on Windows
+            if os.name == "nt" and agent_info["platform"] != "nt":
+                logger.debug("Platform mismatch: expected 'nt', got '%s'",
+                           agent_info["platform"])
                 return False
 
             # Set environment variables
@@ -137,8 +147,22 @@ class PersistentSSHAgent:
 
             # Verify agent is running
             result = self.run_command(["ssh-add", "-l"])
-            return result.returncode != 2
+            if not result:
+                logger.debug("Failed to run ssh-add -l")
+                return False
 
+            # Return code 2 means "agent not running"
+            # Return code 1 means "no identities" (which is fine)
+            if result.returncode == 2:
+                logger.debug("SSH agent is not running")
+                return False
+
+            logger.debug("Successfully loaded agent info")
+            return True
+
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse agent info JSON: %s", e)
+            return False
         except Exception as e:
             logger.error("Failed to load agent info: %s", e)
             return False
@@ -657,73 +681,84 @@ class PersistentSSHAgent:
             invalid_chars = "|[]{}\\;"
             return not any(c in pattern for c in invalid_chars)
 
+        def process_config_line(line: str, config_file: str = str(ssh_config_path)) -> None:
+            """Process a single line from SSH config file."""
+            nonlocal current_host, current_match, config
+
+            line = line.strip()
+            if not line or line.startswith("#"):
+                return
+
+            # Handle Include directives
+            if line.lower().startswith("include "):
+                include_path = line.split(None, 1)[1]
+                include_path = os.path.expanduser(include_path)
+                include_path = os.path.expandvars(include_path)
+
+                # Support both absolute and relative paths
+                if not os.path.isabs(include_path):
+                    include_path = os.path.join(os.path.dirname(config_file), include_path)
+
+                # Expand glob patterns
+                include_files = glob.glob(include_path)
+                for include_file in include_files:
+                    if os.path.isfile(include_file):
+                        try:
+                            with open(include_file) as inc_f:
+                                for inc_line in inc_f:
+                                    process_config_line(inc_line, include_file)
+                        except Exception as e:
+                            logger.debug(f"Failed to read include file {include_file}: {e}")
+                return
+
+            # Handle Match blocks
+            if line.lower().startswith("match "):
+                current_match = line.split(None, 1)[1].lower()
+                return
+
+            # Handle Host blocks
+            if line.lower().startswith("host "):
+                current_host = line.split(None, 1)[1]
+                if is_valid_host_pattern(current_host):
+                    config[current_host] = {}
+                current_match = None
+                return
+
+            # Parse key-value pairs
+            if current_host:
+                # Split line into key and value
+                if "=" in line:
+                    key, value = [x.strip() for x in line.split("=", 1)]
+                else:
+                    parts = line.split(None, 1)
+                    if len(parts) < 2:
+                        return
+                    key, value = parts[0].strip(), parts[1].strip()
+
+                key = key.lower()
+                if not value:  # Skip empty values
+                    return
+
+                # Skip invalid keys or values
+                if key not in valid_keys:
+                    logger.debug(f"Skipping invalid config key in {config_file}: {key}")
+                    return
+
+                if not valid_keys[key](value):
+                    logger.debug(f"Skipping invalid config value in {config_file}: {key}={value}")
+                    return
+
+                # Apply match block settings
+                if current_match:
+                    if current_match == "all" or current_host in current_match:
+                        config[current_host][key] = value
+                else:
+                    config[current_host][key] = value
+
         try:
             with open(ssh_config_path) as f:
                 for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-
-                    # Handle Include directives
-                    if line.lower().startswith("include "):
-                        include_path = line.split(None, 1)[1]
-                        include_path = os.path.expanduser(include_path)
-                        include_path = os.path.expandvars(include_path)
-                        
-                        include_files = glob.glob(include_path)
-                        for include_file in include_files:
-                            if os.path.isfile(include_file):
-                                try:
-                                    with open(include_file) as inc_f:
-                                        for inc_line in inc_f:
-                                            if inc_line.strip() and not inc_line.strip().startswith("#"):
-                                                line = inc_line.strip()
-                                except Exception as e:
-                                    logger.debug(f"Failed to read include file {include_file}: {e}")
-                        continue
-
-                    # Handle Match blocks
-                    if line.lower().startswith("match "):
-                        current_match = line.split(None, 1)[1].lower()
-                        continue
-
-                    # Handle Host blocks
-                    if line.lower().startswith("host "):
-                        current_host = line.split(None, 1)[1]
-                        if is_valid_host_pattern(current_host):
-                            config[current_host] = {}
-                        current_match = None
-                        continue
-
-                    # Parse key-value pairs
-                    if current_host:
-                        if "=" in line:
-                            key, value = [x.strip() for x in line.split("=", 1)]
-                        else:
-                            parts = line.split(None, 1)
-                            if len(parts) < 2:
-                                continue
-                            key, value = parts[0].strip(), parts[1].strip()
-                        
-                        key = key.lower()
-                        if not value:  # Skip empty values
-                            continue
-                            
-                        # Skip invalid keys or values
-                        if key not in valid_keys:
-                            logger.debug(f"Skipping invalid config key: {key}")
-                            continue
-                            
-                        if not valid_keys[key](value):
-                            logger.debug(f"Skipping invalid config value: {key}={value}")
-                            continue
-                            
-                        if current_match:
-                            # Apply match block settings
-                            if current_match == "all" or current_host in current_match:
-                                config[current_host][key] = value
-                        else:
-                            config[current_host][key] = value
+                    process_config_line(line)
 
             self._ssh_config_cache = config
             return config

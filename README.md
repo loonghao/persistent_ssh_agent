@@ -100,10 +100,10 @@ async def setup_multiple_hosts(hosts: list[str]) -> dict[str, bool]:
     """Set up SSH for multiple hosts concurrently."""
     ssh_agent = PersistentSSHAgent()
     results = {}
-    
+
     async def setup_host(host: str):
         results[host] = await ssh_agent.async_setup_ssh(host)
-    
+
     await asyncio.gather(*[setup_host(host) for host in hosts])
     return results
 
@@ -181,21 +181,21 @@ import os
 def clone_repo(repo_url: str, local_path: str, branch: str = None) -> Repo:
     """Clone a repository using persistent SSH authentication."""
     ssh_agent = PersistentSSHAgent()
-    
+
     # Extract hostname from URL and set up SSH
     hostname = ssh_agent.extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("Failed to set up SSH authentication")
-    
+
     # Get SSH command and configure environment
     ssh_command = ssh_agent.get_git_ssh_command(hostname)
     if not ssh_command:
         raise RuntimeError("Failed to get SSH command")
-    
+
     # Clone with GitPython
     env = os.environ.copy()
     env['GIT_SSH_COMMAND'] = ssh_command
-    
+
     return Repo.clone_from(
         repo_url,
         local_path,
