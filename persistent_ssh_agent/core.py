@@ -253,58 +253,57 @@ class PersistentSSHAgent:
             bool: True if successful, False otherwise
         """
         try:
-            # Get passphrase if configured
             passphrase = None
             if self._config and self._config.identity_passphrase:
                 passphrase = self._config.identity_passphrase
+                logger.debug("Using passphrase from config")
             elif "SSH_KEY_PASSPHRASE" in os.environ:
                 passphrase = os.environ["SSH_KEY_PASSPHRASE"]
+                logger.debug("Using passphrase from environment")
 
             if passphrase:
-                logger.debug("Adding key with passphrase")
-                # For Windows, use a different approach
                 if os.name == "nt":
-                    try:
-                        # Use ssh-add with passphrase via stdin
-                        result = subprocess.run(
-                            ["ssh-add", identity_file],
-                            input=passphrase + "\n",  # Add newline to simulate Enter key
-                            capture_output=True,
-                            text=True,
-                            check=False,
-                            timeout=10
-                        )
-
-                        if result and result.returncode == 0:
-                            logger.debug("Successfully added key with passphrase")
-                            return True
-
-                        logger.error(f"Failed to add key: {result.stderr if result else 'Unknown error'}")
-                        return False
-                    except subprocess.TimeoutExpired:
-                        logger.error("Failed to add key: Timeout expired")
-                        return False
+                    # Windows-specific approach
+                    logger.debug("Using Windows-specific key addition")
+                    result = subprocess.run(
+                        ["ssh-add", identity_file],
+                        input=f"{passphrase}\n".encode(),
+                        capture_output=True,
+                        check=False,
+                        timeout=10
+                    )
                 else:
-                    # For Unix systems, use expect script
-                    with NamedTemporaryFile(mode="w", delete=False, suffix=".sh") as f:
-                        script = f"""#!/bin/sh
-expect << EOF
+                    # Unix-specific approach using expect
+                    logger.debug("Using Unix-specific key addition")
+                    expect_script = f"""#!/usr/bin/expect -f
+set timeout 10
 spawn ssh-add {identity_file}
 expect "Enter passphrase"
 send "{passphrase}\\r"
-expect eof
-EOF
+expect {{
+    "Identity added" {{
+        exit 0
+    }}
+    timeout {{
+        exit 1
+    }}
+    eof {{
+        exit 2
+    }}
+}}
 """
-                        f.write(script)
-                        script_path = f.name
-
-                    # Make script executable
-                    os.chmod(script_path, 0o700)
+                    # Create temporary expect script
+                    with NamedTemporaryFile(mode="w", suffix=".exp", delete=False) as script_file:
+                        script_path = script_file.name
+                        script_file.write(expect_script)
 
                     try:
-                        # Run the script
+                        # Make script executable
+                        os.chmod(script_path, 0o700)
+
+                        # Run expect script
                         result = subprocess.run(
-                            ["sh", script_path],
+                            ["expect", script_path],
                             capture_output=True,
                             text=True,
                             check=False,
@@ -317,12 +316,30 @@ EOF
                         except Exception as e:
                             logger.debug(f"Failed to remove temporary script: {e}")
 
-                    if result and result.returncode == 0:
-                        logger.debug("Successfully added key with passphrase")
-                        return True
+                if result and result.returncode == 0:
+                    logger.debug("Successfully added key with passphrase")
+                    return True
 
-                    logger.error(f"Failed to add key: {result.stderr if result else 'Unknown error'}")
-                    return False
+                # If the above methods fail, try a simpler approach
+                logger.debug("First attempt failed, trying simpler approach")
+                env = os.environ.copy()
+                env["DISPLAY"] = ":0"  # Required for some SSH implementations
+
+                result = subprocess.run(
+                    ["ssh-add", identity_file],
+                    input=passphrase.encode(),
+                    env=env,
+                    capture_output=True,
+                    check=False,
+                    timeout=10
+                )
+
+                if result and result.returncode == 0:
+                    logger.debug("Successfully added key with simple passphrase method")
+                    return True
+
+                logger.error(f"Failed to add key: {result.stderr.decode() if result and result.stderr else 'Unknown error'}")
+                return False
 
             else:
                 # Add key without passphrase
@@ -587,6 +604,33 @@ EOF
         logger.debug("Parsing SSH config file: %s", ssh_config_path)
         config = {}
         current_host = None
+        current_match = None
+
+        # Valid SSH config keys and their validation functions
+        valid_keys = {
+            "host": lambda x: True,  # Host patterns are handled separately
+            "hostname": lambda x: is_valid_hostname(x),
+            "port": lambda x: str(x).isdigit() and 1 <= int(x) <= 65535,
+            "user": lambda x: bool(x and not any(c in x for c in " \t\n\r")),
+            "identityfile": lambda x: True,  # Path validation handled elsewhere
+            "identitiesonly": lambda x: x.lower() in ("yes", "no"),
+            "forwardagent": lambda x: x.lower() in ("yes", "no"),
+            "proxycommand": lambda x: bool(x),
+            "proxyhost": lambda x: is_valid_hostname(x),
+            "proxyport": lambda x: str(x).isdigit() and 1 <= int(x) <= 65535,
+            "proxyuser": lambda x: bool(x and not any(c in x for c in " \t\n\r")),
+            "stricthostkeychecking": lambda x: x.lower() in ("yes", "no", "accept-new", "off", "ask"),
+            "userknownhostsfile": lambda x: True,  # Path validation handled elsewhere
+            "batchmode": lambda x: x.lower() in ("yes", "no"),
+            "compression": lambda x: x.lower() in ("yes", "no"),
+        }
+
+        def is_valid_hostname(hostname: str) -> bool:
+            """Check if a hostname is valid."""
+            if not hostname or len(hostname) > 255:
+                return False
+            allowed = set("abcdefghijklmnopqrstuvwxyz0123456789.-")
+            return all(c.lower() in allowed for c in hostname)
 
         def is_valid_host_pattern(pattern: str) -> bool:
             """Check if a host pattern is valid."""
@@ -599,56 +643,77 @@ EOF
         try:
             with open(ssh_config_path) as f:
                 content = f.read()
-                logger.debug("SSH config content:\n%s", content)
 
-            with open(ssh_config_path) as f:
-                for line in f:
-                    # Remove comments and strip whitespace
-                    if "#" in line:
-                        line = line[:line.index("#")]
-                    line = line.strip()
+            for line in content.splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
 
-                    if not line:
+                # Handle Include directives
+                if line.lower().startswith("include "):
+                    include_path = line.split(None, 1)[1]
+                    include_path = os.path.expanduser(include_path)
+                    include_path = os.path.expandvars(include_path)
+
+                    # Handle glob patterns
+                    # Import built-in modules
+                    import glob
+                    include_files = glob.glob(include_path)
+                    for include_file in include_files:
+                        if os.path.isfile(include_file):
+                            try:
+                                with open(include_file) as inc_f:
+                                    content += "\n" + inc_f.read()
+                            except Exception as e:
+                                logger.debug(f"Failed to read include file {include_file}: {e}")
+                    continue
+
+                # Handle Match blocks
+                if line.lower().startswith("match "):
+                    current_match = line.split(None, 1)[1].lower()
+                    continue
+
+                # Handle Host blocks
+                if line.lower().startswith("host "):
+                    current_host = line.split(None, 1)[1]
+                    if is_valid_host_pattern(current_host):
+                        config[current_host] = {}
+                    current_match = None
+                    continue
+
+                # Parse key-value pairs
+                if current_host and "=" in line:
+                    key, value = [x.strip() for x in line.split("=", 1)]
+                    key = key.lower()
+                    # Skip invalid keys or values
+                    if key not in valid_keys or not valid_keys[key](value):
+                        logger.debug(f"Skipping invalid config entry: {key}={value}")
                         continue
-
-                    # Split into key and value
-                    parts = line.split(None, 1)
-                    if not parts:
-                        continue
-
-                    key = parts[0].lower()
-                    logger.debug("Processing config line - key: %s, parts: %s", key, parts)
-
-                    # Handle Host directive
-                    if key == "host":
-                        if len(parts) > 1:
-                            host_pattern = parts[1].strip()
-                            if is_valid_host_pattern(host_pattern):
-                                current_host = host_pattern
-                                logger.debug("Found valid Host directive: %s", current_host)
-                                if current_host not in config:
-                                    config[current_host] = {}
-                            else:
-                                logger.warning("Invalid host pattern found: %s", host_pattern)
-                                current_host = None
-                        continue
-
-                    # Skip if no valid host context
-                    if not current_host:
-                        continue
-
-                    # Handle other directives
-                    if len(parts) > 1:
-                        value = parts[1].strip()
-                        if key in ("identityfile", "user"):
-                            logger.debug("Found %s for host %s: %s", key.title(), current_host, value)
+                    if current_match:
+                        # Apply match block settings
+                        if current_match == "all" or current_host in current_match:
                             config[current_host][key] = value
+                    else:
+                        config[current_host][key] = value
+                elif current_host and len(line.split()) == 2:
+                    # Handle space-separated format
+                    key, value = line.split()
+                    key = key.lower()
+                    # Skip invalid keys or values
+                    if key not in valid_keys or not valid_keys[key](value):
+                        logger.debug(f"Skipping invalid config entry: {key} {value}")
+                        continue
+                    if current_match:
+                        if current_match == "all" or current_host in current_match:
+                            config[current_host][key] = value
+                    else:
+                        config[current_host][key] = value
 
-            logger.debug("Parsed SSH config: %s", config)
             self._ssh_config_cache = config
             return config
+
         except Exception as e:
-            logger.error("Failed to parse SSH config: %s", e)
+            logger.error(f"Failed to parse SSH config: {e}")
             return {}
 
     def get_git_ssh_command(self, hostname: str) -> Optional[str]:

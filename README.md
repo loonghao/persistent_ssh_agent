@@ -93,21 +93,21 @@ import os
 def clone_repo(repo_url: str, local_path: str, branch: str = None) -> Repo:
     """Clone a repository using GitPython with persistent SSH authentication."""
     ssh_agent = PersistentSSHAgent()
-    
+
     # Extract hostname from URL and set up SSH
     hostname = ssh_agent._extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("Failed to set up SSH authentication")
-    
+
     # Get SSH command and configure environment
     ssh_command = ssh_agent.get_git_ssh_command(hostname)
     if not ssh_command:
         raise RuntimeError("Failed to get SSH command")
-    
+
     # Clone with GitPython
     env = os.environ.copy()
     env['GIT_SSH_COMMAND'] = ssh_command
-    
+
     return Repo.clone_from(
         repo_url,
         local_path,
@@ -267,7 +267,7 @@ if ssh_agent.setup_ssh('github.com'):
 2. **Environment Variables**:
    ```python
    import os
-   
+
    config = SSHConfig(
        identity_file='~/.ssh/id_rsa',
        identity_passphrase=os.environ.get('SSH_KEY_PASS'),
