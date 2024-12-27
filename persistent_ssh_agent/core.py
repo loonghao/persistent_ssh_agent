@@ -5,18 +5,19 @@ import fnmatch
 import json
 import logging
 import os
+from pathlib import Path
 import re
 import subprocess
-import time
-from pathlib import Path
 from tempfile import NamedTemporaryFile
+import time
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
 
-from .config import SSHConfig
+# Import third-party modules
+from persistent_ssh_agent.config import SSHConfig
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class PersistentSSHAgent:
 
     def __init__(self, expiration_time: int = 86400, config: Optional[SSHConfig] = None):
         """Initialize SSH manager.
-        
+
         Args:
             expiration_time: Time in seconds before agent info expires
             config: Optional SSH configuration
@@ -204,7 +205,7 @@ class PersistentSSHAgent:
                 # Use sshpass for keys with passphrase
                 result = self._run_command(
                     ["ssh-add", identity_file],
-                    input=passphrase.encode()
+                    input=str(passphrase).encode('utf-8') + b'\n'
                 )
             else:
                 # Try without passphrase
@@ -395,14 +396,14 @@ class PersistentSSHAgent:
         # Check config first
         if self._config and (self._config.identity_file or self._config.identity_content):
             if self._config.identity_file and os.path.exists(self._config.identity_file):
-                return self._config.identity_file
+                return str(Path(self._config.identity_file))
             elif self._config.identity_content:
                 return self._write_temp_key(self._config.identity_content)
 
         # Check environment variables
         env_file = os.environ.get("SSH_IDENTITY_FILE")
         if env_file and os.path.exists(env_file):
-            return env_file
+            return str(Path(env_file))
 
         env_content = os.environ.get("SSH_IDENTITY_CONTENT")
         if env_content:
@@ -410,39 +411,40 @@ class PersistentSSHAgent:
 
         # Check SSH config
         config = self._parse_ssh_config()
-        
+
         # Try exact hostname match
         if hostname in config and "IdentityFile" in config[hostname]:
             identity_file = os.path.expanduser(config[hostname]["IdentityFile"])
             if os.path.exists(identity_file):
-                return identity_file
+                return str(Path(identity_file))
 
         # Try pattern matching
         for pattern, settings in config.items():
             if "IdentityFile" in settings and fnmatch.fnmatch(hostname, pattern):
                 identity_file = os.path.expanduser(settings["IdentityFile"])
                 if os.path.exists(identity_file):
-                    return identity_file
+                    return str(Path(identity_file))
 
         # Try default key files
         for key_name in ["id_ed25519", "id_rsa"]:
-            identity_file = os.path.join(str(self._ssh_dir), key_name)
+            identity_file = str(self._ssh_dir / key_name)
             if os.path.exists(identity_file):
                 return identity_file
 
-        return None
+        # Return default path even if it doesn't exist
+        return str(self._ssh_dir / "id_rsa")
 
     def _write_temp_key(self, key_content: str) -> str:
         """Write key content to a temporary file.
-        
+
         Args:
             key_content: SSH key content to write
-            
+
         Returns:
             str: Path to temporary key file
         """
         try:
-            with NamedTemporaryFile(mode='w', delete=False) as temp_file:
+            with NamedTemporaryFile(mode="w", delete=False) as temp_file:
                 temp_file.write(key_content)
                 # Set correct permissions
                 os.chmod(temp_file.name, 0o600)
