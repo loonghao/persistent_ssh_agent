@@ -8,7 +8,14 @@ import subprocess
 import tempfile
 
 # Import third-party modules
+from persistent_ssh_agent.core import PersistentSSHAgent
 import pytest
+
+
+@pytest.fixture
+def ssh_manager():
+    """Create a PersistentSSHAgent instance."""
+    return PersistentSSHAgent()
 
 
 @pytest.fixture
