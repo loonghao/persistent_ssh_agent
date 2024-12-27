@@ -1,6 +1,8 @@
 """Configuration management for SSH agent."""
+# Import built-in modules
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 
 
 @dataclass
