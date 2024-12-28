@@ -62,6 +62,5 @@ jobs:
         with:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           publish_dir: ./docs/build/html
-          destination_dir: ${{ github.ref_name }}  # Deploy to branch-specific directory
           keep_files: true  # Keep previously deployed files
           enable_jekyll: false  # Disable Jekyll processing
