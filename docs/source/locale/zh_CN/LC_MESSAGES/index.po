@@ -22,15 +22,147 @@ msgstr ""
 
 #: ../../source/index.rst:12
 msgid "Contents:"
-msgstr ""
+msgstr "目录："
 
 #: ../../source/index.rst:2
 msgid "Welcome to persistent_ssh_agent's documentation!"
-msgstr ""
+msgstr "欢迎查看 persistent_ssh_agent 的文档！"
 
 #: ../../../README.md:1
 msgid "persistent-ssh-agent"
-msgstr ""
+msgstr "persistent-ssh-agent"
+
+#: ../../../README.md:3
+msgid "A Python library for managing SSH agent persistence"
+msgstr "一个用于管理 SSH agent 持久化的 Python 库"
+
+#: ../../../README.md:5
+msgid "Features"
+msgstr "特性"
+
+#: ../../../README.md:7
+msgid "Automatic SSH agent management"
+msgstr "自动 SSH agent 管理"
+
+#: ../../../README.md:8
+msgid "Session persistence"
+msgstr "会话持久化"
+
+#: ../../../README.md:9
+msgid "Cross-platform support"
+msgstr "跨平台支持"
+
+#: ../../../README.md:10
+msgid "Easy configuration"
+msgstr "简单配置"
+
+#: ../../../README.md:12
+msgid "Installation"
+msgstr "安装"
+
+#: ../../../README.md:14
+msgid "You can install persistent_ssh_agent using pip:"
+msgstr "你可以使用 pip 安装 persistent_ssh_agent："
+
+#: ../../../README.md:20
+msgid "Usage"
+msgstr "使用方法"
+
+#: ../../../README.md:22
+msgid "Basic usage:"
+msgstr "基本用法："
+
+#: ../../../README.md:28
+msgid "Advanced usage:"
+msgstr "高级用法："
+
+#: ../../../README.md:34
+msgid "Configuration"
+msgstr "配置"
+
+#: ../../../README.md:36
+msgid "The following configuration options are available:"
+msgstr "可以使用以下配置选项："
+
+#: ../../../README.md:38
+msgid "SSH directory path"
+msgstr "SSH 目录路径"
+
+#: ../../../README.md:40
+msgid "Agent reuse"
+msgstr "Agent 重用"
+
+#: ../../../README.md:42
+msgid "The `reuse_agent` parameter controls how the SSH agent handles existing sessions:"
+msgstr "`reuse_agent` 参数控制 SSH agent 如何处理现有会话："
+
+#: ../../../README.md:44
+msgid "When `True` (default):"
+msgstr "当设置为 `True`（默认值）时："
+
+#: ../../../README.md:46
+msgid "Attempts to reuse an existing SSH agent if available"
+msgstr "尝试重用现有的 SSH agent（如果可用）"
+
+#: ../../../README.md:47
+msgid "Creates a new agent if none exists"
+msgstr "如果不存在则创建新的 agent"
+
+#: ../../../README.md:49
+msgid "When `False`:"
+msgstr "当设置为 `False` 时："
+
+#: ../../../README.md:51
+msgid "Always starts a new SSH agent"
+msgstr "总是启动新的 SSH agent"
+
+#: ../../../README.md:52
+msgid "Useful when you want to ensure a clean agent state"
+msgstr "当你需要确保 agent 状态干净时很有用"
+
+#: ../../../README.md:54
+msgid "Example:"
+msgstr "示例："
+
+#: ../../../README.md:60
+msgid "Security"
+msgstr "安全性"
+
+#: ../../../README.md:62
+msgid "Key Management"
+msgstr "密钥管理"
+
+#: ../../../README.md:64
+msgid "The package handles SSH keys securely:"
+msgstr "该包安全地处理 SSH 密钥："
+
+#: ../../../README.md:66
+msgid "Proper file permissions"
+msgstr "正确的文件权限"
+
+#: ../../../README.md:67
+msgid "Secure key loading"
+msgstr "安全的密钥加载"
+
+#: ../../../README.md:68
+msgid "Support for key content injection (useful in CI/CD)"
+msgstr "支持密钥内容注入（在 CI/CD 中很有用）"
+
+#: ../../../README.md:70
+msgid "Contributing"
+msgstr "贡献"
+
+#: ../../../README.md:72
+msgid "We welcome contributions! Please see our contributing guidelines for details."
+msgstr "我们欢迎贡献！详情请参阅我们的贡献指南。"
+
+#: ../../../README.md:74
+msgid "License"
+msgstr "许可证"
+
+#: ../../../README.md:76
+msgid "This project is licensed under the MIT License - see the LICENSE file for details."
+msgstr "本项目采用 MIT 许可证 - 详情请参阅 LICENSE 文件。"
 
 #: ../../../README.md:3
 #, python-format
@@ -669,4 +801,3 @@ msgstr ""
 #: ../../source/index.rst:27
 msgid ":ref:`search`"
 msgstr ""
-

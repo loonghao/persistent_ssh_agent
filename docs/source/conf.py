@@ -3,30 +3,30 @@
 # Import built-in modules
 import os
 import sys
-from pathlib import Path
+
 
 # Add project root to sys.path
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
-project = 'persistent_ssh_agent'
-copyright = '2023, persistent_ssh_agent'
-author = 'persistent_ssh_agent'
+project = "persistent_ssh_agent"
+copyright = "2023, persistent_ssh_agent"
+author = "persistent_ssh_agent"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx',
-    'sphinx_copybutton',
-    'myst_parser',  # Add support for markdown files
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx_copybutton",
+    "myst_parser",  # Add support for markdown files
 ]
 
 # -- Options for HTML output -------------------------------------------------
-html_theme = 'furo'
-html_static_path = ['_static']
-html_css_files = ['custom.css']
+html_theme = "furo"
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Theme options
 html_theme_options = {
@@ -53,19 +53,19 @@ html_theme_options = {
 }
 
 # Configure templates
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # -- Language configuration -------------------------------------------------
-language = os.getenv('SPHINX_LANGUAGE', 'en_US')
+language = os.getenv("SPHINX_LANGUAGE", "en")
 
 # Mapping of supported languages
 language_mapping = {
-    'en_US': 'English',
-    'zh_CN': '简体中文'
+    "en": "English",
+    "zh_CN": "简体中文"
 }
 
 # Locale directories for translations
-locale_dirs = ['locale/']
+locale_dirs = ["locale/"]
 gettext_compact = False
 
 # Language to use for generating the HTML full-text search index.
@@ -74,24 +74,24 @@ gettext_compact = False
 #   'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr', 'ar', 'fa', 'hi',
 #   'ko', 'zh'
 html_search_language = {
-    'en_US': 'en',
-    'zh_CN': 'zh'
-}.get(language, 'en')
+    "en": "en",
+    "zh_CN": "zh"
+}.get(language, "en")
 
 html_context = {
-    'languages': {
-        'en_US': 'English',
-        'zh_CN': '简体中文',
+    "languages": {
+        "en": "English",
+        "zh_CN": "简体中文",
     },
-    'current_language': language,
-    'language_links': {
-        'en_US': '/en_US/',
-        'zh_CN': '/zh_CN/',
+    "current_language": language,
+    "language_links": {
+        "en": "/persistent_ssh_agent/en/",
+        "zh_CN": "/persistent_ssh_agent/zh_CN/",
     }
 }
 
 # Configure master document
-master_doc = 'index'
+master_doc = "index"
 
 # Configure sidebars
 html_sidebars = {
@@ -110,7 +110,7 @@ html_sidebars = {
 # -- Custom configuration --------------------------------------------------
 def setup(app):
     """Setup Sphinx application."""
-    app.add_css_file('custom.css')
+    app.add_css_file("custom.css")
 
 # Add custom template directory
-templates_path = ['_templates']
+templates_path = ["_templates"]

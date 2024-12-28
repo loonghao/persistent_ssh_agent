@@ -577,4 +577,3 @@ msgstr ""
 #: ../../source/readme.rst:52
 msgid "See the documentation for detailed configuration options."
 msgstr ""
-

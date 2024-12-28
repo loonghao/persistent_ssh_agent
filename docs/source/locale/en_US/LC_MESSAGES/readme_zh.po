@@ -87,4 +87,3 @@ msgstr ""
 #: ../../source/readme_zh.rst:52
 msgid "查看文档获取详细的配置选项。"
 msgstr ""
-

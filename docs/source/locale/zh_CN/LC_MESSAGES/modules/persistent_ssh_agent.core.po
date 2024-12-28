@@ -160,4 +160,3 @@ msgstr ""
 #: of persistent_ssh_agent.core.SSHError:1
 msgid "Base exception for SSH-related errors."
 msgstr ""
-
