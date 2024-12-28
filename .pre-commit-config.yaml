@@ -23,7 +23,7 @@ repos:
         language: system
         types: [rst, markdown]
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
         # Only run when docs related files are changed
         files: |
           (?x)^(

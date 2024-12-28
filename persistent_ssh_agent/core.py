@@ -11,6 +11,7 @@ import re
 import socket
 import subprocess
 from subprocess import CompletedProcess
+import sys
 import tempfile
 from textwrap import dedent
 import time
@@ -22,6 +23,12 @@ from typing import Optional
 from typing import Tuple
 from typing import TypeVar
 from typing import Union
+
+
+if sys.version_info >= (3, 9):
+    pass
+else:
+    pass
 
 # Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
@@ -522,7 +529,7 @@ class PersistentSSHAgent:
 
     def run_command(self, command: List[str], shell: bool = False,
                     check_output: bool = True, timeout: Optional[int] = None,
-                    env: Optional[Dict[str, str]] = None) -> Optional[CompletedProcess[bytes]]:
+                    env: Optional[Dict[str, str]] = None) -> Optional[CompletedProcess]:
         """Run a command and return its output.
 
         Args:
@@ -687,7 +694,7 @@ class PersistentSSHAgent:
             return config
 
         # Define valid keys and their validation functions
-        valid_keys: Dict[str, ValidatorFunc] = {
+        valid_keys: Dict[str, Callable[[str], bool]] = {
             # Connection settings
             "hostname": lambda x: True,  # Any hostname is valid
             "port": lambda x: x.isdigit() and 1 <= int(x) <= 65535,

@@ -18,6 +18,13 @@ docs = [
     "doc8",
     "sphinx-intl",
 ]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-benchmark",
+    "pytest-timeout",
+]
 
 [build-system]
 requires = ["poetry-core"]
