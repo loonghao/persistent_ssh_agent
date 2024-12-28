@@ -3,17 +3,16 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" /><link rel="next" title="persistent_ssh_agent package" href="modules/persistent_ssh_agent.html" />
+<link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent 文档</title>
+        <title>persistent_ssh_agent 0.5.1 文档</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/tabs.css?v=4c969af8" />
-    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=88357e94" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=2707e25f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
-    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=88357e94" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=2707e25f" />
     
     
 
@@ -176,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">persistent_ssh_agent  文档</div></a>
+      <a href="#"><div class="brand">persistent_ssh_agent 0.5.1 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +187,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -200,34 +199,21 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent  文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.5.1 文档</span>
   
-</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+</a>
+<div class="language-switcher">
+        <span class="current-lang">中文</span>
+        <a href="/persistent_ssh_agent/en/index.html">English</a>
+</div><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="搜索" name="q" aria-label="搜索">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="modules/persistent_ssh_agent.html">persistent_ssh_agent package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of persistent_ssh_agent package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modules/persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html">概述</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id2">特性</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id3">安装</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id4">使用方法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id5">配置</a></li>
-</ul>
-
+  
 </div>
 </div>
-
       </div>
       
     </div>
@@ -261,7 +247,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -269,28 +255,32 @@
         <article role="main" id="furo-main-content">
           <section id="welcome-to-persistent-ssh-agent-s-documentation">
 <h1>欢迎查看 persistent_ssh_agent 的文档！<a class="headerlink" href="#welcome-to-persistent-ssh-agent-s-documentation" title="Link to this heading">¶</a></h1>
-<p># persistent-ssh-agent</p>
-<p>[![Python Version](<a class="reference external" href="https://img.shields.io/pypi/pyversions/persistent_ssh_agent)](https://img.shields.io/pypi/pyversions/persistent_ssh_agent">https://img.shields.io/pypi/pyversions/persistent_ssh_agent)](https://img.shields.io/pypi/pyversions/persistent_ssh_agent</a>)
-[![Nox](<a class="reference external" href="https://img.shields.io/badge/%F0%9F%A6%8A-Nox-D85E00.svg)](https://github.com/wntrblm/nox">https://img.shields.io/badge/%F0%9F%A6%8A-Nox-D85E00.svg)](https://github.com/wntrblm/nox</a>)
-[![PyPI Version](<a class="reference external" href="https://img.shields.io/pypi/v/persistent_ssh_agent?color=green)](https://pypi.org/project/persistent_ssh_agent/">https://img.shields.io/pypi/v/persistent_ssh_agent?color=green)](https://pypi.org/project/persistent_ssh_agent/</a>)
-[![Downloads](<a class="reference external" href="https://static.pepy.tech/badge/persistent_ssh_agent)](https://pepy.tech/project/persistent_ssh_agent">https://static.pepy.tech/badge/persistent_ssh_agent)](https://pepy.tech/project/persistent_ssh_agent</a>)
-[![Downloads](<a class="reference external" href="https://static.pepy.tech/badge/persistent_ssh_agent/month)](https://pepy.tech/project/persistent_ssh_agent">https://static.pepy.tech/badge/persistent_ssh_agent/month)](https://pepy.tech/project/persistent_ssh_agent</a>)
-[![Downloads](<a class="reference external" href="https://static.pepy.tech/badge/persistent_ssh_agent/week)](https://pepy.tech/project/persistent_ssh_agent">https://static.pepy.tech/badge/persistent_ssh_agent/week)](https://pepy.tech/project/persistent_ssh_agent</a>)
-[![License](<a class="reference external" href="https://img.shields.io/pypi/l/persistent_ssh_agent)](https://pypi.org/project/persistent_ssh_agent/">https://img.shields.io/pypi/l/persistent_ssh_agent)](https://pypi.org/project/persistent_ssh_agent/</a>)
-[![PyPI Format](<a class="reference external" href="https://img.shields.io/pypi/format/persistent_ssh_agent)](https://pypi.org/project/persistent_ssh_agent/">https://img.shields.io/pypi/format/persistent_ssh_agent)](https://pypi.org/project/persistent_ssh_agent/</a>)
-[![Maintenance](<a class="reference external" href="https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/loonghao/persistent_ssh_agent/graphs/commit-activity">https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/loonghao/persistent_ssh_agent/graphs/commit-activity</a>)
-[![Codecov](<a class="reference external" href="https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)](https://codecov.io/gh/loonghao/persistent_ssh_agent">https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)](https://codecov.io/gh/loonghao/persistent_ssh_agent</a>)</p>
-<p>[English](./README.md) | [中文](./README_zh.md)</p>
+<section id="persistent-ssh-agent">
+<h2>persistent-ssh-agent<a class="headerlink" href="#persistent-ssh-agent" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://img.shields.io/pypi/pyversions/persistent_ssh_agent"><img alt="Python Version" src="https://img.shields.io/pypi/pyversions/persistent_ssh_agent" /></a>
+<a class="reference external" href="https://github.com/wntrblm/nox"><img alt="Nox" src="https://img.shields.io/badge/%F0%9F%A6%8A-Nox-D85E00.svg" /></a>
+<a class="reference external" href="https://pypi.org/project/persistent_ssh_agent/"><img alt="PyPI Version" src="https://img.shields.io/pypi/v/persistent_ssh_agent?color=green" /></a>
+<a class="reference external" href="https://pepy.tech/project/persistent_ssh_agent"><img alt="Downloads" src="https://static.pepy.tech/badge/persistent_ssh_agent" /></a>
+<a class="reference external" href="https://pepy.tech/project/persistent_ssh_agent"><img alt="Downloads" src="https://static.pepy.tech/badge/persistent_ssh_agent/month" /></a>
+<a class="reference external" href="https://pepy.tech/project/persistent_ssh_agent"><img alt="Downloads" src="https://static.pepy.tech/badge/persistent_ssh_agent/week" /></a>
+<a class="reference external" href="https://pypi.org/project/persistent_ssh_agent/"><img alt="License" src="https://img.shields.io/pypi/l/persistent_ssh_agent" /></a>
+<a class="reference external" href="https://pypi.org/project/persistent_ssh_agent/"><img alt="PyPI Format" src="https://img.shields.io/pypi/format/persistent_ssh_agent" /></a>
+<a class="reference external" href="https://github.com/loonghao/persistent_ssh_agent/graphs/commit-activity"><img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" /></a>
+<a class="reference external" href="https://codecov.io/gh/loonghao/persistent_ssh_agent"><img alt="Codecov" src="https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent" /></a></p>
+<p><a class="reference internal" href="#./README.md"><span class="xref myst">English</span></a> | <a class="reference internal" href="#./README_zh.md"><span class="xref myst">中文</span></a></p>
 <p>🔐 A modern Python library for persistent SSH agent management across sessions.</p>
-<p>## 📚 Table of Contents</p>
+<section id="table-of-contents">
+<h3>📚 Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p>[Features](#features)</p></li>
-<li><p>[Installation](#installation)</p></li>
-<li><p>[Usage](#usage)</p></li>
-<li><p>[Security Features](#security-features)</p></li>
-<li><p>[Contributing](#contributing)</p></li>
+<li><p><a class="reference internal" href="#features"><span class="xref myst">Features</span></a></p></li>
+<li><p><a class="reference internal" href="#installation"><span class="xref myst">Installation</span></a></p></li>
+<li><p><a class="reference internal" href="#usage"><span class="xref myst">Usage</span></a></p></li>
+<li><p><a class="reference internal" href="#security-features"><span class="xref myst">Security Features</span></a></p></li>
+<li><p><a class="reference internal" href="#contributing"><span class="xref myst">Contributing</span></a></p></li>
 </ul>
-<p>## ✨ Features</p>
+</section>
+<section id="features">
+<h3>✨ Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>🔄 Persistent SSH agent management across sessions</p></li>
 <li><p>🔑 Automatic SSH key loading and caching</p></li>
@@ -308,295 +298,314 @@
 <li><p>🔍 Enhanced SSH configuration validation</p></li>
 <li><p>🛠️ Modern development toolchain (Poetry, Commitizen, Black)</p></li>
 </ul>
-<p>## 🚀 Installation</p>
-<p><code class="docutils literal notranslate"><span class="pre">`bash</span>
-<span class="pre">pip</span> <span class="pre">install</span> <span class="pre">persistent-ssh-agent</span>
-<span class="pre">`</span></code></p>
-<p>## 📋 Requirements</p>
+</section>
+<section id="installation">
+<h3>🚀 Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>persistent-ssh-agent
+</pre></div>
+</div>
+</section>
+<section id="requirements">
+<h3>📋 Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Python 3.8-3.13</p></li>
 <li><p>OpenSSH (ssh-agent, ssh-add) installed and available in PATH</p></li>
 <li><p>Git (optional, for Git operations)</p></li>
 </ul>
-<p>## 📖 Usage</p>
-<p>### Basic Usage</p>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent</p>
-<p># Create an instance with custom expiration time (default is 24 hours)
-ssh_agent = PersistentSSHAgent(expiration_time=86400)</p>
-<p># Set up SSH for a specific host
-if ssh_agent.setup_ssh('github.com'):</p>
-<blockquote>
-<div><p>print(&quot;✅ SSH authentication ready!&quot;)</p>
-</div></blockquote>
-<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
-<p>### Advanced Configuration</p>
-<p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<p># Create custom SSH configuration
-config = SSHConfig(</p>
-<blockquote>
-<div><p>identity_file='~/.ssh/github_key',  # Optional specific identity file
-identity_passphrase='your-passphrase',  # Optional passphrase
-ssh_options={  # Optional SSH options</p>
-<blockquote>
-<div><p>'StrictHostKeyChecking': 'yes',
-'PasswordAuthentication': 'no',
-'PubkeyAuthentication': 'yes'</p>
-</div></blockquote>
-<p>}</p>
-</div></blockquote>
-<p>)</p>
-<p># Initialize with custom config and agent reuse settings
-ssh_agent = PersistentSSHAgent(</p>
-<blockquote>
-<div><p>config=config,
-expiration_time=86400,  # Optional: Set agent expiration time (default 24 hours)
-reuse_agent=True  # Optional: Control agent reuse behavior (default True)</p>
-</div></blockquote>
-<p>)</p>
-<p># Set up SSH authentication
-if ssh_agent.setup_ssh('github.com'):</p>
-<blockquote>
-<div><p># Get Git SSH command for the host
-ssh_command = ssh_agent.get_git_ssh_command('github.com')
-if ssh_command:</p>
-<blockquote>
-<div><p>print(&quot;✅ Git SSH command ready!&quot;)</p>
-</div></blockquote>
-</div></blockquote>
-<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
-<p>### Agent Reuse Behavior</p>
-<p>The <cite>reuse_agent</cite> parameter controls how the SSH agent handles existing sessions:</p>
+</section>
+<section id="usage">
+<h3>📖 Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
+<section id="basic-usage">
+<h4>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="c1"># Create an instance with custom expiration time (default is 24 hours)</span>
+<span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">expiration_time</span><span class="o">=</span><span class="mi">86400</span><span class="p">)</span>
+
+<span class="c1"># Set up SSH for a specific host</span>
+<span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ SSH authentication ready!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="advanced-configuration">
+<h4>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="c1"># Create custom SSH configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
+    <span class="n">identity_file</span><span class="o">=</span><span class="s1">&#39;~/.ssh/github_key&#39;</span><span class="p">,</span>  <span class="c1"># Optional specific identity file</span>
+    <span class="n">identity_passphrase</span><span class="o">=</span><span class="s1">&#39;your-passphrase&#39;</span><span class="p">,</span>  <span class="c1"># Optional passphrase</span>
+    <span class="n">ssh_options</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># Optional SSH options</span>
+        <span class="s1">&#39;StrictHostKeyChecking&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PasswordAuthentication&#39;</span><span class="p">:</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PubkeyAuthentication&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize with custom config and agent reuse settings</span>
+<span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+    <span class="n">expiration_time</span><span class="o">=</span><span class="mi">86400</span><span class="p">,</span>  <span class="c1"># Optional: Set agent expiration time (default 24 hours)</span>
+    <span class="n">reuse_agent</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Optional: Control agent reuse behavior (default True)</span>
+<span class="p">)</span>
+
+<span class="c1"># Set up SSH authentication</span>
+<span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">):</span>
+    <span class="c1"># Get Git SSH command for the host</span>
+    <span class="n">ssh_command</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">get_git_ssh_command</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ssh_command</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Git SSH command ready!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="agent-reuse-behavior">
+<h4>Agent Reuse Behavior<a class="headerlink" href="#agent-reuse-behavior" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">reuse_agent</span></code> parameter controls how the SSH agent handles existing sessions:</p>
 <ul class="simple">
-<li><p>When <cite>reuse_agent=True</cite> (default):
-- Attempts to reuse an existing SSH agent if available
-- Reduces the number of agent startups and key additions
-- Improves performance by avoiding unnecessary agent operations</p></li>
-<li><p>When <cite>reuse_agent=False</cite>:
-- Always starts a new SSH agent session
-- Useful when you need a fresh agent state
-- May be preferred in certain security-sensitive environments</p></li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">reuse_agent=True</span></code> (default):</p>
+<ul>
+<li><p>Attempts to reuse an existing SSH agent if available</p></li>
+<li><p>Reduces the number of agent startups and key additions</p></li>
+<li><p>Improves performance by avoiding unnecessary agent operations</p></li>
+</ul>
+</li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">reuse_agent=False</span></code>:</p>
+<ul>
+<li><p>Always starts a new SSH agent session</p></li>
+<li><p>Useful when you need a fresh agent state</p></li>
+<li><p>May be preferred in certain security-sensitive environments</p></li>
+</ul>
+</li>
 </ul>
 <p>Example with agent reuse disabled:</p>
-<p><code class="docutils literal notranslate"><span class="pre">`python</span>
-<span class="pre">#</span> <span class="pre">Always</span> <span class="pre">start</span> <span class="pre">a</span> <span class="pre">new</span> <span class="pre">agent</span> <span class="pre">session</span>
-<span class="pre">ssh_agent</span> <span class="pre">=</span> <span class="pre">PersistentSSHAgent(reuse_agent=False)</span>
-<span class="pre">`</span></code></p>
-<p>### Multiple Host Configuration</p>
-<p><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<p># Create configuration with common options
-config = SSHConfig(</p>
-<blockquote>
-<div><dl class="simple">
-<dt>ssh_options={</dt><dd><p>'BatchMode': 'yes',
-'StrictHostKeyChecking': 'yes',
-'ServerAliveInterval': '60'</p>
-</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
-<p>)</p>
-<p># Initialize agent
-agent = PersistentSSHAgent(config=config)</p>
-<p># Set up SSH for multiple hosts
-hosts = ['github.com', 'gitlab.com', 'bitbucket.org']
-for host in hosts:</p>
-<blockquote>
-<div><dl class="simple">
-<dt>if agent.setup_ssh(host):</dt><dd><p>print(f&quot;✅ SSH configured for {host}&quot;)</p>
-</dd>
-<dt>else:</dt><dd><p>print(f&quot;❌ Failed to configure SSH for {host}&quot;)</p>
-</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
-<p>### Global SSH Configuration</p>
-<p><a href="#id25"><span class="problematic" id="id26">``</span></a><a href="#id27"><span class="problematic" id="id28">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<p># Create configuration with global options
-config = SSHConfig(</p>
-<blockquote>
-<div><p># Set identity file (optional)
-identity_file='~/.ssh/id_ed25519',</p>
-<p># Set global SSH options
-ssh_options={</p>
-<blockquote>
-<div><p>'StrictHostKeyChecking': 'yes',
-'PasswordAuthentication': 'no',
-'PubkeyAuthentication': 'yes',
-'BatchMode': 'yes',
-'ConnectTimeout': '30'</p>
-</div></blockquote>
-<p>}</p>
-</div></blockquote>
-<p>)</p>
-<p># Initialize agent with global configuration
-agent = PersistentSSHAgent(config=config)
-<a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a></p>
-<p>### Asynchronous Support</p>
-<p><a href="#id33"><span class="problematic" id="id34">``</span></a><a href="#id35"><span class="problematic" id="id36">`</span></a>python
-import asyncio
-from persistent_ssh_agent import PersistentSSHAgent</p>
-<dl>
-<dt>async def setup_multiple_hosts(hosts: list[str]) -&gt; dict[str, bool]:</dt><dd><p>&quot;&quot;&quot;Set up SSH for multiple hosts concurrently.&quot;&quot;&quot;
-ssh_agent = PersistentSSHAgent()
-results = {}</p>
-<dl class="simple">
-<dt>async def setup_host(host: str):</dt><dd><p>results[host] = await ssh_agent.async_setup_ssh(host)</p>
-</dd>
-</dl>
-<p>await asyncio.gather(<a href="#id37"><span class="problematic" id="id38">*</span></a>[setup_host(host) for host in hosts])
-return results</p>
-</dd>
-</dl>
-<p># Usage example
-async def main():</p>
-<blockquote>
-<div><p>hosts = ['github.com', 'gitlab.com', 'bitbucket.org']
-results = await setup_multiple_hosts(hosts)
-for host, success in results.items():</p>
-<blockquote>
-<div><p>print(f&quot;{host}: {'✅' if success else '❌'}&quot;)</p>
-</div></blockquote>
-</div></blockquote>
-<p>asyncio.run(main())
-<a href="#id39"><span class="problematic" id="id40">``</span></a><a href="#id41"><span class="problematic" id="id42">`</span></a></p>
-<p>### Security Best Practices</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Always start a new agent session</span>
+<span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">reuse_agent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="multiple-host-configuration">
+<h4>Multiple Host Configuration<a class="headerlink" href="#multiple-host-configuration" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="c1"># Create configuration with common options</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
+    <span class="n">ssh_options</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;BatchMode&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;StrictHostKeyChecking&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ServerAliveInterval&#39;</span><span class="p">:</span> <span class="s1">&#39;60&#39;</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize agent</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Set up SSH for multiple hosts</span>
+<span class="n">hosts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="s1">&#39;gitlab.com&#39;</span><span class="p">,</span> <span class="s1">&#39;bitbucket.org&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">host</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ SSH configured for </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Failed to configure SSH for </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="global-ssh-configuration">
+<h4>Global SSH Configuration<a class="headerlink" href="#global-ssh-configuration" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="c1"># Create configuration with global options</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
+    <span class="c1"># Set identity file (optional)</span>
+    <span class="n">identity_file</span><span class="o">=</span><span class="s1">&#39;~/.ssh/id_ed25519&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Set global SSH options</span>
+    <span class="n">ssh_options</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;StrictHostKeyChecking&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PasswordAuthentication&#39;</span><span class="p">:</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PubkeyAuthentication&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BatchMode&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ConnectTimeout&#39;</span><span class="p">:</span> <span class="s1">&#39;30&#39;</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize agent with global configuration</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="asynchronous-support">
+<h4>Asynchronous Support<a class="headerlink" href="#asynchronous-support" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">setup_multiple_hosts</span><span class="p">(</span><span class="n">hosts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up SSH for multiple hosts concurrently.&quot;&quot;&quot;</span>
+    <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">setup_host</span><span class="p">(</span><span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">host</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">async_setup_ssh</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">setup_host</span><span class="p">(</span><span class="n">host</span><span class="p">)</span> <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">hosts</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+<span class="c1"># Usage example</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">hosts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="s1">&#39;gitlab.com&#39;</span><span class="p">,</span> <span class="s1">&#39;bitbucket.org&#39;</span><span class="p">]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">setup_multiple_hosts</span><span class="p">(</span><span class="n">hosts</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">success</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">&#39;✅&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">success</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;❌&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="security-best-practices">
+<h4>Security Best Practices<a class="headerlink" href="#security-best-practices" title="Link to this heading">¶</a></h4>
 <ol class="arabic">
-<li><p><strong>Key Management</strong>:
-- Store SSH keys in standard locations (<cite>~/.ssh/</cite>)
-- Use Ed25519 keys for better security
-- Keep private keys protected (600 permissions)</p></li>
-<li><p><strong>Error Handling</strong>:</p>
-<p><a href="#id43"><span class="problematic" id="id44">``</span></a><a href="#id45"><span class="problematic" id="id46">`</span></a>python
-try:</p>
-<blockquote>
-<div><p>ssh_agent = PersistentSSHAgent()
-success = ssh_agent.setup_ssh('github.com')
-if not success:</p>
-<blockquote>
-<div><p>print(&quot;⚠️ SSH setup failed&quot;)</p>
-</div></blockquote>
-</div></blockquote>
-<dl class="simple">
-<dt>except Exception as e:</dt><dd><p>print(f&quot;❌ Error: {e}&quot;)</p>
-</dd>
-</dl>
-<p><a href="#id47"><span class="problematic" id="id48">``</span></a><a href="#id49"><span class="problematic" id="id50">`</span></a></p>
+<li><p><strong>Key Management</strong>:</p>
+<ul class="simple">
+<li><p>Store SSH keys in standard locations (<code class="docutils literal notranslate"><span class="pre">~/.ssh/</span></code>)</p></li>
+<li><p>Use Ed25519 keys for better security</p></li>
+<li><p>Keep private keys protected (600 permissions)</p></li>
+</ul>
 </li>
-<li><p><strong>Session Management</strong>:
-- Agent information persists across sessions
-- Automatic cleanup of expired sessions
-- Configurable expiration time
-- Multi-session concurrent management</p></li>
-<li><p><strong>Security Features</strong>:
-- Automatic key unloading after expiration
-- Secure temporary file handling
-- Platform-specific security measures
-- Key usage tracking</p></li>
+<li><p><strong>Error Handling</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+    <span class="n">success</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⚠️ SSH setup failed&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Session Management</strong>:</p>
+<ul class="simple">
+<li><p>Agent information persists across sessions</p></li>
+<li><p>Automatic cleanup of expired sessions</p></li>
+<li><p>Configurable expiration time</p></li>
+<li><p>Multi-session concurrent management</p></li>
+</ul>
+</li>
+<li><p><strong>Security Features</strong>:</p>
+<ul class="simple">
+<li><p>Automatic key unloading after expiration</p></li>
+<li><p>Secure temporary file handling</p></li>
+<li><p>Platform-specific security measures</p></li>
+<li><p>Key usage tracking</p></li>
+</ul>
+</li>
 </ol>
-<p>## 🔧 Common Use Cases</p>
-<p>### CI/CD Pipeline Integration</p>
-<p><a href="#id51"><span class="problematic" id="id52">``</span></a><a href="#id53"><span class="problematic" id="id54">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<dl>
-<dt>def setup_ci_ssh():</dt><dd><p>&quot;&quot;&quot;Set up SSH for CI environment.&quot;&quot;&quot;
-# Create configuration with key content
-config = SSHConfig(</p>
-<blockquote>
-<div><p>identity_content=os.environ.get('SSH_PRIVATE_KEY'),
-ssh_options={'BatchMode': 'yes'}</p>
-</div></blockquote>
-<p>)</p>
-<p>ssh_agent = PersistentSSHAgent(config=config)</p>
-<dl class="simple">
-<dt>if ssh_agent.setup_ssh('github.com'):</dt><dd><p>print(&quot;✅ SSH agent started successfully&quot;)
-return True</p>
-</dd>
-</dl>
-<p>raise RuntimeError(&quot;Failed to start SSH agent&quot;)</p>
-</dd>
-</dl>
-<p><a href="#id55"><span class="problematic" id="id56">``</span></a><a href="#id57"><span class="problematic" id="id58">`</span></a></p>
-<p>### Git Integration</p>
-<p><a href="#id59"><span class="problematic" id="id60">``</span></a><a href="#id61"><span class="problematic" id="id62">`</span></a>python
-from git import Repo
-from persistent_ssh_agent import PersistentSSHAgent
-import os</p>
-<dl>
-<dt>def clone_repo(repo_url: str, local_path: str) -&gt; Repo:</dt><dd><p>&quot;&quot;&quot;Clone a repository using persistent SSH authentication.&quot;&quot;&quot;
-ssh_agent = PersistentSSHAgent()</p>
-<p># Extract hostname and set up SSH
-hostname = ssh_agent._extract_hostname(repo_url)
-if not hostname or not ssh_agent.setup_ssh(hostname):</p>
-<blockquote>
-<div><p>raise RuntimeError(&quot;Failed to set up SSH authentication&quot;)</p>
-</div></blockquote>
-<p># Get SSH command and configure environment
-ssh_command = ssh_agent.get_git_ssh_command(hostname)
-if not ssh_command:</p>
-<blockquote>
-<div><p>raise RuntimeError(&quot;Failed to get SSH command&quot;)</p>
-</div></blockquote>
-<p># Clone with GitPython
-env = os.environ.copy()
-env['GIT_SSH_COMMAND'] = ssh_command</p>
-<dl class="simple">
-<dt>return Repo.clone_from(</dt><dd><p>repo_url,
-local_path,
-env=env</p>
-</dd>
-</dl>
-<p>)</p>
-</dd>
-</dl>
-<p><a href="#id63"><span class="problematic" id="id64">``</span></a><a href="#id65"><span class="problematic" id="id66">`</span></a></p>
-<p>## 🌟 Advanced Features</p>
-<p>### Custom Configuration</p>
-<p><a href="#id67"><span class="problematic" id="id68">``</span></a><a href="#id69"><span class="problematic" id="id70">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<p># Create config instance
-config = SSHConfig()</p>
-<p># Add global configuration
-config.add_global_config({</p>
-<blockquote>
-<div><p>'AddKeysToAgent': 'yes',
-'UseKeychain': 'yes'</p>
-</div></blockquote>
-<p>})</p>
-<p># Add host-specific configuration
-config.add_host_config('<a href="#id71"><span class="problematic" id="id72">*</span></a>.github.com', {</p>
-<blockquote>
-<div><p>'User': 'git',
-'IdentityFile': '~/.ssh/github_ed25519',
-'PreferredAuthentications': 'publickey'</p>
-</div></blockquote>
-<p>})</p>
-<p># Initialize agent with config
-agent = PersistentSSHAgent(config=config)
-<a href="#id73"><span class="problematic" id="id74">``</span></a><a href="#id75"><span class="problematic" id="id76">`</span></a></p>
-<p>### Key Management</p>
+</section>
+</section>
+<section id="common-use-cases">
+<h3>🔧 Common Use Cases<a class="headerlink" href="#common-use-cases" title="Link to this heading">¶</a></h3>
+<section id="ci-cd-pipeline-integration">
+<h4>CI/CD Pipeline Integration<a class="headerlink" href="#ci-cd-pipeline-integration" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="k">def</span> <span class="nf">setup_ci_ssh</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up SSH for CI environment.&quot;&quot;&quot;</span>
+    <span class="c1"># Create configuration with key content</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
+        <span class="n">identity_content</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SSH_PRIVATE_KEY&#39;</span><span class="p">),</span>
+        <span class="n">ssh_options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;BatchMode&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ SSH agent started successfully&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to start SSH agent&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="git-integration">
+<h4>Git Integration<a class="headerlink" href="#git-integration" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">git</span> <span class="kn">import</span> <span class="n">Repo</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">clone_repo</span><span class="p">(</span><span class="n">repo_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Repo</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clone a repository using persistent SSH authentication.&quot;&quot;&quot;</span>
+    <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+    <span class="c1"># Extract hostname and set up SSH</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">_extract_hostname</span><span class="p">(</span><span class="n">repo_url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hostname</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to set up SSH authentication&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get SSH command and configure environment</span>
+    <span class="n">ssh_command</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">get_git_ssh_command</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ssh_command</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to get SSH command&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Clone with GitPython</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">env</span><span class="p">[</span><span class="s1">&#39;GIT_SSH_COMMAND&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssh_command</span>
+
+    <span class="k">return</span> <span class="n">Repo</span><span class="o">.</span><span class="n">clone_from</span><span class="p">(</span>
+        <span class="n">repo_url</span><span class="p">,</span>
+        <span class="n">local_path</span><span class="p">,</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">env</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-features">
+<h3>🌟 Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading">¶</a></h3>
+<section id="custom-configuration">
+<h4>Custom Configuration<a class="headerlink" href="#custom-configuration" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="c1"># Create config instance</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">()</span>
+
+<span class="c1"># Add global configuration</span>
+<span class="n">config</span><span class="o">.</span><span class="n">add_global_config</span><span class="p">({</span>
+    <span class="s1">&#39;AddKeysToAgent&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UseKeychain&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span>
+<span class="p">})</span>
+
+<span class="c1"># Add host-specific configuration</span>
+<span class="n">config</span><span class="o">.</span><span class="n">add_host_config</span><span class="p">(</span><span class="s1">&#39;*.github.com&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s1">&#39;User&#39;</span><span class="p">:</span> <span class="s1">&#39;git&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IdentityFile&#39;</span><span class="p">:</span> <span class="s1">&#39;~/.ssh/github_ed25519&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PreferredAuthentications&#39;</span><span class="p">:</span> <span class="s1">&#39;publickey&#39;</span>
+<span class="p">})</span>
+
+<span class="c1"># Initialize agent with config</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="key-management">
+<h4>Key Management<a class="headerlink" href="#key-management" title="Link to this heading">¶</a></h4>
 <p>The library automatically manages SSH keys based on your SSH configuration:</p>
-<p><a href="#id77"><span class="problematic" id="id78">``</span></a><a href="#id79"><span class="problematic" id="id80">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<p># Use specific key
-config = SSHConfig(identity_file='~/.ssh/id_ed25519')
-agent = PersistentSSHAgent(config=config)</p>
-<p># Or let the library automatically detect and use available keys
-agent = PersistentSSHAgent()
-if agent.setup_ssh('github.com'):</p>
-<blockquote>
-<div><p>print(&quot;✅ SSH key loaded and ready!&quot;)</p>
-</div></blockquote>
-<p><a href="#id81"><span class="problematic" id="id82">``</span></a><a href="#id83"><span class="problematic" id="id84">`</span></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="c1"># Use specific key</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span><span class="n">identity_file</span><span class="o">=</span><span class="s1">&#39;~/.ssh/id_ed25519&#39;</span><span class="p">)</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Or let the library automatically detect and use available keys</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ SSH key loaded and ready!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>The library supports the following key types in order of preference:</p>
 <ul class="simple">
 <li><p>Ed25519 (recommended, most secure)</p></li>
@@ -606,37 +615,43 @@ if agent.setup_ssh('github.com'):</p>
 <li><p>RSA</p></li>
 <li><p>DSA (legacy, not recommended)</p></li>
 </ul>
-<p>### SSH Configuration Validation</p>
+</section>
+<section id="ssh-configuration-validation">
+<h4>SSH Configuration Validation<a class="headerlink" href="#ssh-configuration-validation" title="Link to this heading">¶</a></h4>
 <p>The library provides comprehensive SSH configuration validation with support for:</p>
-<p><a href="#id85"><span class="problematic" id="id86">``</span></a><a href="#id87"><span class="problematic" id="id88">`</span></a>python
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<p># Create custom SSH configuration with validation
-config = SSHConfig()</p>
-<p># Add host configuration with various options
-config.add_host_config('github.com', {</p>
-<blockquote>
-<div><p># Connection Settings
-'IdentityFile': '~/.ssh/github_key',
-'User': 'git',
-'Port': '22',</p>
-<p># Security Settings
-'StrictHostKeyChecking': 'yes',
-'PasswordAuthentication': 'no',
-'PubkeyAuthentication': 'yes',</p>
-<p># Connection Optimization
-'Compression': 'yes',
-'ConnectTimeout': '60',
-'ServerAliveInterval': '60',
-'ServerAliveCountMax': '3',</p>
-<p># Proxy and Forwarding
-'ProxyCommand': 'ssh -W %h:%p bastion',
-'ForwardAgent': 'yes'</p>
-</div></blockquote>
-<p>})</p>
-<p># Initialize with validated config
-ssh_agent = PersistentSSHAgent(config=config)
-<a href="#id89"><span class="problematic" id="id90">``</span></a><a href="#id91"><span class="problematic" id="id92">`</span></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="c1"># Create custom SSH configuration with validation</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">()</span>
+
+<span class="c1"># Add host configuration with various options</span>
+<span class="n">config</span><span class="o">.</span><span class="n">add_host_config</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="c1"># Connection Settings</span>
+    <span class="s1">&#39;IdentityFile&#39;</span><span class="p">:</span> <span class="s1">&#39;~/.ssh/github_key&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;User&#39;</span><span class="p">:</span> <span class="s1">&#39;git&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Port&#39;</span><span class="p">:</span> <span class="s1">&#39;22&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Security Settings</span>
+    <span class="s1">&#39;StrictHostKeyChecking&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PasswordAuthentication&#39;</span><span class="p">:</span> <span class="s1">&#39;no&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PubkeyAuthentication&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Connection Optimization</span>
+    <span class="s1">&#39;Compression&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ConnectTimeout&#39;</span><span class="p">:</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ServerAliveInterval&#39;</span><span class="p">:</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ServerAliveCountMax&#39;</span><span class="p">:</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span>
+
+    <span class="c1"># Proxy and Forwarding</span>
+    <span class="s1">&#39;ProxyCommand&#39;</span><span class="p">:</span> <span class="s1">&#39;ssh -W %h:%p bastion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ForwardAgent&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span>
+<span class="p">})</span>
+
+<span class="c1"># Initialize with validated config</span>
+<span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Supported configuration categories:</p>
 <ul class="simple">
 <li><p><strong>Connection Settings</strong>: Port, Hostname, User, IdentityFile</p></li>
@@ -646,8 +661,10 @@ ssh_agent = PersistentSSHAgent(config=config)
 <li><p><strong>Environment Settings</strong>: RequestTTY, SendEnv</p></li>
 <li><p><strong>Multiplexing Options</strong>: ControlMaster, ControlPath, ControlPersist</p></li>
 </ul>
-<p>For detailed validation rules and supported options, see [SSH Configuration Validation](#ssh-configuration-validation)</p>
-<p>### SSH Key Types Support</p>
+<p>For detailed validation rules and supported options, see <a class="reference internal" href="#ssh-configuration-validation"><span class="xref myst">SSH Configuration Validation</span></a></p>
+</section>
+<section id="ssh-key-types-support">
+<h4>SSH Key Types Support<a class="headerlink" href="#ssh-key-types-support" title="Link to this heading">¶</a></h4>
 <p>The library supports multiple SSH key types:</p>
 <ul class="simple">
 <li><p>Ed25519 (recommended, most secure)</p></li>
@@ -657,7 +674,9 @@ ssh_agent = PersistentSSHAgent(config=config)
 <li><p>RSA</p></li>
 <li><p>DSA (legacy, not recommended)</p></li>
 </ul>
-<p>### Security Features</p>
+</section>
+<section id="security-features">
+<h4>Security Features<a class="headerlink" href="#security-features" title="Link to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p><strong>SSH Key Management</strong>:</p>
 <ul class="simple">
@@ -683,63 +702,41 @@ ssh_agent = PersistentSSHAgent(config=config)
 </ul>
 </li>
 </ol>
-<p>### Type Hints Support</p>
+</section>
+<section id="type-hints-support">
+<h4>Type Hints Support<a class="headerlink" href="#type-hints-support" title="Link to this heading">¶</a></h4>
 <p>The library provides comprehensive type hints for all public interfaces:</p>
-<p><a href="#id93"><span class="problematic" id="id94">``</span></a><a href="#id95"><span class="problematic" id="id96">`</span></a>python
-from typing import Optional
-from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.config import SSHConfig</p>
-<dl class="simple">
-<dt>def setup_ssh(hostname: str, key_file: Optional[str] = None) -&gt; bool:</dt><dd><p>config = SSHConfig(identity_file=key_file)
-agent = PersistentSSHAgent(config=config)
-return agent.setup_ssh(hostname)</p>
-</dd>
-</dl>
-<p><a href="#id97"><span class="problematic" id="id98">``</span></a><a href="#id99"><span class="problematic" id="id100">`</span></a></p>
-<p>## 🤝 Contributing</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent</span> <span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+
+<span class="k">def</span> <span class="nf">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span><span class="n">identity_file</span><span class="o">=</span><span class="n">key_file</span><span class="p">)</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="contributing">
+<h3>🤝 Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h3>
 <p>Contributions are welcome! Please feel free to submit a Pull Request.</p>
 <ol class="arabic simple">
 <li><p>Fork the repository</p></li>
-<li><p>Create your feature branch (<cite>git checkout -b feature/amazing-feature</cite>)</p></li>
-<li><p>Commit your changes (<cite>git commit -m 'Add amazing feature'</cite>)</p></li>
-<li><p>Push to the branch (<cite>git push origin feature/amazing-feature</cite>)</p></li>
+<li><p>Create your feature branch (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">-b</span> <span class="pre">feature/amazing-feature</span></code>)</p></li>
+<li><p>Commit your changes (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">-m</span> <span class="pre">'Add</span> <span class="pre">amazing</span> <span class="pre">feature'</span></code>)</p></li>
+<li><p>Push to the branch (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">origin</span> <span class="pre">feature/amazing-feature</span></code>)</p></li>
 <li><p>Open a Pull Request</p></li>
 </ol>
-<p>## 📄 License</p>
-<p>This project is licensed under the MIT License - see the [LICENSE](#license) file for details.</p>
 </section>
-<section id="documentation">
-<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h1>
+<section id="license">
+<h3>📄 License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h3>
+<p>This project is licensed under the MIT License - see the <a class="reference internal" href="#license"><span class="xref myst">LICENSE</span></a> file for details.</p>
+</section>
+</section>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules/persistent_ssh_agent.html">persistent_ssh_agent package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.html#persistent_ssh_agent.PersistentSSHAgent"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.html#persistent_ssh_agent.SSHConfig"><code class="docutils literal notranslate"><span class="pre">SSHConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.html#submodules">Submodules</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modules/persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.core.html#persistent_ssh_agent.core.PersistentSSHAgent"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.core.html#persistent_ssh_agent.core.SSHError"><code class="docutils literal notranslate"><span class="pre">SSHError</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modules/persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modules/persistent_ssh_agent.config.html#persistent_ssh_agent.config.SSHConfig"><code class="docutils literal notranslate"><span class="pre">SSHConfig</span></code></a></li>
-</ul>
-</li>
-</ul>
 </div>
-</section>
-<section id="additional-information">
-<h1>Additional Information<a class="headerlink" href="#additional-information" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html">概述</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id2">特性</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id3">安装</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id4">使用方法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readme_zh.html#id5">配置</a></li>
-</ul>
 </div>
 </section>
 <section id="indices-and-tables">
@@ -756,15 +753,7 @@ return agent.setup_ssh(hostname)</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="modules/persistent_ssh_agent.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">persistent_ssh_agent package</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
+          
           
         </div>
         <div class="bottom-of-page">
@@ -791,19 +780,70 @@ return agent.setup_ssh(hostname)</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">欢迎查看 persistent_ssh_agent 的文档！</a><ul>
+<li><a class="reference internal" href="#persistent-ssh-agent">persistent-ssh-agent</a><ul>
+<li><a class="reference internal" href="#table-of-contents">📚 Table of Contents</a></li>
+<li><a class="reference internal" href="#features">✨ Features</a></li>
+<li><a class="reference internal" href="#installation">🚀 Installation</a></li>
+<li><a class="reference internal" href="#requirements">📋 Requirements</a></li>
+<li><a class="reference internal" href="#usage">📖 Usage</a><ul>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
+<li><a class="reference internal" href="#agent-reuse-behavior">Agent Reuse Behavior</a></li>
+<li><a class="reference internal" href="#multiple-host-configuration">Multiple Host Configuration</a></li>
+<li><a class="reference internal" href="#global-ssh-configuration">Global SSH Configuration</a></li>
+<li><a class="reference internal" href="#asynchronous-support">Asynchronous Support</a></li>
+<li><a class="reference internal" href="#security-best-practices">Security Best Practices</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#common-use-cases">🔧 Common Use Cases</a><ul>
+<li><a class="reference internal" href="#ci-cd-pipeline-integration">CI/CD Pipeline Integration</a></li>
+<li><a class="reference internal" href="#git-integration">Git Integration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-features">🌟 Advanced Features</a><ul>
+<li><a class="reference internal" href="#custom-configuration">Custom Configuration</a></li>
+<li><a class="reference internal" href="#key-management">Key Management</a></li>
+<li><a class="reference internal" href="#ssh-configuration-validation">SSH Configuration Validation</a></li>
+<li><a class="reference internal" href="#ssh-key-types-support">SSH Key Types Support</a></li>
+<li><a class="reference internal" href="#security-features">Security Features</a></li>
+<li><a class="reference internal" href="#type-hints-support">Type Hints Support</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#contributing">🤝 Contributing</a></li>
+<li><a class="reference internal" href="#license">📄 License</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=7d86a446"></script>
+</div><script src="_static/documentation_options.js?v=a91b451b"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
-    <script src="_static/tabs.js?v=3ee01567"></script>
     <script src="_static/translations.js?v=beaddf03"></script>
     </body>
 </html>

@@ -1,29 +1,29 @@
 Welcome to persistent_ssh_agent's documentation!
-=================================================
+==============================================
 
 .. include:: ../../README.md
-
-Documentation
-============================================
+   :parser: myst_parser.sphinx_
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents
 
-   modules/persistent_ssh_agent
-   modules/persistent_ssh_agent.core
-   modules/persistent_ssh_agent.config
-
-Additional Information
-============================================
+   features
+   installation
+   usage
+   security-features
+   contributing
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :caption: API Documentation
 
-   readme_zh
-
+   persistent_ssh_agent package <persistent_ssh_agent>
+   persistent_ssh_agent.core module <persistent_ssh_agent.core>
+   persistent_ssh_agent.config module <persistent_ssh_agent.config>
 
 Indices and tables
-============================================
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`
