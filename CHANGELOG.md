@@ -1,3 +1,10 @@
+## v0.5.0 (2024-12-28)
+
+### Feat
+
+- **persistent_ssh_agent/core.py**: Add reuse_agent parameter to PersistentSSHAgent constructor
+- **README.md**: Document reuse_agent parameter and behavior
+
 ## v0.4.0 (2024-12-28)
 
 ### Feat
