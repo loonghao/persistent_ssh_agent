@@ -1,0 +1,25 @@
+{% extends "!layout.html" %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function switchLanguage(lang) {
+        var currentPath = window.location.pathname;
+        var newPath = currentPath.replace(/\/(en_US|zh_CN)\//, '/' + lang + '/');
+        window.location.href = newPath;
+    }
+</script>
+{% endblock %}
+
+{% block document %}
+<div class="language-switcher">
+    {% if language == 'en_US' %}Language:{% else %}语言：{% endif %}
+    <span class="current-lang">{{ supported_languages[language]["name"] }}</span>
+    {% for lang, info in supported_languages.items() %}
+        {% if lang != language %}
+            | <a href="javascript:switchLanguage('{{ lang }}')" class="lang-link">{{ info.name }}</a>
+        {% endif %}
+    {% endfor %}
+</div>
+{{ super() }}
+{% endblock %}

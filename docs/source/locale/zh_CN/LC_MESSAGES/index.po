@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: persistent_ssh_agent \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-28 21:14+0800\n"
+"POT-Creation-Date: 2024-12-28 23:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -20,20 +20,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: ../../source/index.rst:13
-msgid "Contents:"
-msgstr "目录："
-
-#: ../../source/index.rst:2
+#: ../../source/index.rst:2 4b2c569af2264c4f85a625b3788df485
 msgid "Welcome to persistent_ssh_agent's documentation!"
 msgstr "欢迎查看 persistent_ssh_agent 的文档！"
 
-#: ../../source/readme.md:1
+#: ../../../README.md:1 f6d59769e5b84e08ab4fefdd1786c049
 #, fuzzy
 msgid "# persistent-ssh-agent"
 msgstr "persistent-ssh-agent"
 
-#: ../../source/readme.md:3
+#: ../../../README.md:3 ad2c74400a964e32a96e17115193739c
 #, python-format
 msgid ""
 "[![Python "
@@ -57,115 +53,881 @@ msgid ""
 "[![Codecov](https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)](https://codecov.io/gh/loonghao/persistent_ssh_agent)"
 msgstr ""
 
-#: ../../source/readme.md:14
-msgid "```{eval-rst} :doc:`English <readme>` | :doc:`中文 <readme_zh>` ```"
+#: ../../../README.md:14 d76bf52a24ce477f8f22c45cea495d92
+msgid "[English](./README.md) | [中文](./README_zh.md)"
 msgstr ""
 
-#: ../../source/readme.md:18
+#: ../../../README.md:16 46c71e696332422ebf6f99276a2ed34f
 msgid ""
 "🔐 A modern Python library for persistent SSH agent management across "
 "sessions."
 msgstr ""
 
-#: ../../source/readme.md:20
+#: ../../../README.md:18 570fa455d51e4fada9dac5fdece574fd
 msgid "## 📚 Table of Contents"
 msgstr ""
 
-#: ../../source/readme.md:22
+#: ../../../README.md:20 e7da715f779c475f99fcce8dac2c66e3
+msgid "[Features](#features)"
+msgstr ""
+
+#: ../../../README.md:21 d5e5ad90b1684a3982b0b74806fec417
+msgid "[Installation](#installation)"
+msgstr ""
+
+#: ../../../README.md:22 6dc30d92469d4393987032f357b37e3d
+msgid "[Usage](#usage)"
+msgstr ""
+
+#: ../../../README.md:23 27bfed867e984686a45eb87ba157e2c6
+msgid "[Security Features](#security-features)"
+msgstr ""
+
+#: ../../../README.md:24 bd48713fd0084706b2967c9a605ca5d6
+msgid "[Contributing](#contributing)"
+msgstr ""
+
+#: ../../../README.md:26 3dc7365f9156422288b08a1edecfbb87
+msgid "## ✨ Features"
+msgstr ""
+
+#: ../../../README.md:28 734f67ceca824b218590a2916087927d
+msgid "🔄 Persistent SSH agent management across sessions"
+msgstr ""
+
+#: ../../../README.md:29 3e9c74b0af3a4dbc96bfb83a04bf3991
+msgid "🔑 Automatic SSH key loading and caching"
+msgstr ""
+
+#: ../../../README.md:30 2c3f01b5be3d41868c67117edef619b4
+msgid "🪟 Windows-optimized implementation"
+msgstr ""
+
+#: ../../../README.md:31 d05da61c026e4d5c8f358171129e3cdd
+msgid "🔗 Seamless Git integration"
+msgstr ""
+
+#: ../../../README.md:32 cb3acaa3d7fa4eb2801ccdca8982fbdf
+msgid "🌐 Cross-platform compatibility (Windows, Linux, macOS)"
+msgstr ""
+
+#: ../../../README.md:33 3e029558640542ed9a7f60f5ec25a048
+msgid "📦 No external dependencies beyond standard SSH tools"
+msgstr ""
+
+#: ../../../README.md:34 e024d6e599414ce6857fe2a024411537
+msgid "🔒 Secure key management and session control"
+msgstr ""
+
+#: ../../../README.md:35 a4b831754d91453584b686b8cb8fcc25
+msgid "⚡ Asynchronous operation support"
+msgstr ""
+
+#: ../../../README.md:36 984d8d494f504d2fa1b1698e24f2b673
+msgid "🧪 Complete unit test coverage with performance benchmarks"
+msgstr ""
+
+#: ../../../README.md:37 d70360e2da464735b26d74b413676875
+msgid "📝 Comprehensive type hints support"
+msgstr ""
+
+#: ../../../README.md:38 8ec359c7b1f047b6bfb5bce55f62105e
+msgid "🔐 Support for multiple SSH key types (Ed25519, ECDSA, RSA)"
+msgstr ""
+
+#: ../../../README.md:39 922c492b245e444790b4c910b91edf75
+msgid "🌍 IPv6 support"
+msgstr ""
+
+#: ../../../README.md:40 4844f5e3cf904c428a2bc9ab9fb6216b
+msgid "📚 Multi-language documentation support"
+msgstr ""
+
+#: ../../../README.md:41 97cff5dce46f4fb89d2b2c8f53c1fe3c
+msgid "🔍 Enhanced SSH configuration validation"
+msgstr ""
+
+#: ../../../README.md:42 7b801c9d828a46dfa5151c3eaf6bff1a
+msgid "🛠️ Modern development toolchain (Poetry, Commitizen, Black)"
+msgstr ""
+
+#: ../../../README.md:44 963df7f38b144a6c9a1e6d908dde6ad3
+msgid "## 🚀 Installation"
+msgstr ""
+
+#: ../../../README.md:46 7090d18ce9024e10b518975774ca5a08
+#, fuzzy
+msgid "```bash pip install persistent-ssh-agent ```"
+msgstr "persistent-ssh-agent"
+
+#: ../../../README.md:50 c12bbd97f54d4704a00032c644e88dc3
+msgid "## 📋 Requirements"
+msgstr ""
+
+#: ../../../README.md:52 886ec72c7bc3421a8732a432541bb021
+msgid "Python 3.8-3.13"
+msgstr ""
+
+#: ../../../README.md:53 e37fee8bd0124854bfdb91a923f05cc2
+msgid "OpenSSH (ssh-agent, ssh-add) installed and available in PATH"
+msgstr ""
+
+#: ../../../README.md:54 6e5487855e3f4f2fbea634b1511751b2
+msgid "Git (optional, for Git operations)"
+msgstr ""
+
+#: ../../../README.md:56 c0021b6a980d4d43bb5b2604492a316d
+msgid "## 📖 Usage"
+msgstr ""
+
+#: ../../../README.md:58 a5fc19ce3ad0422fb06014164927ce3e
+msgid "### Basic Usage"
+msgstr ""
+
+#: ../../../README.md:60 4307fd0bb37e4e8e8441fe7ccdfdd96b
+msgid "```python from persistent_ssh_agent import PersistentSSHAgent"
+msgstr ""
+
+#: ../../../README.md:63 83d2d09903844232ac833d620325633a
 msgid ""
-"```{eval-rst} * :ref:`features` * :ref:`installation` * :ref:`usage` * "
-":ref:`security-features` * :ref:`contributing` ```"
+"# Create an instance with custom expiration time (default is 24 hours) "
+"ssh_agent = PersistentSSHAgent(expiration_time=86400)"
 msgstr ""
 
-#: ../../source/index.rst
-msgid "parser"
+#: ../../../README.md:66 dbd23fcb1c87405c95742b39a9dc9968
+msgid "# Set up SSH for a specific host if ssh_agent.setup_ssh('github.com'):"
 msgstr ""
 
-#: ../../source/index.rst:11
-msgid "myst_parser.sphinx_"
+#: ../../../README.md:68 aec2841e5f0448e6a9e84291e5f498aa
+msgid "print(\"✅ SSH authentication ready!\")"
 msgstr ""
 
-#: ../../source/readme_zh.rst:2
-msgid "概述"
+#: ../../../README.md:69 ../../../README.md:101 ../../../README.md:149
+#: ../../../README.md:220 ../../../README.md:257 ../../../README.md:289
+#: ../../../README.md:335 ../../../README.md:441
+#: 35d24e473bbe45fdaa26813e628fded8 3c0d96f130a04547a7387c666b8482fc
+#: 51fdda32ee9241cfbc84588b8ad49a0f 7eb1bd35620444e2a57f4bd757721e63
+#: afd966ce2a3b49e4953197f18291d066 c740800ccfa84606a5d1447c982e6cd2
+#: dcd22fe2c2634186928b6439ab92dc2a eaf0b2e3c4394a4f99363c4f6e6a613f
+msgid "```"
 msgstr ""
 
-#: ../../source/readme_zh.rst:4
-msgid "persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python 包。"
+#: ../../../README.md:71 686b357a9e62417db178a7f8faaf3181
+msgid "### Advanced Configuration"
 msgstr ""
 
-#: ../../source/readme_zh.rst:7
-msgid "特性"
+#: ../../../README.md:73 ../../../README.md:126 ../../../README.md:153
+#: ../../../README.md:238 ../../../README.md:295 ../../../README.md:323
+#: ../../../README.md:350 3c932e1431d34afc9805c7d86b60d43a
+#: 91e7bb6f68cf4a38aeb1b012c26b1f4c a8de5f760af04a65832f3b7598995834
+#: bb4472e660ee4e498a6ed3e3080a4af0 dfb7ed428eda4c318ca510a291b50b00
+#: e63bcfd8da424faa98e7adb427ba6826 ede98fbe2265403c963052653c4592fb
+msgid ""
+"```python from persistent_ssh_agent import PersistentSSHAgent from "
+"persistent_ssh_agent.config import SSHConfig"
 msgstr ""
 
-#: ../../source/readme_zh.rst:9
-msgid "自动 SSH agent 管理"
+#: ../../../README.md:77 24aead3959a547608bfc30e4b3e8b9ab
+msgid "# Create custom SSH configuration config = SSHConfig("
 msgstr ""
 
-#: ../../source/readme_zh.rst:10
-msgid "会话持久化"
+#: ../../../README.md:79 1f91ec683f2b47e7b9bbc42381e94002
+msgid ""
+"identity_file='~/.ssh/github_key',  # Optional specific identity file "
+"identity_passphrase='your-passphrase',  # Optional passphrase "
+"ssh_options={  # Optional SSH options"
 msgstr ""
 
-#: ../../source/readme_zh.rst:11
-msgid "跨平台支持"
+#: ../../../README.md:82 f7b31565e8af49a386a70da91a1c4dd3
+msgid ""
+"'StrictHostKeyChecking': 'yes', 'PasswordAuthentication': 'no', "
+"'PubkeyAuthentication': 'yes'"
 msgstr ""
 
-#: ../../source/readme_zh.rst:12
-msgid "简单配置"
+#: ../../../README.md:85 ../../../README.md:136 ../../../README.md:169
+#: 08acc0c4ada34ac1918fb30e04b6e6f9 69c7a3fc9263488eba64a7f926c70e0d
+#: eb5a594680de4d4c82f40da919120cc2
+msgid "}"
 msgstr ""
 
-#: ../../source/readme_zh.rst:15
-msgid "安装"
+#: ../../../README.md:86 ../../../README.md:93 ../../../README.md:137
+#: ../../../README.md:170 ../../../README.md:248 ../../../README.md:288
+#: 52251caa6a0645a9909c9bb4ded6de82 5ace6b827d254ab3815d8fc1c32b3d8a
+#: 7cac1f4eaeb347789405e0e402516408 a7eb4c68bf304aa2a2e8b32d2411b20a
+#: d6903010a6814417999977b704d918f0 e3d6a888067548af8f9c6a5a4244cd79
+msgid ")"
 msgstr ""
 
-#: ../../source/readme_zh.rst:17
-msgid "你可以使用 pip 安装 persistent_ssh_agent："
+#: ../../../README.md:88 a1aa2553b526407b8ab1b3b2ce4b0517
+msgid ""
+"# Initialize with custom config and agent reuse settings ssh_agent = "
+"PersistentSSHAgent("
 msgstr ""
 
-#: ../../source/readme_zh.rst:24
-msgid "使用方法"
+#: ../../../README.md:90 b29175bd46684d7e8fb1542524e118b9
+msgid ""
+"config=config, expiration_time=86400,  # Optional: Set agent expiration "
+"time (default 24 hours) reuse_agent=True  # Optional: Control agent reuse"
+" behavior (default True)"
 msgstr ""
 
-#: ../../source/readme_zh.rst:26
-msgid "基本用法："
+#: ../../../README.md:95 08cc47e35f2c41878d92678c4b0c7e07
+msgid "# Set up SSH authentication if ssh_agent.setup_ssh('github.com'):"
 msgstr ""
 
-#: ../../source/readme_zh.rst:44
-msgid "配置"
+#: ../../../README.md:97 94bbd2a9e7c744a19feb98f3f75e03b0
+msgid ""
+"# Get Git SSH command for the host ssh_command = "
+"ssh_agent.get_git_ssh_command('github.com') if ssh_command:"
 msgstr ""
 
-#: ../../source/readme_zh.rst:46
-msgid "你可以通过以下方式配置 agent 行为："
+#: ../../../README.md:100 234f736c93184a6798f6e9708dad88c3
+msgid "print(\"✅ Git SSH command ready!\")"
 msgstr ""
 
-#: ../../source/readme_zh.rst:48
-msgid "环境变量"
+#: ../../../README.md:103 0d328aa89ba743f7a0592c87de6fa218
+msgid "### Agent Reuse Behavior"
 msgstr ""
 
-#: ../../source/readme_zh.rst:49
-msgid "配置文件"
+#: ../../../README.md:105 e712d1a41aed475a812604af1b507d95
+msgid ""
+"The `reuse_agent` parameter controls how the SSH agent handles existing "
+"sessions:"
 msgstr ""
 
-#: ../../source/readme_zh.rst:50
-msgid "直接参数"
+#: ../../../README.md:107 0543c68b2ab94a4e9b31c3dff2a307c8
+msgid ""
+"When `reuse_agent=True` (default): - Attempts to reuse an existing SSH "
+"agent if available - Reduces the number of agent startups and key "
+"additions - Improves performance by avoiding unnecessary agent operations"
 msgstr ""
 
-#: ../../source/readme_zh.rst:52
-msgid "查看文档获取详细的配置选项。"
+#: ../../../README.md:112 f252616ad5534d9fae0d6c3095d90f82
+msgid ""
+"When `reuse_agent=False`: - Always starts a new SSH agent session - "
+"Useful when you need a fresh agent state - May be preferred in certain "
+"security-sensitive environments"
 msgstr ""
 
-#: ../../source/index.rst:24
+#: ../../../README.md:117 3d70c7383a17447c802d26f5d60651aa
+msgid "Example with agent reuse disabled:"
+msgstr ""
+
+#: ../../../README.md:119 1760559735c94429b1d077a8533edf24
+msgid ""
+"```python # Always start a new agent session ssh_agent = "
+"PersistentSSHAgent(reuse_agent=False) ```"
+msgstr ""
+
+#: ../../../README.md:124 1a858ae4099a45a186ac5d3cfa39c4f8
+msgid "### Multiple Host Configuration"
+msgstr ""
+
+#: ../../../README.md:130 f02cdee0710d4adca5f259994eb5f129
+msgid "# Create configuration with common options config = SSHConfig("
+msgstr ""
+
+#: ../../../README.md:132 f673c7f0add44de6b6cd695e79753c7c
+msgid "ssh_options={"
+msgstr ""
+
+#: ../../../README.md:133 7b8c0ff1045d4d91957f6f4a732c9d85
+msgid ""
+"'BatchMode': 'yes', 'StrictHostKeyChecking': 'yes', "
+"'ServerAliveInterval': '60'"
+msgstr ""
+
+#: ../../../README.md:139 701c7368242e43b5ad9ba59dd60b12b2
+msgid "# Initialize agent agent = PersistentSSHAgent(config=config)"
+msgstr ""
+
+#: ../../../README.md:142 479a0457fcb04d7682aa4b881a65f9d7
+msgid ""
+"# Set up SSH for multiple hosts hosts = ['github.com', 'gitlab.com', "
+"'bitbucket.org'] for host in hosts:"
+msgstr ""
+
+#: ../../../README.md:145 c08bc930fb1e470bbbb4f9293b890c9c
+msgid "if agent.setup_ssh(host):"
+msgstr ""
+
+#: ../../../README.md:146 a9c58d149e0645b3b7e2f9b6ba41135b
+msgid "print(f\"✅ SSH configured for {host}\")"
+msgstr ""
+
+#: ../../../README.md:147 eae928ffa12e4bc49fca3c73589a070a
+msgid "else:"
+msgstr ""
+
+#: ../../../README.md:148 cc196faead9a478dac59f14279067d21
+msgid "print(f\"❌ Failed to configure SSH for {host}\")"
+msgstr ""
+
+#: ../../../README.md:151 430f4ec502034126a19e39fbb6346f8e
+msgid "### Global SSH Configuration"
+msgstr ""
+
+#: ../../../README.md:157 76cbee98281e4344b56aef77530b592a
+msgid "# Create configuration with global options config = SSHConfig("
+msgstr ""
+
+#: ../../../README.md:159 746cba0ed4ee4df688ca8b451be94d10
+msgid "# Set identity file (optional) identity_file='~/.ssh/id_ed25519',"
+msgstr ""
+
+#: ../../../README.md:162 1868c29cdbaa41c098f9010d28e31475
+msgid "# Set global SSH options ssh_options={"
+msgstr ""
+
+#: ../../../README.md:164 7104e329d0f044dfac0a60371536071e
+msgid ""
+"'StrictHostKeyChecking': 'yes', 'PasswordAuthentication': 'no', "
+"'PubkeyAuthentication': 'yes', 'BatchMode': 'yes', 'ConnectTimeout': '30'"
+msgstr ""
+
+#: ../../../README.md:172 cd2b8e17bee74219b3eaedb96dfdb0f6
+msgid ""
+"# Initialize agent with global configuration agent = "
+"PersistentSSHAgent(config=config) ```"
+msgstr ""
+
+#: ../../../README.md:176 dd58423a7fd7408ea31039f8c22a1e25
+msgid "### Asynchronous Support"
+msgstr ""
+
+#: ../../../README.md:178 e6ebfb0e283b48d4895413e5bf7fd7f2
+msgid ""
+"```python import asyncio from persistent_ssh_agent import "
+"PersistentSSHAgent"
+msgstr ""
+
+#: ../../../README.md:182 ee444a4da1614291bff0747c6dbf0e91
+msgid "async def setup_multiple_hosts(hosts: list[str]) -> dict[str, bool]:"
+msgstr ""
+
+#: ../../../README.md:183 4ffe68e9c623479c95e2c600a3f0f947
+msgid ""
+"\"\"\"Set up SSH for multiple hosts concurrently.\"\"\" ssh_agent = "
+"PersistentSSHAgent() results = {}"
+msgstr ""
+
+#: ../../../README.md:187 62742a2530f04e67b0f5f2bd1f23d719
+msgid "async def setup_host(host: str):"
+msgstr ""
+
+#: ../../../README.md:188 78491ea3e7164c78ad7f08d9ee3749fc
+msgid "results[host] = await ssh_agent.async_setup_ssh(host)"
+msgstr ""
+
+#: ../../../README.md:190 effaae85597e4407a72e733176c2c63e
+msgid "await asyncio.gather(*[setup_host(host) for host in hosts]) return results"
+msgstr ""
+
+#: ../../../README.md:193 0cbe6cc854824f03ac2001742b6e91eb
+msgid "# Usage example async def main():"
+msgstr ""
+
+#: ../../../README.md:195 dff1c18f695d4a88bb5ee8c66383e00c
+msgid ""
+"hosts = ['github.com', 'gitlab.com', 'bitbucket.org'] results = await "
+"setup_multiple_hosts(hosts) for host, success in results.items():"
+msgstr ""
+
+#: ../../../README.md:198 4ecd9ac2cffa4149a676ffabe98ed9cc
+msgid "print(f\"{host}: {'✅' if success else '❌'}\")"
+msgstr ""
+
+#: ../../../README.md:200 7df98415d20046e8a9e27ae7f96052dd
+msgid "asyncio.run(main()) ```"
+msgstr ""
+
+#: ../../../README.md:203 6f4d8331e1e247069680af1c40433daa
+msgid "### Security Best Practices"
+msgstr ""
+
+#: ../../../README.md:205 2a9abd69abcc4dd1aabab475fece59d1
+msgid ""
+"**Key Management**: - Store SSH keys in standard locations (`~/.ssh/`) - "
+"Use Ed25519 keys for better security - Keep private keys protected (600 "
+"permissions)"
+msgstr ""
+
+#: ../../../README.md:210 c1f005518a984255b1b9d0b6aad8cff9
+msgid "**Error Handling**:"
+msgstr ""
+
+#: ../../../README.md:212 811f1380ba564132af6a3541dc4715e4
+msgid "```python try:"
+msgstr ""
+
+#: ../../../README.md:214 582f9835fc2f425ea0fb0fb6e2ded9fd
+msgid ""
+"ssh_agent = PersistentSSHAgent() success = "
+"ssh_agent.setup_ssh('github.com') if not success:"
+msgstr ""
+
+#: ../../../README.md:217 55a395a1fa624a09aa68c4cea8b4e107
+msgid "print(\"⚠️ SSH setup failed\")"
+msgstr ""
+
+#: ../../../README.md:218 35f82fab530843e983f6feb4ad23c64b
+msgid "except Exception as e:"
+msgstr ""
+
+#: ../../../README.md:219 d37c1f9cf471437db89f4b5f53ee51ba
+msgid "print(f\"❌ Error: {e}\")"
+msgstr ""
+
+#: ../../../README.md:222 843555b893884128a40225851f8a7920
+msgid ""
+"**Session Management**: - Agent information persists across sessions - "
+"Automatic cleanup of expired sessions - Configurable expiration time - "
+"Multi-session concurrent management"
+msgstr ""
+
+#: ../../../README.md:228 f38dbfa9821f45f8b53f5b7c450a7c89
+msgid ""
+"**Security Features**: - Automatic key unloading after expiration - "
+"Secure temporary file handling - Platform-specific security measures - "
+"Key usage tracking"
+msgstr ""
+
+#: ../../../README.md:234 7431205e3fe1400fb87c833e8fe43766
+msgid "## 🔧 Common Use Cases"
+msgstr ""
+
+#: ../../../README.md:236 c16f0f03e6004c3f803e6c4870179b87
+msgid "### CI/CD Pipeline Integration"
+msgstr ""
+
+#: ../../../README.md:242 4baf69bde41f44d9893d7d8e847437c6
+msgid "def setup_ci_ssh():"
+msgstr ""
+
+#: ../../../README.md:243 81b3872081664743956d7aec30655936
+msgid ""
+"\"\"\"Set up SSH for CI environment.\"\"\" # Create configuration with "
+"key content config = SSHConfig("
+msgstr ""
+
+#: ../../../README.md:246 421a22ed22164b578d708d9b3c8fb23d
+msgid ""
+"identity_content=os.environ.get('SSH_PRIVATE_KEY'), "
+"ssh_options={'BatchMode': 'yes'}"
+msgstr ""
+
+#: ../../../README.md:250 780fb2af1b5c47a9a3962fce2c9c1154
+msgid "ssh_agent = PersistentSSHAgent(config=config)"
+msgstr ""
+
+#: ../../../README.md:252 315120c198434827bbcc7a4f128471b8
+msgid "if ssh_agent.setup_ssh('github.com'):"
+msgstr ""
+
+#: ../../../README.md:253 1912c7ece90447839f16f1294f8e8fd2
+msgid "print(\"✅ SSH agent started successfully\") return True"
+msgstr ""
+
+#: ../../../README.md:256 fa70963a5e6e4722956df5729201ce27
+msgid "raise RuntimeError(\"Failed to start SSH agent\")"
+msgstr ""
+
+#: ../../../README.md:259 d21d4d2ff4b34cbd88ded1c4f7a03439
+msgid "### Git Integration"
+msgstr ""
+
+#: ../../../README.md:261 0f035d24bda74e6081525a2bcd824192
+msgid ""
+"```python from git import Repo from persistent_ssh_agent import "
+"PersistentSSHAgent import os"
+msgstr ""
+
+#: ../../../README.md:266 60b9212f76b54b129b8b665892d5425e
+msgid "def clone_repo(repo_url: str, local_path: str) -> Repo:"
+msgstr ""
+
+#: ../../../README.md:267 7e92936e0e814d73a76ec6aed46610a9
+msgid ""
+"\"\"\"Clone a repository using persistent SSH authentication.\"\"\" "
+"ssh_agent = PersistentSSHAgent()"
+msgstr ""
+
+#: ../../../README.md:270 0f4c48e522aa4ea9ab57f21b00e2d11b
+msgid ""
+"# Extract hostname and set up SSH hostname = "
+"ssh_agent._extract_hostname(repo_url) if not hostname or not "
+"ssh_agent.setup_ssh(hostname):"
+msgstr ""
+
+#: ../../../README.md:273 2f368c22e93a43e9a87e478771628690
+msgid "raise RuntimeError(\"Failed to set up SSH authentication\")"
+msgstr ""
+
+#: ../../../README.md:275 313bff591073415b8e5092685736c1c6
+msgid ""
+"# Get SSH command and configure environment ssh_command = "
+"ssh_agent.get_git_ssh_command(hostname) if not ssh_command:"
+msgstr ""
+
+#: ../../../README.md:278 eb4e0d517c9b4eb28d34955a37b9efbf
+msgid "raise RuntimeError(\"Failed to get SSH command\")"
+msgstr ""
+
+#: ../../../README.md:280 eeac1bb76ccc4f32849b0e76e2b7a217
+msgid ""
+"# Clone with GitPython env = os.environ.copy() env['GIT_SSH_COMMAND'] = "
+"ssh_command"
+msgstr ""
+
+#: ../../../README.md:284 00ee1c3eea644b889ee54220d92fae45
+msgid "return Repo.clone_from("
+msgstr ""
+
+#: ../../../README.md:285 76d7e27e47e740c39d31e34625849ef6
+msgid "repo_url, local_path, env=env"
+msgstr ""
+
+#: ../../../README.md:291 17653cb9a0b44ed2bda5b49c889974b2
+msgid "## 🌟 Advanced Features"
+msgstr ""
+
+#: ../../../README.md:293 68876b33572d4f7396b98b9f46de5d55
+msgid "### Custom Configuration"
+msgstr ""
+
+#: ../../../README.md:299 81a32146ab46494a9345ddf195591524
+msgid "# Create config instance config = SSHConfig()"
+msgstr ""
+
+#: ../../../README.md:302 5bb3a431ffca48698dd2b32c76880a7b
+msgid "# Add global configuration config.add_global_config({"
+msgstr ""
+
+#: ../../../README.md:304 e573677ee1cc429eb223e81f81d3a9f3
+msgid "'AddKeysToAgent': 'yes', 'UseKeychain': 'yes'"
+msgstr ""
+
+#: ../../../README.md:306 ../../../README.md:313 ../../../README.md:378
+#: 0360696c36b442d4983c576c13c617e7 063c251555c64898b4e67b82eb7608cf
+#: 4b60b4b7ca4a48718420ec3795bfd225
+msgid "})"
+msgstr ""
+
+#: ../../../README.md:308 075b65a2873247fab1f027d52be1a52b
+msgid "# Add host-specific configuration config.add_host_config('*.github.com', {"
+msgstr ""
+
+#: ../../../README.md:310 f89de403d50b47a391eefa672a0964c3
+msgid ""
+"'User': 'git', 'IdentityFile': '~/.ssh/github_ed25519', "
+"'PreferredAuthentications': 'publickey'"
+msgstr ""
+
+#: ../../../README.md:315 10324fbe303746eab1ca2395a123485d
+msgid ""
+"# Initialize agent with config agent = PersistentSSHAgent(config=config) "
+"```"
+msgstr ""
+
+#: ../../../README.md:319 b9ddea9c1a014996b7999491d3e43a8d
+msgid "### Key Management"
+msgstr ""
+
+#: ../../../README.md:321 127607b7384e4fe189e51dba737a5d0e
+msgid ""
+"The library automatically manages SSH keys based on your SSH "
+"configuration:"
+msgstr ""
+
+#: ../../../README.md:327 2d3502e8d21d4be681730c0c9324ed45
+msgid ""
+"# Use specific key config = SSHConfig(identity_file='~/.ssh/id_ed25519') "
+"agent = PersistentSSHAgent(config=config)"
+msgstr ""
+
+#: ../../../README.md:331 ce18ef19bd6544b19cbaa3a67d001d95
+msgid ""
+"# Or let the library automatically detect and use available keys agent = "
+"PersistentSSHAgent() if agent.setup_ssh('github.com'):"
+msgstr ""
+
+#: ../../../README.md:334 44c8c6ffbb9c4101bc3c7deedaf8e62d
+msgid "print(\"✅ SSH key loaded and ready!\")"
+msgstr ""
+
+#: ../../../README.md:337 ef7e102a3ce6460e9fad99826418fc53
+msgid "The library supports the following key types in order of preference:"
+msgstr ""
+
+#: ../../../README.md:339 ../../../README.md:399
+#: 5c6e2debe562459f8e14e51d4f7cbca0 cd87d356609644c592f59ef77859c40c
+msgid "Ed25519 (recommended, most secure)"
+msgstr ""
+
+#: ../../../README.md:340 ../../../README.md:400
+#: 3dbe8f324a25447a9cf939294d70519a cf8993c21c464a16aed2d6d26c8a02d3
+msgid "ECDSA"
+msgstr ""
+
+#: ../../../README.md:341 ../../../README.md:401
+#: 14af707017124e2089ec9fe27c84713f d1249f421f644ce28b47896d0c4cefa2
+msgid "ECDSA with security key"
+msgstr ""
+
+#: ../../../README.md:342 ../../../README.md:402
+#: 9ca462854844416da034c8cd874bd345 e4ce6d008fb64df483ef257b3b371854
+msgid "Ed25519 with security key"
+msgstr ""
+
+#: ../../../README.md:343 ../../../README.md:403
+#: 0807ba72df5144de950f4f014d09fa3a 96628f7732e840889dddb4951a0c5369
+msgid "RSA"
+msgstr ""
+
+#: ../../../README.md:344 ../../../README.md:404
+#: 0cb83145dbf941a7942944e9a5ae049e 4515e97c2df74ba8bf4f7265cbcabdab
+msgid "DSA (legacy, not recommended)"
+msgstr ""
+
+#: ../../../README.md:346 13f63e6debe6409587db6f10cb273694
+msgid "### SSH Configuration Validation"
+msgstr ""
+
+#: ../../../README.md:348 6fb0e1c5c9e04ee0a7336f0e7be7d3ed
+msgid ""
+"The library provides comprehensive SSH configuration validation with "
+"support for:"
+msgstr ""
+
+#: ../../../README.md:354 58fd5909b9f94ddca40e5c5406b4c1ba
+msgid "# Create custom SSH configuration with validation config = SSHConfig()"
+msgstr ""
+
+#: ../../../README.md:357 026982263c8d486b87afbf61a877540d
+msgid ""
+"# Add host configuration with various options "
+"config.add_host_config('github.com', {"
+msgstr ""
+
+#: ../../../README.md:359 0078548b6a05475294f2bec26dc79c2e
+msgid ""
+"# Connection Settings 'IdentityFile': '~/.ssh/github_key', 'User': 'git',"
+" 'Port': '22',"
+msgstr ""
+
+#: ../../../README.md:364 1ad83c8de36942b4811f0e91e5cfce35
+msgid ""
+"# Security Settings 'StrictHostKeyChecking': 'yes', "
+"'PasswordAuthentication': 'no', 'PubkeyAuthentication': 'yes',"
+msgstr ""
+
+#: ../../../README.md:369 9116f3114b01456d92948f7f71fec0c0
+msgid ""
+"# Connection Optimization 'Compression': 'yes', 'ConnectTimeout': '60', "
+"'ServerAliveInterval': '60', 'ServerAliveCountMax': '3',"
+msgstr ""
+
+#: ../../../README.md:375 5de85be1b1524babb3e10ec209de2333
+msgid ""
+"# Proxy and Forwarding 'ProxyCommand': 'ssh -W %h:%p bastion', "
+"'ForwardAgent': 'yes'"
+msgstr ""
+
+#: ../../../README.md:380 ca87037a8f8d44d9b3e5a7e31f47fcb2
+msgid ""
+"# Initialize with validated config ssh_agent = "
+"PersistentSSHAgent(config=config) ```"
+msgstr ""
+
+#: ../../../README.md:384 63cbd2ca1d6747b5b96b52ac65fac120
+msgid "Supported configuration categories:"
+msgstr ""
+
+#: ../../../README.md:386 80067b8f949c439c996c7b99f577e65b
+msgid "**Connection Settings**: Port, Hostname, User, IdentityFile"
+msgstr ""
+
+#: ../../../README.md:387 6261221864e34991ae8466570a8c36bb
+msgid ""
+"**Security Settings**: StrictHostKeyChecking, BatchMode, "
+"PasswordAuthentication"
+msgstr ""
+
+#: ../../../README.md:388 4061d5b9bb334536a9ca6cbf14b55b85
+msgid ""
+"**Connection Optimization**: Compression, ConnectTimeout, "
+"ServerAliveInterval"
+msgstr ""
+
+#: ../../../README.md:389 2e757c289a72406daff79097ff6fe9a7
+msgid "**Proxy and Forwarding**: ProxyCommand, ForwardAgent, ForwardX11"
+msgstr ""
+
+#: ../../../README.md:390 1ff2f026277f4400b237ea09be1b23ab
+msgid "**Environment Settings**: RequestTTY, SendEnv"
+msgstr ""
+
+#: ../../../README.md:391 d3d105aab41045e49cfe8220f3011c25
+msgid "**Multiplexing Options**: ControlMaster, ControlPath, ControlPersist"
+msgstr ""
+
+#: ../../../README.md:393 649808fd71bc4c6798b7b4f0680212d4
+msgid ""
+"For detailed validation rules and supported options, see [SSH "
+"Configuration Validation](#ssh-configuration-validation)"
+msgstr ""
+
+#: ../../../README.md:395 e91fa583dbc9433486742b2ee54ba516
+msgid "### SSH Key Types Support"
+msgstr ""
+
+#: ../../../README.md:397 ad42b3dba68d47e0bd8ac9e065e99972
+msgid "The library supports multiple SSH key types:"
+msgstr ""
+
+#: ../../../README.md:406 49224aa5765a46d19e962bd5cb9e142d
+msgid "### Security Features"
+msgstr ""
+
+#: ../../../README.md:408 6ab073fced854d98aa71de567e0b71dd
+msgid "**SSH Key Management**:"
+msgstr ""
+
+#: ../../../README.md:410 18f378c59b8b4d75a7c0383c77eb16a3
+msgid "Automatic detection and loading of SSH keys (Ed25519, ECDSA, RSA)"
+msgstr ""
+
+#: ../../../README.md:411 b95b8325dd5549dba936eff0495451c1
+msgid "Support for key content injection (useful in CI/CD)"
+msgstr ""
+
+#: ../../../README.md:412 4b4d6c6b3cc74f53a165124e1b3dbb53
+msgid "Secure key file permissions handling"
+msgstr ""
+
+#: ../../../README.md:413 f296dbf48dd04a5fba5e3437f3b2651b
+msgid "Optional passphrase support"
+msgstr ""
+
+#: ../../../README.md:415 2fb001ca7139416795ddd2e9156d1efe
+msgid "**Configuration Security**:"
+msgstr ""
+
+#: ../../../README.md:417 deea2a99774d491189eedabe4b098c8d
+msgid "Strict hostname validation"
+msgstr ""
+
+#: ../../../README.md:418 11730c1baff64eaf849fe891de905a3a
+msgid "Secure default settings"
+msgstr ""
+
+#: ../../../README.md:419 fffe0d6df18541679de9a3c07f5f5743
+msgid "Support for security-focused SSH options"
+msgstr ""
+
+#: ../../../README.md:421 6144b9c21fc240f08948ba0fa5604c11
+msgid "**Session Management**:"
+msgstr ""
+
+#: ../../../README.md:423 5b215019002a4ff5bb1c2c5fce996751
+msgid "Secure storage of agent information"
+msgstr ""
+
+#: ../../../README.md:424 f986e280fc404fb78a40bc935ddaebb6
+msgid "Platform-specific security measures"
+msgstr ""
+
+#: ../../../README.md:425 4af397cd6f3141ad82d603c1c85972ee
+msgid "Automatic cleanup of expired sessions"
+msgstr ""
+
+#: ../../../README.md:426 432d49401dcc4c18bef54f36c0a5cc98
+msgid "Cross-platform compatibility"
+msgstr ""
+
+#: ../../../README.md:428 ffde3b96b1f14a1ea580469d45fcb7db
+msgid "### Type Hints Support"
+msgstr ""
+
+#: ../../../README.md:430 b89cb1235fca48d187d47ab9e0b0c39c
+msgid "The library provides comprehensive type hints for all public interfaces:"
+msgstr ""
+
+#: ../../../README.md:432 b4c86df427bb456e8b12c9915dd0d5d6
+msgid ""
+"```python from typing import Optional from persistent_ssh_agent import "
+"PersistentSSHAgent from persistent_ssh_agent.config import SSHConfig"
+msgstr ""
+
+#: ../../../README.md:437 bf22d236849d4aeeb2b3cda4cf9ab9f9
+msgid "def setup_ssh(hostname: str, key_file: Optional[str] = None) -> bool:"
+msgstr ""
+
+#: ../../../README.md:438 c977cbfd9da94a5c940d0f32b6a612a1
+msgid ""
+"config = SSHConfig(identity_file=key_file) agent = "
+"PersistentSSHAgent(config=config) return agent.setup_ssh(hostname)"
+msgstr ""
+
+#: ../../../README.md:443 843de53c4d6e42aca17e56696ad192bc
+msgid "## 🤝 Contributing"
+msgstr ""
+
+#: ../../../README.md:445 69ff9415249e46ccbeca8a75ab9cbdef
+msgid "Contributions are welcome! Please feel free to submit a Pull Request."
+msgstr ""
+
+#: ../../../README.md:447 36cf64d6c464496eb4d5496e8e0d2c5c
+msgid "Fork the repository"
+msgstr ""
+
+#: ../../../README.md:448 99927f79eacc47f888924bc4134f7c87
+msgid "Create your feature branch (`git checkout -b feature/amazing-feature`)"
+msgstr ""
+
+#: ../../../README.md:449 cb110f193fe54bbaaebfb2fab2c683fc
+msgid "Commit your changes (`git commit -m 'Add amazing feature'`)"
+msgstr ""
+
+#: ../../../README.md:450 640daaa294994be59cc0f08d992722ee
+msgid "Push to the branch (`git push origin feature/amazing-feature`)"
+msgstr ""
+
+#: ../../../README.md:451 54dfe07cc1b74a548d7ba18e996e6137
+msgid "Open a Pull Request"
+msgstr ""
+
+#: ../../../README.md:453 713d3060d4db4d7e885ccf09103ddaee
+msgid "## 📄 License"
+msgstr ""
+
+#: ../../../README.md:455 a74b745ee7484eec802066e7dc617828
+msgid ""
+"This project is licensed under the MIT License - see the "
+"[LICENSE](#license) file for details."
+msgstr ""
+
+#: ../../source/index.rst:7 833319e1083844adb3dca0ab31ad8319
+msgid "Documentation"
+msgstr ""
+
+#: ../../source/index.rst:17 7e62901868684fca86b40bd230635fe6
+msgid "Additional Information"
+msgstr ""
+
+#: ../../source/index.rst:26 e2dedec1fc344f61a95464ead924669c
 msgid "Indices and tables"
 msgstr ""
 
-#: ../../source/index.rst:26
+#: ../../source/index.rst:28 19be23a6f308430c95999806550eec64
 msgid ":ref:`genindex`"
 msgstr ""
 
-#: ../../source/index.rst:27
+#: ../../source/index.rst:29 4ab26fb65b07471dae554dbd35980e3a
 msgid ":ref:`modindex`"
 msgstr ""
 
-#: ../../source/index.rst:28
+#: ../../source/index.rst:30 3092f350b04743a9bfa304ae26745cd8
 msgid ":ref:`search`"
 msgstr ""
 
@@ -628,4 +1390,73 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "See the documentation for detailed configuration options."
+#~ msgstr ""
+
+#~ msgid "Contents:"
+#~ msgstr "目录："
+
+#~ msgid "```{eval-rst} :doc:`English <readme>` | :doc:`中文 <readme_zh>` ```"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "```{eval-rst} * :ref:`features` * "
+#~ ":ref:`installation` * :ref:`usage` * :ref"
+#~ ":`security-features` * :ref:`contributing` ```"
+#~ msgstr ""
+
+#~ msgid "parser"
+#~ msgstr ""
+
+#~ msgid "myst_parser.sphinx_"
+#~ msgstr ""
+
+#~ msgid "概述"
+#~ msgstr ""
+
+#~ msgid "persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python 包。"
+#~ msgstr ""
+
+#~ msgid "特性"
+#~ msgstr ""
+
+#~ msgid "自动 SSH agent 管理"
+#~ msgstr ""
+
+#~ msgid "会话持久化"
+#~ msgstr ""
+
+#~ msgid "跨平台支持"
+#~ msgstr ""
+
+#~ msgid "简单配置"
+#~ msgstr ""
+
+#~ msgid "安装"
+#~ msgstr ""
+
+#~ msgid "你可以使用 pip 安装 persistent_ssh_agent："
+#~ msgstr ""
+
+#~ msgid "使用方法"
+#~ msgstr ""
+
+#~ msgid "基本用法："
+#~ msgstr ""
+
+#~ msgid "配置"
+#~ msgstr ""
+
+#~ msgid "你可以通过以下方式配置 agent 行为："
+#~ msgstr ""
+
+#~ msgid "环境变量"
+#~ msgstr ""
+
+#~ msgid "配置文件"
+#~ msgstr ""
+
+#~ msgid "直接参数"
+#~ msgstr ""
+
+#~ msgid "查看文档获取详细的配置选项。"
 #~ msgstr ""
