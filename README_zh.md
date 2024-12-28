@@ -79,8 +79,12 @@ config = SSHConfig(
     }
 )
 
-# 使用自定义配置初始化
-ssh_agent = PersistentSSHAgent(config=config)
+# 使用自定义配置和 agent 复用设置初始化
+ssh_agent = PersistentSSHAgent(
+    config=config,
+    expiration_time=86400,  # 可选：设置 agent 过期时间（默认24小时）
+    reuse_agent=True  # 可选：控制 agent 复用行为（默认为 True）
+)
 
 # 设置 SSH 认证
 if ssh_agent.setup_ssh('github.com'):
@@ -88,6 +92,27 @@ if ssh_agent.setup_ssh('github.com'):
     ssh_command = ssh_agent.get_git_ssh_command('github.com')
     if ssh_command:
         print("✅ Git SSH 命令已就绪！")
+```
+
+### Agent 复用行为
+
+`reuse_agent` 参数控制 SSH agent 如何处理现有会话：
+
+- 当 `reuse_agent=True`（默认值）时：
+  - 尝试复用现有的 SSH agent（如果可用）
+  - 减少 agent 启动和密钥添加的次数
+  - 通过避免不必要的 agent 操作来提高性能
+
+- 当 `reuse_agent=False` 时：
+  - 总是启动新的 SSH agent 会话
+  - 当您需要全新的 agent 状态时很有用
+  - 在某些对安全性要求较高的环境中可能更受欢迎
+
+禁用 agent 复用的示例：
+
+```python
+# 总是启动新的 agent 会话
+ssh_agent = PersistentSSHAgent(reuse_agent=False)
 ```
 
 ### CI/CD 集成
