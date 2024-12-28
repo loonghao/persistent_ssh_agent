@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: persistent_ssh_agent \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-28 19:48+0800\n"
+"POT-Creation-Date: 2024-12-28 21:14+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_CN\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: ../../source/index.rst:12
+#: ../../source/index.rst:13
 msgid "Contents:"
 msgstr "目录："
 
@@ -28,143 +28,12 @@ msgstr "目录："
 msgid "Welcome to persistent_ssh_agent's documentation!"
 msgstr "欢迎查看 persistent_ssh_agent 的文档！"
 
-#: ../../../README.md:1
-msgid "persistent-ssh-agent"
+#: ../../source/readme.md:1
+#, fuzzy
+msgid "# persistent-ssh-agent"
 msgstr "persistent-ssh-agent"
 
-#: ../../../README.md:3
-msgid "A Python library for managing SSH agent persistence"
-msgstr "一个用于管理 SSH agent 持久化的 Python 库"
-
-#: ../../../README.md:5
-msgid "Features"
-msgstr "特性"
-
-#: ../../../README.md:7
-msgid "Automatic SSH agent management"
-msgstr "自动 SSH agent 管理"
-
-#: ../../../README.md:8
-msgid "Session persistence"
-msgstr "会话持久化"
-
-#: ../../../README.md:9
-msgid "Cross-platform support"
-msgstr "跨平台支持"
-
-#: ../../../README.md:10
-msgid "Easy configuration"
-msgstr "简单配置"
-
-#: ../../../README.md:12
-msgid "Installation"
-msgstr "安装"
-
-#: ../../../README.md:14
-msgid "You can install persistent_ssh_agent using pip:"
-msgstr "你可以使用 pip 安装 persistent_ssh_agent："
-
-#: ../../../README.md:20
-msgid "Usage"
-msgstr "使用方法"
-
-#: ../../../README.md:22
-msgid "Basic usage:"
-msgstr "基本用法："
-
-#: ../../../README.md:28
-msgid "Advanced usage:"
-msgstr "高级用法："
-
-#: ../../../README.md:34
-msgid "Configuration"
-msgstr "配置"
-
-#: ../../../README.md:36
-msgid "The following configuration options are available:"
-msgstr "可以使用以下配置选项："
-
-#: ../../../README.md:38
-msgid "SSH directory path"
-msgstr "SSH 目录路径"
-
-#: ../../../README.md:40
-msgid "Agent reuse"
-msgstr "Agent 重用"
-
-#: ../../../README.md:42
-msgid "The `reuse_agent` parameter controls how the SSH agent handles existing sessions:"
-msgstr "`reuse_agent` 参数控制 SSH agent 如何处理现有会话："
-
-#: ../../../README.md:44
-msgid "When `True` (default):"
-msgstr "当设置为 `True`（默认值）时："
-
-#: ../../../README.md:46
-msgid "Attempts to reuse an existing SSH agent if available"
-msgstr "尝试重用现有的 SSH agent（如果可用）"
-
-#: ../../../README.md:47
-msgid "Creates a new agent if none exists"
-msgstr "如果不存在则创建新的 agent"
-
-#: ../../../README.md:49
-msgid "When `False`:"
-msgstr "当设置为 `False` 时："
-
-#: ../../../README.md:51
-msgid "Always starts a new SSH agent"
-msgstr "总是启动新的 SSH agent"
-
-#: ../../../README.md:52
-msgid "Useful when you want to ensure a clean agent state"
-msgstr "当你需要确保 agent 状态干净时很有用"
-
-#: ../../../README.md:54
-msgid "Example:"
-msgstr "示例："
-
-#: ../../../README.md:60
-msgid "Security"
-msgstr "安全性"
-
-#: ../../../README.md:62
-msgid "Key Management"
-msgstr "密钥管理"
-
-#: ../../../README.md:64
-msgid "The package handles SSH keys securely:"
-msgstr "该包安全地处理 SSH 密钥："
-
-#: ../../../README.md:66
-msgid "Proper file permissions"
-msgstr "正确的文件权限"
-
-#: ../../../README.md:67
-msgid "Secure key loading"
-msgstr "安全的密钥加载"
-
-#: ../../../README.md:68
-msgid "Support for key content injection (useful in CI/CD)"
-msgstr "支持密钥内容注入（在 CI/CD 中很有用）"
-
-#: ../../../README.md:70
-msgid "Contributing"
-msgstr "贡献"
-
-#: ../../../README.md:72
-msgid "We welcome contributions! Please see our contributing guidelines for details."
-msgstr "我们欢迎贡献！详情请参阅我们的贡献指南。"
-
-#: ../../../README.md:74
-msgid "License"
-msgstr "许可证"
-
-#: ../../../README.md:76
-msgid "This project is licensed under the MIT License - see the LICENSE file for details."
-msgstr "本项目采用 MIT 许可证 - 详情请参阅 LICENSE 文件。"
-
-#: ../../../README.md:3
+#: ../../source/readme.md:3
 #, python-format
 msgid ""
 "[![Python "
@@ -188,534 +57,32 @@ msgid ""
 "[![Codecov](https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)](https://codecov.io/gh/loonghao/persistent_ssh_agent)"
 msgstr ""
 
-#: ../../../README.md:3
-msgid "Python Version"
+#: ../../source/readme.md:14
+msgid "```{eval-rst} :doc:`English <readme>` | :doc:`中文 <readme_zh>` ```"
 msgstr ""
 
-#: ../../../README.md:3
-msgid "Nox"
-msgstr ""
-
-#: ../../../README.md:3
-msgid "PyPI Version"
-msgstr ""
-
-#: ../../../README.md:3
-msgid "Downloads"
-msgstr ""
-
-#: ../../../README.md:3
-msgid "License"
-msgstr ""
-
-#: ../../../README.md:3
-msgid "PyPI Format"
-msgstr ""
-
-#: ../../../README.md:3
-msgid "Maintenance"
-msgstr ""
-
-#: ../../../README.md:3
-msgid "Codecov"
-msgstr ""
-
-#: ../../../README.md:14
-msgid "[English](README.md) | [中文](README_zh.md)"
-msgstr ""
-
-#: ../../../README.md:16
+#: ../../source/readme.md:18
 msgid ""
 "🔐 A modern Python library for persistent SSH agent management across "
 "sessions."
 msgstr ""
 
-#: ../../../README.md:18
-msgid "📚 Table of Contents"
+#: ../../source/readme.md:20
+msgid "## 📚 Table of Contents"
 msgstr ""
 
-#: ../../../README.md:20
-msgid "[Features](#features)"
-msgstr ""
-
-#: ../../../README.md:21
-msgid "[Installation](#installation)"
-msgstr ""
-
-#: ../../../README.md:22
-msgid "[Usage](#usage)"
-msgstr ""
-
-#: ../../../README.md:23
-msgid "[Security](#security-features)"
-msgstr ""
-
-#: ../../../README.md:24
-msgid "[Contributing](#contributing)"
-msgstr ""
-
-#: ../../../README.md:26
-msgid "✨ Features"
-msgstr ""
-
-#: ../../../README.md:28
-msgid "🔄 Persistent SSH agent management across sessions"
-msgstr ""
-
-#: ../../../README.md:29
-msgid "🔑 Automatic SSH key loading and caching"
-msgstr ""
-
-#: ../../../README.md:30
-msgid "🪟 Windows-optimized implementation"
-msgstr ""
-
-#: ../../../README.md:31
-msgid "🔗 Seamless Git integration"
-msgstr ""
-
-#: ../../../README.md:32
-msgid "🌐 Cross-platform compatibility (Windows, Linux, macOS)"
-msgstr ""
-
-#: ../../../README.md:33
-msgid "📦 No external dependencies beyond standard SSH tools"
-msgstr ""
-
-#: ../../../README.md:34
-msgid "🔒 Secure key management and session control"
-msgstr ""
-
-#: ../../../README.md:35
-msgid "⚡ Asynchronous operation support"
-msgstr ""
-
-#: ../../../README.md:36
-msgid "🧪 Complete unit test coverage"
-msgstr ""
-
-#: ../../../README.md:37
-msgid "📝 Type hints support"
-msgstr ""
-
-#: ../../../README.md:39
-msgid "🚀 Installation"
-msgstr ""
-
-#: ../../../README.md:45
-msgid "📋 Requirements"
-msgstr ""
-
-#: ../../../README.md:47
-msgid "Python 3.8+"
-msgstr ""
-
-#: ../../../README.md:48
-msgid "OpenSSH (ssh-agent, ssh-add) installed and available in PATH"
-msgstr ""
-
-#: ../../../README.md:49
-msgid "Git (optional, for Git operations)"
-msgstr ""
-
-#: ../../../README.md:51
-msgid "📖 Usage"
-msgstr ""
-
-#: ../../../README.md:53
-msgid "Basic Usage"
-msgstr ""
-
-#: ../../../README.md:66
-msgid "Advanced Configuration"
-msgstr ""
-
-#: ../../../README.md:98
-msgid "Agent Reuse Behavior"
-msgstr ""
-
-#: ../../../README.md:100
+#: ../../source/readme.md:22
 msgid ""
-"The `reuse_agent` parameter controls how the SSH agent handles existing "
-"sessions:"
+"```{eval-rst} * :ref:`features` * :ref:`installation` * :ref:`usage` * "
+":ref:`security-features` * :ref:`contributing` ```"
 msgstr ""
 
-#: ../../../README.md:102
-msgid "When `reuse_agent=True` (default):"
+#: ../../source/index.rst
+msgid "parser"
 msgstr ""
 
-#: ../../../README.md:103
-msgid "Attempts to reuse an existing SSH agent if available"
-msgstr ""
-
-#: ../../../README.md:104
-msgid "Reduces the number of agent startups and key additions"
-msgstr ""
-
-#: ../../../README.md:105
-msgid "Improves performance by avoiding unnecessary agent operations"
-msgstr ""
-
-#: ../../../README.md:107
-msgid "When `reuse_agent=False`:"
-msgstr ""
-
-#: ../../../README.md:108
-msgid "Always starts a new SSH agent session"
-msgstr ""
-
-#: ../../../README.md:109
-msgid "Useful when you need a fresh agent state"
-msgstr ""
-
-#: ../../../README.md:110
-msgid "May be preferred in certain security-sensitive environments"
-msgstr ""
-
-#: ../../../README.md:112
-msgid "Example with agent reuse disabled:"
-msgstr ""
-
-#: ../../../README.md:119
-msgid "Multiple Host Configuration"
-msgstr ""
-
-#: ../../../README.md:146
-msgid "Global SSH Configuration"
-msgstr ""
-
-#: ../../../README.md:171
-msgid "Asynchronous Support"
-msgstr ""
-
-#: ../../../README.md:198
-msgid "Security Best Practices"
-msgstr ""
-
-#: ../../../README.md:200
-msgid "**Key Management**:"
-msgstr ""
-
-#: ../../../README.md:201
-msgid "Store SSH keys in standard locations (`~/.ssh/`)"
-msgstr ""
-
-#: ../../../README.md:202
-msgid "Use Ed25519 keys for better security"
-msgstr ""
-
-#: ../../../README.md:203
-msgid "Keep private keys protected (600 permissions)"
-msgstr ""
-
-#: ../../../README.md:205
-msgid "**Error Handling**:"
-msgstr ""
-
-#: ../../../README.md:217 ../../../README.md:405
-msgid "**Session Management**:"
-msgstr ""
-
-#: ../../../README.md:218
-msgid "Agent information persists across sessions"
-msgstr ""
-
-#: ../../../README.md:219 ../../../README.md:409
-msgid "Automatic cleanup of expired sessions"
-msgstr ""
-
-#: ../../../README.md:220
-msgid "Configurable expiration time"
-msgstr ""
-
-#: ../../../README.md:221
-msgid "Multi-session concurrent management"
-msgstr ""
-
-#: ../../../README.md:223
-msgid "**Security Features**:"
-msgstr ""
-
-#: ../../../README.md:224
-msgid "Automatic key unloading after expiration"
-msgstr ""
-
-#: ../../../README.md:225
-msgid "Secure temporary file handling"
-msgstr ""
-
-#: ../../../README.md:226 ../../../README.md:408
-msgid "Platform-specific security measures"
-msgstr ""
-
-#: ../../../README.md:227
-msgid "Key usage tracking"
-msgstr ""
-
-#: ../../../README.md:229
-msgid "🔧 Common Use Cases"
-msgstr ""
-
-#: ../../../README.md:231
-msgid "CI/CD Pipeline Integration"
-msgstr ""
-
-#: ../../../README.md:254
-msgid "Git Integration"
-msgstr ""
-
-#: ../../../README.md:286
-msgid "🌟 Advanced Features"
-msgstr ""
-
-#: ../../../README.md:288
-msgid "Custom Configuration"
-msgstr ""
-
-#: ../../../README.md:314
-msgid "Key Management"
-msgstr ""
-
-#: ../../../README.md:316
-msgid ""
-"The library automatically manages SSH keys based on your SSH "
-"configuration:"
-msgstr ""
-
-#: ../../../README.md:332
-msgid "The library supports the following key types in order of preference:"
-msgstr ""
-
-#: ../../../README.md:334
-msgid "Ed25519 (recommended, most secure)"
-msgstr ""
-
-#: ../../../README.md:335
-msgid "ECDSA"
-msgstr ""
-
-#: ../../../README.md:336
-msgid "ECDSA with security key"
-msgstr ""
-
-#: ../../../README.md:337
-msgid "Ed25519 with security key"
-msgstr ""
-
-#: ../../../README.md:338
-msgid "RSA"
-msgstr ""
-
-#: ../../../README.md:339
-msgid "DSA (legacy, not recommended)"
-msgstr ""
-
-#: ../../../README.md:341
-msgid "SSH Configuration Validation"
-msgstr ""
-
-#: ../../../README.md:343
-msgid ""
-"The library provides comprehensive SSH configuration validation with "
-"support for:"
-msgstr ""
-
-#: ../../../README.md:379
-msgid "Supported configuration categories:"
-msgstr ""
-
-#: ../../../README.md:381
-msgid "**Connection Settings**: Port, Hostname, User, IdentityFile"
-msgstr ""
-
-#: ../../../README.md:382
-msgid ""
-"**Security Settings**: StrictHostKeyChecking, BatchMode, "
-"PasswordAuthentication"
-msgstr ""
-
-#: ../../../README.md:383
-msgid ""
-"**Connection Optimization**: Compression, ConnectTimeout, "
-"ServerAliveInterval"
-msgstr ""
-
-#: ../../../README.md:384
-msgid "**Proxy and Forwarding**: ProxyCommand, ForwardAgent, ForwardX11"
-msgstr ""
-
-#: ../../../README.md:385
-msgid "**Environment Settings**: RequestTTY, SendEnv"
-msgstr ""
-
-#: ../../../README.md:386
-msgid "**Multiplexing Options**: ControlMaster, ControlPath, ControlPersist"
-msgstr ""
-
-#: ../../../README.md:388
-msgid ""
-"For detailed validation rules and supported options, see [SSH "
-"Configuration Validation](docs/ssh_config_validation.md)"
-msgstr ""
-
-#: ../../../README.md:390
-msgid "Security Features"
-msgstr ""
-
-#: ../../../README.md:392
-msgid "**SSH Key Management**:"
-msgstr ""
-
-#: ../../../README.md:394
-msgid "Automatic detection and loading of SSH keys (Ed25519, ECDSA, RSA)"
-msgstr ""
-
-#: ../../../README.md:395
-msgid "Support for key content injection (useful in CI/CD)"
-msgstr ""
-
-#: ../../../README.md:396
-msgid "Secure key file permissions handling"
-msgstr ""
-
-#: ../../../README.md:397
-msgid "Optional passphrase support"
-msgstr ""
-
-#: ../../../README.md:399
-msgid "**Configuration Security**:"
-msgstr ""
-
-#: ../../../README.md:401
-msgid "Strict hostname validation"
-msgstr ""
-
-#: ../../../README.md:402
-msgid "Secure default settings"
-msgstr ""
-
-#: ../../../README.md:403
-msgid "Support for security-focused SSH options"
-msgstr ""
-
-#: ../../../README.md:407
-msgid "Secure storage of agent information"
-msgstr ""
-
-#: ../../../README.md:410
-msgid "Cross-platform compatibility"
-msgstr ""
-
-#: ../../../README.md:412
-msgid "Type Hints Support"
-msgstr ""
-
-#: ../../../README.md:414
-msgid "The library provides comprehensive type hints for all public interfaces:"
-msgstr ""
-
-#: ../../../README.md:427
-msgid "🤝 Contributing"
-msgstr ""
-
-#: ../../../README.md:429
-msgid "Contributions are welcome! Please feel free to submit a Pull Request."
-msgstr ""
-
-#: ../../../README.md:431
-msgid "Fork the repository"
-msgstr ""
-
-#: ../../../README.md:432
-msgid "Create your feature branch (`git checkout -b feature/amazing-feature`)"
-msgstr ""
-
-#: ../../../README.md:433
-msgid "Commit your changes (`git commit -m 'Add amazing feature'`)"
-msgstr ""
-
-#: ../../../README.md:434
-msgid "Push to the branch (`git push origin feature/amazing-feature`)"
-msgstr ""
-
-#: ../../../README.md:435
-msgid "Open a Pull Request"
-msgstr ""
-
-#: ../../../README.md:437
-msgid "📄 License"
-msgstr ""
-
-#: ../../../README.md:439
-msgid ""
-"This project is licensed under the MIT License - see the "
-"[LICENSE](LICENSE) file for details."
-msgstr ""
-
-#: ../../source/readme.rst:4
-msgid ""
-"persistent_ssh_agent is a Python package that helps manage SSH agent "
-"persistence across sessions."
-msgstr ""
-
-#: ../../source/readme.rst:7
-msgid "Features"
-msgstr ""
-
-#: ../../source/readme.rst:9
-msgid "Automatic SSH agent management"
-msgstr ""
-
-#: ../../source/readme.rst:10
-msgid "Session persistence"
-msgstr ""
-
-#: ../../source/readme.rst:11
-msgid "Cross-platform support"
-msgstr ""
-
-#: ../../source/readme.rst:12
-msgid "Easy configuration"
-msgstr ""
-
-#: ../../source/readme.rst:15
-msgid "Installation"
-msgstr ""
-
-#: ../../source/readme.rst:17
-msgid "You can install persistent_ssh_agent using pip:"
-msgstr ""
-
-#: ../../source/readme.rst:24
-msgid "Usage"
-msgstr ""
-
-#: ../../source/readme.rst:26
-msgid "Basic usage:"
-msgstr ""
-
-#: ../../source/readme.rst:44
-msgid "Configuration"
-msgstr ""
-
-#: ../../source/readme.rst:46
-msgid "You can configure the agent behavior through:"
-msgstr ""
-
-#: ../../source/readme.rst:48
-msgid "Environment variables"
-msgstr ""
-
-#: ../../source/readme.rst:49
-msgid "Configuration file"
-msgstr ""
-
-#: ../../source/readme.rst:50
-msgid "Direct parameters"
-msgstr ""
-
-#: ../../source/readme.rst:52
-msgid "See the documentation for detailed configuration options."
+#: ../../source/index.rst:11
+msgid "myst_parser.sphinx_"
 msgstr ""
 
 #: ../../source/readme_zh.rst:2
@@ -786,18 +153,479 @@ msgstr ""
 msgid "查看文档获取详细的配置选项。"
 msgstr ""
 
-#: ../../source/index.rst:23
+#: ../../source/index.rst:24
 msgid "Indices and tables"
 msgstr ""
 
-#: ../../source/index.rst:25
+#: ../../source/index.rst:26
 msgid ":ref:`genindex`"
 msgstr ""
 
-#: ../../source/index.rst:26
+#: ../../source/index.rst:27
 msgid ":ref:`modindex`"
 msgstr ""
 
-#: ../../source/index.rst:27
+#: ../../source/index.rst:28
 msgid ":ref:`search`"
 msgstr ""
+
+#~ msgid "A Python library for managing SSH agent persistence"
+#~ msgstr "一个用于管理 SSH agent 持久化的 Python 库"
+
+#~ msgid "Features"
+#~ msgstr "特性"
+
+#~ msgid "Automatic SSH agent management"
+#~ msgstr "自动 SSH agent 管理"
+
+#~ msgid "Session persistence"
+#~ msgstr "会话持久化"
+
+#~ msgid "Cross-platform support"
+#~ msgstr "跨平台支持"
+
+#~ msgid "Easy configuration"
+#~ msgstr "简单配置"
+
+#~ msgid "Installation"
+#~ msgstr "安装"
+
+#~ msgid "You can install persistent_ssh_agent using pip:"
+#~ msgstr "你可以使用 pip 安装 persistent_ssh_agent："
+
+#~ msgid "Usage"
+#~ msgstr "使用方法"
+
+#~ msgid "Basic usage:"
+#~ msgstr "基本用法："
+
+#~ msgid "Advanced usage:"
+#~ msgstr "高级用法："
+
+#~ msgid "Configuration"
+#~ msgstr "配置"
+
+#~ msgid "The following configuration options are available:"
+#~ msgstr "可以使用以下配置选项："
+
+#~ msgid "SSH directory path"
+#~ msgstr "SSH 目录路径"
+
+#~ msgid "Agent reuse"
+#~ msgstr "Agent 重用"
+
+#~ msgid ""
+#~ "The `reuse_agent` parameter controls how "
+#~ "the SSH agent handles existing sessions:"
+#~ msgstr "`reuse_agent` 参数控制 SSH agent 如何处理现有会话："
+
+#~ msgid "When `True` (default):"
+#~ msgstr "当设置为 `True`（默认值）时："
+
+#~ msgid "Attempts to reuse an existing SSH agent if available"
+#~ msgstr "尝试重用现有的 SSH agent（如果可用）"
+
+#~ msgid "Creates a new agent if none exists"
+#~ msgstr "如果不存在则创建新的 agent"
+
+#~ msgid "When `False`:"
+#~ msgstr "当设置为 `False` 时："
+
+#~ msgid "Always starts a new SSH agent"
+#~ msgstr "总是启动新的 SSH agent"
+
+#~ msgid "Useful when you want to ensure a clean agent state"
+#~ msgstr "当你需要确保 agent 状态干净时很有用"
+
+#~ msgid "Example:"
+#~ msgstr "示例："
+
+#~ msgid "Security"
+#~ msgstr "安全性"
+
+#~ msgid "Key Management"
+#~ msgstr "密钥管理"
+
+#~ msgid "The package handles SSH keys securely:"
+#~ msgstr "该包安全地处理 SSH 密钥："
+
+#~ msgid "Proper file permissions"
+#~ msgstr "正确的文件权限"
+
+#~ msgid "Secure key loading"
+#~ msgstr "安全的密钥加载"
+
+#~ msgid "Support for key content injection (useful in CI/CD)"
+#~ msgstr "支持密钥内容注入（在 CI/CD 中很有用）"
+
+#~ msgid "Contributing"
+#~ msgstr "贡献"
+
+#~ msgid ""
+#~ "We welcome contributions! Please see our"
+#~ " contributing guidelines for details."
+#~ msgstr "我们欢迎贡献！详情请参阅我们的贡献指南。"
+
+#~ msgid "License"
+#~ msgstr "许可证"
+
+#~ msgid ""
+#~ "This project is licensed under the "
+#~ "MIT License - see the LICENSE file"
+#~ " for details."
+#~ msgstr "本项目采用 MIT 许可证 - 详情请参阅 LICENSE 文件。"
+
+#~ msgid "Python Version"
+#~ msgstr ""
+
+#~ msgid "Nox"
+#~ msgstr ""
+
+#~ msgid "PyPI Version"
+#~ msgstr ""
+
+#~ msgid "Downloads"
+#~ msgstr ""
+
+#~ msgid "PyPI Format"
+#~ msgstr ""
+
+#~ msgid "Maintenance"
+#~ msgstr ""
+
+#~ msgid "Codecov"
+#~ msgstr ""
+
+#~ msgid "[English](README.md) | [中文](README_zh.md)"
+#~ msgstr ""
+
+#~ msgid "📚 Table of Contents"
+#~ msgstr ""
+
+#~ msgid "[Features](#features)"
+#~ msgstr ""
+
+#~ msgid "[Installation](#installation)"
+#~ msgstr ""
+
+#~ msgid "[Usage](#usage)"
+#~ msgstr ""
+
+#~ msgid "[Security](#security-features)"
+#~ msgstr ""
+
+#~ msgid "[Contributing](#contributing)"
+#~ msgstr ""
+
+#~ msgid "✨ Features"
+#~ msgstr ""
+
+#~ msgid "🔄 Persistent SSH agent management across sessions"
+#~ msgstr ""
+
+#~ msgid "🔑 Automatic SSH key loading and caching"
+#~ msgstr ""
+
+#~ msgid "🪟 Windows-optimized implementation"
+#~ msgstr ""
+
+#~ msgid "🔗 Seamless Git integration"
+#~ msgstr ""
+
+#~ msgid "🌐 Cross-platform compatibility (Windows, Linux, macOS)"
+#~ msgstr ""
+
+#~ msgid "📦 No external dependencies beyond standard SSH tools"
+#~ msgstr ""
+
+#~ msgid "🔒 Secure key management and session control"
+#~ msgstr ""
+
+#~ msgid "⚡ Asynchronous operation support"
+#~ msgstr ""
+
+#~ msgid "🧪 Complete unit test coverage"
+#~ msgstr ""
+
+#~ msgid "📝 Type hints support"
+#~ msgstr ""
+
+#~ msgid "🚀 Installation"
+#~ msgstr ""
+
+#~ msgid "📋 Requirements"
+#~ msgstr ""
+
+#~ msgid "Python 3.8+"
+#~ msgstr ""
+
+#~ msgid "OpenSSH (ssh-agent, ssh-add) installed and available in PATH"
+#~ msgstr ""
+
+#~ msgid "Git (optional, for Git operations)"
+#~ msgstr ""
+
+#~ msgid "📖 Usage"
+#~ msgstr ""
+
+#~ msgid "Basic Usage"
+#~ msgstr ""
+
+#~ msgid "Advanced Configuration"
+#~ msgstr ""
+
+#~ msgid "Agent Reuse Behavior"
+#~ msgstr ""
+
+#~ msgid "When `reuse_agent=True` (default):"
+#~ msgstr ""
+
+#~ msgid "Reduces the number of agent startups and key additions"
+#~ msgstr ""
+
+#~ msgid "Improves performance by avoiding unnecessary agent operations"
+#~ msgstr ""
+
+#~ msgid "When `reuse_agent=False`:"
+#~ msgstr ""
+
+#~ msgid "Always starts a new SSH agent session"
+#~ msgstr ""
+
+#~ msgid "Useful when you need a fresh agent state"
+#~ msgstr ""
+
+#~ msgid "May be preferred in certain security-sensitive environments"
+#~ msgstr ""
+
+#~ msgid "Example with agent reuse disabled:"
+#~ msgstr ""
+
+#~ msgid "Multiple Host Configuration"
+#~ msgstr ""
+
+#~ msgid "Global SSH Configuration"
+#~ msgstr ""
+
+#~ msgid "Asynchronous Support"
+#~ msgstr ""
+
+#~ msgid "Security Best Practices"
+#~ msgstr ""
+
+#~ msgid "**Key Management**:"
+#~ msgstr ""
+
+#~ msgid "Store SSH keys in standard locations (`~/.ssh/`)"
+#~ msgstr ""
+
+#~ msgid "Use Ed25519 keys for better security"
+#~ msgstr ""
+
+#~ msgid "Keep private keys protected (600 permissions)"
+#~ msgstr ""
+
+#~ msgid "**Error Handling**:"
+#~ msgstr ""
+
+#~ msgid "**Session Management**:"
+#~ msgstr ""
+
+#~ msgid "Agent information persists across sessions"
+#~ msgstr ""
+
+#~ msgid "Automatic cleanup of expired sessions"
+#~ msgstr ""
+
+#~ msgid "Configurable expiration time"
+#~ msgstr ""
+
+#~ msgid "Multi-session concurrent management"
+#~ msgstr ""
+
+#~ msgid "**Security Features**:"
+#~ msgstr ""
+
+#~ msgid "Automatic key unloading after expiration"
+#~ msgstr ""
+
+#~ msgid "Secure temporary file handling"
+#~ msgstr ""
+
+#~ msgid "Platform-specific security measures"
+#~ msgstr ""
+
+#~ msgid "Key usage tracking"
+#~ msgstr ""
+
+#~ msgid "🔧 Common Use Cases"
+#~ msgstr ""
+
+#~ msgid "CI/CD Pipeline Integration"
+#~ msgstr ""
+
+#~ msgid "Git Integration"
+#~ msgstr ""
+
+#~ msgid "🌟 Advanced Features"
+#~ msgstr ""
+
+#~ msgid "Custom Configuration"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The library automatically manages SSH "
+#~ "keys based on your SSH configuration:"
+#~ msgstr ""
+
+#~ msgid "The library supports the following key types in order of preference:"
+#~ msgstr ""
+
+#~ msgid "Ed25519 (recommended, most secure)"
+#~ msgstr ""
+
+#~ msgid "ECDSA"
+#~ msgstr ""
+
+#~ msgid "ECDSA with security key"
+#~ msgstr ""
+
+#~ msgid "Ed25519 with security key"
+#~ msgstr ""
+
+#~ msgid "RSA"
+#~ msgstr ""
+
+#~ msgid "DSA (legacy, not recommended)"
+#~ msgstr ""
+
+#~ msgid "SSH Configuration Validation"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The library provides comprehensive SSH "
+#~ "configuration validation with support for:"
+#~ msgstr ""
+
+#~ msgid "Supported configuration categories:"
+#~ msgstr ""
+
+#~ msgid "**Connection Settings**: Port, Hostname, User, IdentityFile"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Security Settings**: StrictHostKeyChecking, "
+#~ "BatchMode, PasswordAuthentication"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "**Connection Optimization**: Compression, "
+#~ "ConnectTimeout, ServerAliveInterval"
+#~ msgstr ""
+
+#~ msgid "**Proxy and Forwarding**: ProxyCommand, ForwardAgent, ForwardX11"
+#~ msgstr ""
+
+#~ msgid "**Environment Settings**: RequestTTY, SendEnv"
+#~ msgstr ""
+
+#~ msgid "**Multiplexing Options**: ControlMaster, ControlPath, ControlPersist"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For detailed validation rules and "
+#~ "supported options, see [SSH Configuration "
+#~ "Validation](docs/ssh_config_validation.md)"
+#~ msgstr ""
+
+#~ msgid "Security Features"
+#~ msgstr ""
+
+#~ msgid "**SSH Key Management**:"
+#~ msgstr ""
+
+#~ msgid "Automatic detection and loading of SSH keys (Ed25519, ECDSA, RSA)"
+#~ msgstr ""
+
+#~ msgid "Secure key file permissions handling"
+#~ msgstr ""
+
+#~ msgid "Optional passphrase support"
+#~ msgstr ""
+
+#~ msgid "**Configuration Security**:"
+#~ msgstr ""
+
+#~ msgid "Strict hostname validation"
+#~ msgstr ""
+
+#~ msgid "Secure default settings"
+#~ msgstr ""
+
+#~ msgid "Support for security-focused SSH options"
+#~ msgstr ""
+
+#~ msgid "Secure storage of agent information"
+#~ msgstr ""
+
+#~ msgid "Cross-platform compatibility"
+#~ msgstr ""
+
+#~ msgid "Type Hints Support"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The library provides comprehensive type "
+#~ "hints for all public interfaces:"
+#~ msgstr ""
+
+#~ msgid "🤝 Contributing"
+#~ msgstr ""
+
+#~ msgid "Contributions are welcome! Please feel free to submit a Pull Request."
+#~ msgstr ""
+
+#~ msgid "Fork the repository"
+#~ msgstr ""
+
+#~ msgid "Create your feature branch (`git checkout -b feature/amazing-feature`)"
+#~ msgstr ""
+
+#~ msgid "Commit your changes (`git commit -m 'Add amazing feature'`)"
+#~ msgstr ""
+
+#~ msgid "Push to the branch (`git push origin feature/amazing-feature`)"
+#~ msgstr ""
+
+#~ msgid "Open a Pull Request"
+#~ msgstr ""
+
+#~ msgid "📄 License"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This project is licensed under the "
+#~ "MIT License - see the [LICENSE](LICENSE)"
+#~ " file for details."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "persistent_ssh_agent is a Python package "
+#~ "that helps manage SSH agent persistence"
+#~ " across sessions."
+#~ msgstr ""
+
+#~ msgid "You can configure the agent behavior through:"
+#~ msgstr ""
+
+#~ msgid "Environment variables"
+#~ msgstr ""
+
+#~ msgid "Configuration file"
+#~ msgstr ""
+
+#~ msgid "Direct parameters"
+#~ msgstr ""
+
+#~ msgid "See the documentation for detailed configuration options."
+#~ msgstr ""

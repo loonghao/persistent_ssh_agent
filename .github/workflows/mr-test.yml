@@ -5,6 +5,8 @@ on:
       - '**.md'
       - '.github/**'
       - '!.github/workflows/**'
+      - 'docs/**'
+      - '**.rst'
 
 jobs:
   lint:

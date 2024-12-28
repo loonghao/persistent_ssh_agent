@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import socket
 import subprocess
+from subprocess import CompletedProcess
 import tempfile
 from textwrap import dedent
 import time
@@ -521,7 +522,7 @@ class PersistentSSHAgent:
 
     def run_command(self, command: List[str], shell: bool = False,
                     check_output: bool = True, timeout: Optional[int] = None,
-                    env: Optional[Dict[str, str]] = None) -> Optional[subprocess.CompletedProcess]:
+                    env: Optional[Dict[str, str]] = None) -> Optional[CompletedProcess[bytes]]:
         """Run a command and return its output.
 
         Args:
@@ -532,7 +533,7 @@ class PersistentSSHAgent:
             env: Environment variables for command
 
         Returns:
-            CompletedProcess object if successful, None on error
+            CompletedProcess: CompletedProcess object if successful, None on error
         """
         try:
             result = subprocess.run(

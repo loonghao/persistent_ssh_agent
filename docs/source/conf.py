@@ -23,6 +23,19 @@ extensions = [
     "myst_parser",  # Add support for markdown files
 ]
 
+# MyST Parser settings
+myst_enable_extensions = [
+    "colon_fence",  # Enable ::: fences
+    "deflist",      # Enable definition lists
+    "fieldlist",    # Enable field lists
+    "eval",         # Enable evaluate-rst
+]
+myst_disable_all_warnings = True  # Disable all MyST warnings
+suppress_warnings = [
+    "myst.xref_missing",  # Suppress missing reference warnings
+    "ref.class"  # Suppress class reference warnings
+]
+
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"
 html_static_path = ["_static"]
