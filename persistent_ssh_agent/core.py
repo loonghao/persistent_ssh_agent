@@ -750,9 +750,10 @@ class PersistentSSHAgent:
             # Handle Host blocks
             if line.lower().startswith("host "):
                 current_host = line.split(None, 1)[1]
-                if is_valid_host_pattern(current_host) and current_host not in config:
-                    config[current_host] = {}
-                current_match = None
+                if is_valid_host_pattern(current_host):
+                    if current_host not in config:
+                        config[current_host] = {}
+                    current_match = None
                 return
 
             # Parse key-value pairs
@@ -779,10 +780,13 @@ class PersistentSSHAgent:
                     logger.debug(f"Skipping invalid config value in {config_file}: {key}={value}")
                     return
 
-                # Apply settings
-                if current_host not in config:
-                    config[current_host] = {}
-                config[current_host][key] = value
+                # Handle array values (e.g., multiple IdentityFile entries)
+                if key in config[current_host]:
+                    if not isinstance(config[current_host][key], list):
+                        config[current_host][key] = [config[current_host][key]]
+                    config[current_host][key].append(value)
+                else:
+                    config[current_host][key] = value
 
         try:
             with open(ssh_config_path) as f:
