@@ -9,6 +9,15 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 
+[tool.poetry.optional-dependencies]
+docs = [
+    "sphinx",
+    "furo",
+    "sphinx-autobuild",
+    "sphinx-copybutton",
+    "doc8",
+    "sphinx-intl",
+]
 
 [build-system]
 requires = ["poetry-core"]

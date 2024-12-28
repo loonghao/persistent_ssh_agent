@@ -1,0 +1,154 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, persistent_ssh_agent
+# This file is distributed under the same license as the
+# persistent_ssh_agent package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: persistent_ssh_agent \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-28 19:48+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: ../../source/modules/persistent_ssh_agent.rst:2
+msgid "persistent_ssh_agent package"
+msgstr ""
+
+#: of persistent_ssh_agent.config.SSHConfig:1
+#: persistent_ssh_agent.core.PersistentSSHAgent:1
+msgid "Bases: :py:class:`object`"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent:1
+msgid "Handles persistent SSH agent operations and authentication."
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent:3
+msgid ""
+"This class manages SSH agent persistence across sessions by saving and "
+"restoring agent information. It also handles SSH key management and "
+"authentication for various operations including Git."
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.get_git_ssh_command:1
+msgid "Generate Git SSH command with proper configuration."
+msgstr ""
+
+#: ../../source/modules/persistent_ssh_agent.rst
+msgid "Parameters"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.get_git_ssh_command:3
+msgid "Target Git host"
+msgstr ""
+
+#: ../../source/modules/persistent_ssh_agent.rst
+msgid "Returns"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.get_git_ssh_command:5
+msgid "SSH command string if successful, None on error"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:1
+msgid "Check if a hostname is valid according to RFC 1123 and supports IPv6."
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:3
+msgid "The hostname to validate"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:5
+msgid "True if the hostname is valid, False otherwise"
+msgstr ""
+
+#: ../../source/modules/persistent_ssh_agent.rst
+msgid "Return type"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:9
+msgid "Notes"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:10
+msgid "Maximum length of 255 characters"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:11
+msgid "Can contain letters (a-z), numbers (0-9), dots (.) and hyphens (-)"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:12
+msgid "Cannot start or end with a dot or hyphen"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:13
+msgid "Labels (parts between dots) cannot start or end with a hyphen"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:14
+msgid "Labels cannot be longer than 63 characters"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.is_valid_hostname:15
+msgid "IPv6 addresses are supported (with or without brackets)"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:1
+msgid "Run a command and return its output."
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:3
+msgid "Command and arguments to run"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:4
+msgid "Whether to run command through shell"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:5
+msgid "Whether to capture command output"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:6
+msgid "Command timeout in seconds"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:7
+msgid "Environment variables for command"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.run_command:9
+msgid "CompletedProcess object if successful, None on error"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.setup_ssh:1
+msgid "Set up SSH authentication for a host."
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.setup_ssh:3
+msgid "Hostname to set up SSH for"
+msgstr ""
+
+#: of persistent_ssh_agent.core.PersistentSSHAgent.setup_ssh:5
+msgid "True if setup successful"
+msgstr ""
+
+#: of persistent_ssh_agent.config.SSHConfig:1
+msgid "SSH configuration class."
+msgstr ""
+
+#: ../../source/modules/persistent_ssh_agent.rst:10
+msgid "Submodules"
+msgstr ""
+
