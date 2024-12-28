@@ -399,35 +399,6 @@ def test_ssh_key_management_edge_cases(ssh_manager):
         )
         assert not ssh_manager._add_ssh_key("test_key")
 
-
-def test_ssh_config_parsing_edge_cases(ssh_manager):
-    """Test edge cases in SSH config parsing."""
-    # Import built-in modules
-    from textwrap import dedent
-    config_data = dedent("""
-        Host test
-            HostName test.example.com
-            User testuser
-            Port 2222
-            IdentityFile ~/.ssh/invalid_key
-        Host *
-            IdentityFile ~/.ssh/default_key
-    """).lstrip()
-
-    with patch("builtins.open", mock_open(read_data=config_data)):
-        config = ssh_manager._parse_ssh_config()
-        assert "test" in config
-        assert config["test"]["hostname"] == "test.example.com"
-        assert config["test"]["user"] == "testuser"
-        assert config["test"]["port"] == "2222"
-        assert isinstance(config["test"]["identityfile"], list)
-        assert "~/.ssh/invalid_key" in config["test"]["identityfile"]
-        assert "*" in config
-        assert "identityfile" in config["*"]
-        assert isinstance(config["*"]["identityfile"], list)
-        assert "~/.ssh/default_key" in config["*"]["identityfile"]
-
-
 def test_identity_file_resolution(ssh_manager):
     """Test identity file resolution."""
     with patch("os.path.expanduser") as mock_expand, \

@@ -69,12 +69,15 @@ from persistent_ssh_agent import PersistentSSHAgent
 from persistent_ssh_agent.config import SSHConfig
 
 # 创建自定义 SSH 配置
-config = SSHConfig()
-config.add_host_config('github.com', {
-    'IdentityFile': '~/.ssh/github_key',
-    'User': 'git',
-    'Port': '22'
-})
+config = SSHConfig(
+    identity_file='~/.ssh/github_key',  # 可选的指定身份文件
+    identity_passphrase='your-passphrase',  # 可选的密码短语
+    ssh_options={  # 可选的 SSH 选项
+        'StrictHostKeyChecking': 'yes',
+        'PasswordAuthentication': 'no',
+        'PubkeyAuthentication': 'yes'
+    }
+)
 
 # 使用自定义配置初始化
 ssh_agent = PersistentSSHAgent(config=config)
@@ -87,62 +90,94 @@ if ssh_agent.setup_ssh('github.com'):
         print("✅ Git SSH 命令已就绪！")
 ```
 
-### 异步操作支持
+### CI/CD 集成
 
 ```python
-import asyncio
 from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
 
-async def setup_multiple_hosts(hosts: list[str]) -> dict[str, bool]:
-    """并发设置多个主机的 SSH。"""
-    ssh_agent = PersistentSSHAgent()
-    results = {}
+def setup_ci_ssh():
+    """为 CI 环境设置 SSH。"""
+    # 创建带有密钥内容的配置
+    config = SSHConfig(
+        identity_content=os.environ.get('SSH_PRIVATE_KEY'),
+        ssh_options={'BatchMode': 'yes'}
+    )
 
-    async def setup_host(host: str):
-        results[host] = await ssh_agent.async_setup_ssh(host)
+    ssh_agent = PersistentSSHAgent(config=config)
 
-    await asyncio.gather(*[setup_host(host) for host in hosts])
-    return results
+    if ssh_agent.setup_ssh('github.com'):
+        print("✅ SSH agent 启动成功")
+        return True
 
-# 使用示例
-async def main():
-    hosts = ['github.com', 'gitlab.com', 'bitbucket.org']
-    results = await setup_multiple_hosts(hosts)
-    for host, success in results.items():
-        print(f"{host}: {'✅' if success else '❌'}")
-
-asyncio.run(main())
+    raise RuntimeError("SSH agent 启动失败")
 ```
 
-### 安全最佳实践
+### Git 集成
 
-1. **密钥管理**:
-   - 将 SSH 密钥存储在标准位置 (`~/.ssh/`)
-   - 使用 Ed25519 密钥以获得更好的安全性
-   - 确保私钥权限正确 (600)
+```python
+from git import Repo
+from persistent_ssh_agent import PersistentSSHAgent
+import os
 
-2. **错误处理**:
-   ```python
-   try:
-       ssh_agent = PersistentSSHAgent()
-       success = ssh_agent.setup_ssh('github.com')
-       if not success:
-           print("⚠️ SSH 设置失败")
-   except Exception as e:
-       print(f"❌ 错误: {e}")
-   ```
+def clone_repo(repo_url: str, local_path: str) -> Repo:
+    """使用持久化 SSH 认证克隆仓库。"""
+    ssh_agent = PersistentSSHAgent()
 
-3. **会话管理**:
-   - 会话信息在重启后持久化
-   - 自动清理过期会话
-   - 可配置的过期时间
-   - 支持多会话并发管理
+    # 提取主机名并设置 SSH
+    hostname = ssh_agent._extract_hostname(repo_url)
+    if not hostname or not ssh_agent.setup_ssh(hostname):
+        raise RuntimeError("SSH 认证设置失败")
 
-4. **安全特性**:
-   - 到期后自动卸载密钥
-   - 安全的临时文件处理
+    # 获取 SSH 命令并配置环境
+    ssh_command = ssh_agent.get_git_ssh_command(hostname)
+    if not ssh_command:
+        raise RuntimeError("获取 SSH 命令失败")
+
+    # 使用 GitPython 克隆
+    env = os.environ.copy()
+    env['GIT_SSH_COMMAND'] = ssh_command
+
+    return Repo.clone_from(
+        repo_url,
+        local_path,
+        env=env
+    )
+```
+
+### 安全特性
+
+1. **SSH 密钥管理**：
+   - 自动检测和加载 SSH 密钥（Ed25519、ECDSA、RSA）
+   - 支持密钥内容注入（适用于 CI/CD）
+   - 安全的密钥文件权限处理
+   - 可选的密码短语支持
+
+2. **配置安全**：
+   - 严格的主机名验证
+   - 安全的默认设置
+   - 支持安全相关的 SSH 选项
+
+3. **会话管理**：
+   - 安全的代理信息存储
    - 平台特定的安全措施
-   - 密钥使用追踪
+   - 自动清理过期会话
+   - 跨平台兼容性
+
+### 类型提示支持
+
+该库为所有公共接口提供全面的类型提示：
+
+```python
+from typing import Optional
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+def setup_ssh(hostname: str, key_file: Optional[str] = None) -> bool:
+    config = SSHConfig(identity_file=key_file)
+    agent = PersistentSSHAgent(config=config)
+    return agent.setup_ssh(hostname)
+```
 
 ## 🔧 常见使用场景
 
@@ -214,6 +249,134 @@ except Exception as e:
 
 ## 🌟 高级功能
 
+### SSH 配置验证
+
+该库提供全面的 SSH 配置验证功能，支持：
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# 创建带验证的自定义 SSH 配置
+config = SSHConfig()
+
+# 添加包含各种选项的主机配置
+config.add_host_config('github.com', {
+    # 连接设置
+    'IdentityFile': '~/.ssh/github_key',
+    'User': 'git',
+    'Port': '22',
+
+    # 安全设置
+    'StrictHostKeyChecking': 'yes',
+    'PasswordAuthentication': 'no',
+    'PubkeyAuthentication': 'yes',
+
+    # 连接优化
+    'Compression': 'yes',
+    'ServerAliveInterval': '60',
+    'ServerAliveCountMax': '3',
+
+    # 代理和转发
+    'ForwardAgent': 'yes'
+})
+
+# 使用经过验证的配置初始化
+ssh_agent = PersistentSSHAgent(config=config)
+```
+
+支持的配置类别：
+- **连接设置**：端口、主机名、用户、身份文件
+- **安全设置**：严格主机密钥检查、批处理模式、密码认证
+- **连接优化**：压缩、连接超时、服务器保活间隔
+- **代理和转发**：代理命令、代理转发、X11转发
+- **环境设置**：TTY请求、环境变量发送
+- **多路复用选项**：控制主机、控制路径、控制持久化
+
+详细的验证规则和支持的选项，请参见 [SSH 配置验证](docs/ssh_config_validation.md)
+
+### 多主机配置
+
+配置多个主机的 SSH：
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# 创建带有通用选项的配置
+config = SSHConfig(
+    ssh_options={
+        'BatchMode': 'yes',
+        'StrictHostKeyChecking': 'yes',
+        'ServerAliveInterval': '60'
+    }
+)
+
+# 初始化代理
+agent = PersistentSSHAgent(config=config)
+
+# 为多个主机设置 SSH
+hosts = ['github.com', 'gitlab.com', 'bitbucket.org']
+for host in hosts:
+    if agent.setup_ssh(host):
+        print(f"✅ SSH 已为 {host} 配置完成")
+    else:
+        print(f"❌ {host} 的 SSH 配置失败")
+```
+
+### 全局 SSH 配置
+
+设置全局 SSH 选项：
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# 创建带有全局选项的配置
+config = SSHConfig(
+    # 设置身份文件（可选）
+    identity_file='~/.ssh/id_ed25519',
+
+    # 设置全局 SSH 选项
+    ssh_options={
+        'StrictHostKeyChecking': 'yes',
+        'PasswordAuthentication': 'no',
+        'PubkeyAuthentication': 'yes',
+        'BatchMode': 'yes',
+        'ConnectTimeout': '30'
+    }
+)
+
+# 使用全局配置初始化代理
+agent = PersistentSSHAgent(config=config)
+```
+
+### 密钥管理
+
+该库基于您的 SSH 配置自动管理 SSH 密钥：
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# 使用指定的密钥
+config = SSHConfig(identity_file='~/.ssh/id_ed25519')
+agent = PersistentSSHAgent(config=config)
+
+# 或让库自动检测并使用可用的密钥
+agent = PersistentSSHAgent()
+if agent.setup_ssh('github.com'):
+    print("✅ SSH 密钥已加载并就绪！")
+```
+
+该库支持以下密钥类型（按优先级排序）：
+- Ed25519（推荐，最安全）
+- ECDSA
+- 带安全密钥的 ECDSA
+- 带安全密钥的 Ed25519
+- RSA
+- DSA（传统，不推荐）
+
 ### 自定义配置
 
 ```python
@@ -238,28 +401,6 @@ config.add_host_config('*.github.com', {
 
 # 使用配置初始化 agent
 agent = PersistentSSHAgent(config=config)
-```
-
-### 密钥管理
-
-```python
-from persistent_ssh_agent import PersistentSSHAgent
-
-agent = PersistentSSHAgent()
-
-# 添加密钥
-agent.add_key('~/.ssh/id_ed25519')
-
-# 列出已加载的密钥
-keys = agent.list_keys()
-for key in keys:
-    print(f"已加载密钥: {key}")
-
-# 移除特定密钥
-agent.remove_key('~/.ssh/id_ed25519')
-
-# 清理所有密钥
-agent.clear_keys()
 ```
 
 ## 🤝 贡献
