@@ -95,3 +95,77 @@ def test_is_valid_hostname(ssh_manager):
     assert ssh_manager.is_valid_hostname("invalid_hostname") is False  # Contains underscore
     assert ssh_manager.is_valid_hostname("host@name") is False  # Contains @
     assert ssh_manager.is_valid_hostname("host:name") is False  # Contains :
+
+
+def test_start_ssh_agent_reuse(ssh_manager, mocker):
+    """Test SSH agent reuse functionality."""
+    # Mock necessary methods
+    mock_load_agent = mocker.patch.object(ssh_manager, "_load_agent_info")
+    mock_verify_key = mocker.patch.object(ssh_manager, "_verify_loaded_key")
+    mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_logger = mocker.patch("persistent_ssh_agent.core.logger")
+
+    # Test case 1: Successfully reuse existing agent
+    mock_load_agent.return_value = True
+    mock_verify_key.return_value = True
+    identity_file = "~/.ssh/id_rsa"
+
+    assert ssh_manager._start_ssh_agent(identity_file) is True
+    mock_logger.debug.assert_called_with("Using existing agent with loaded key: %s", identity_file)
+    mock_run_command.assert_not_called()
+
+    # Test case 2: Found agent but key not loaded
+    mock_verify_key.return_value = False
+    assert ssh_manager._start_ssh_agent(identity_file) is True
+    mock_logger.debug.assert_called_with("Existing agent found but key not loaded")
+
+    # Test case 3: No valid agent found
+    mock_load_agent.return_value = False
+    assert ssh_manager._start_ssh_agent(identity_file) is True
+    mock_logger.debug.assert_called_with("No valid existing agent found")
+
+    # Test case 4: Agent reuse disabled
+    ssh_manager._reuse_agent = False
+    assert ssh_manager._start_ssh_agent(identity_file) is True
+    mock_logger.debug.assert_called_with("Agent reuse disabled, starting new agent")
+
+
+def test_start_ssh_agent_platform_specific(ssh_manager, mocker):
+    """Test platform-specific SSH agent startup."""
+    mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_os = mocker.patch("persistent_ssh_agent.core.os")
+
+    # Mock run_command to return a successful result
+    class MockResult:
+        returncode = 0
+    mock_run_command.return_value = MockResult()
+
+    # Test Windows (nt) platform
+    mock_os.name = "nt"
+    ssh_manager._reuse_agent = False  # Disable reuse to test agent startup
+    identity_file = "~/.ssh/id_rsa"
+
+    assert ssh_manager._start_ssh_agent(identity_file) is True
+    mock_run_command.assert_called_with(["ssh-agent", "-s"])
+
+    # Test Unix platform
+    mock_os.name = "posix"
+    assert ssh_manager._start_ssh_agent(identity_file) is True
+    mock_run_command.assert_called_with(["ssh-agent"])
+
+
+def test_start_ssh_agent_failure(ssh_manager, mocker):
+    """Test SSH agent startup failure cases."""
+    mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_logger = mocker.patch("persistent_ssh_agent.core.logger")
+
+    # Mock run_command to return a failed result
+    class MockResult:
+        returncode = 1
+    mock_run_command.return_value = MockResult()
+
+    ssh_manager._reuse_agent = False  # Disable reuse to test agent startup
+    identity_file = "~/.ssh/id_rsa"
+
+    assert ssh_manager._start_ssh_agent(identity_file) is False
+    mock_logger.error.assert_called()

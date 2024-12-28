@@ -33,8 +33,13 @@
 - 📦 No external dependencies beyond standard SSH tools
 - 🔒 Secure key management and session control
 - ⚡ Asynchronous operation support
-- 🧪 Complete unit test coverage
-- 📝 Type hints support
+- 🧪 Complete unit test coverage with performance benchmarks
+- 📝 Comprehensive type hints support
+- 🔐 Support for multiple SSH key types (Ed25519, ECDSA, RSA)
+- 🌍 IPv6 support
+- 📚 Multi-language documentation support
+- 🔍 Enhanced SSH configuration validation
+- 🛠️ Modern development toolchain (Poetry, Commitizen, Black)
 
 ## 🚀 Installation
 
@@ -44,7 +49,7 @@ pip install persistent-ssh-agent
 
 ## 📋 Requirements
 
-- Python 3.8+
+- Python 3.8-3.13
 - OpenSSH (ssh-agent, ssh-add) installed and available in PATH
 - Git (optional, for Git operations)
 
@@ -386,6 +391,17 @@ Supported configuration categories:
 - **Multiplexing Options**: ControlMaster, ControlPath, ControlPersist
 
 For detailed validation rules and supported options, see [SSH Configuration Validation](#ssh-configuration-validation)
+
+### SSH Key Types Support
+
+The library supports multiple SSH key types:
+
+- Ed25519 (recommended, most secure)
+- ECDSA
+- ECDSA with security key
+- Ed25519 with security key
+- RSA
+- DSA (legacy, not recommended)
 
 ### Security Features
 
