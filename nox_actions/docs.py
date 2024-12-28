@@ -27,6 +27,8 @@ docs_dependencies = [
     "doc8",
     "sphinx-intl",
     "myst-parser>=2.0.0",
+    "sphinx-inline-tabs",
+    "sphinxcontrib-towncrier",
 ]
 
 
@@ -339,7 +341,7 @@ def docs_build(session: Session) -> None:
 
     The output structure will be:
     build/html/
-    ├── en/         # English documentation
+    ├── en_US/      # English documentation
     │   ├── index.html
     │   └── ...
     ├── zh_CN/      # Chinese documentation
@@ -364,12 +366,12 @@ def docs_build(session: Session) -> None:
             "source",
             "build/gettext"
         )
-        
-        # Update PO files for each language
+
+        # Update PO files for Chinese
         session.run("sphinx-intl", "update", "-p", "build/gettext", "-l", "zh_CN")
-        
+
         # Build documentation for each language
-        for lang in ["en", "zh_CN"]:
+        for lang in ["en_US", "zh_CN"]:
             session.log(f"Building documentation for {lang}")
             output_dir = f"build/html/{lang}"
             session.run(
@@ -377,7 +379,8 @@ def docs_build(session: Session) -> None:
                 "-b", "html",
                 "-D", f"language={lang}",
                 "source",
-                output_dir
+                output_dir,
+                env={"SPHINX_LANGUAGE": lang}
             )
 
     # Create a simple language selection page
@@ -386,13 +389,13 @@ def docs_build(session: Session) -> None:
     <html>
     <head>
         <meta charset="UTF-8">
-        <meta http-equiv="refresh" content="0; url=en/">
+        <meta http-equiv="refresh" content="0; url=en_US/">
         <script>
             var lang = navigator.language || navigator.userLanguage;
             if (lang.toLowerCase().startsWith('zh')) {
                 window.location.href = 'zh_CN/';
             } else {
-                window.location.href = 'en/';
+                window.location.href = 'en_US/';
             }
         </script>
         <title>Redirecting...</title>
@@ -400,13 +403,13 @@ def docs_build(session: Session) -> None:
     <body>
         <h1>Redirecting...</h1>
         <p>
-            <a href="en/">English</a><br>
+            <a href="en_US/">English</a><br>
             <a href="zh_CN/">中文</a>
         </p>
     </body>
     </html>
     """
-    
+
     # Write the language selection page
     index_path = Path(get_docs_dir()) / "build" / "html" / "index.html"
     index_path.write_text(index_html, encoding="utf-8")
