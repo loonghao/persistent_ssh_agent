@@ -66,6 +66,22 @@ html_theme_options = {
             "class": "",
         },
     ],
+    "source_repository": "https://github.com/yourusername/persistent_ssh_agent",
+    "source_branch": "main",
+    "source_directory": "docs/",
+    "announcement": """
+        <div class="language-switcher">
+            {% if language == 'en_US' %}
+                <strong>Language:</strong>
+                <span class="current-lang">English</span> |
+                <a href="../zh_CN/{{ pagename }}.html">中文</a>
+            {% else %}
+                <strong>语言：</strong>
+                <a href="../en/{{ pagename }}.html">English</a> |
+                <span class="current-lang">中文</span>
+            {% endif %}
+        </div>
+    """,
 }
 
 # Configure templates
@@ -75,35 +91,37 @@ templates_path = ["_templates"]
 language = os.getenv("SPHINX_LANGUAGE", "en")
 
 # Mapping of supported languages
-language_mapping = {
-    "en": "English",
-    "zh_CN": "简体中文"
-}
+languages = ["en", "zh_CN"]
 
 # Locale directories for translations
 locale_dirs = ["locale/"]
 gettext_compact = False
+gettext_uuid = True  # 添加 UUID 以便更好地追踪翻译
+gettext_location = True  # 添加位置信息以便更好地维护翻译
 
 # Language to use for generating the HTML full-text search index.
-# Sphinx supports the following languages:
-#   'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja'
-#   'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr', 'ar', 'fa', 'hi',
-#   'ko', 'zh'
 html_search_language = {
     "en": "en",
     "zh_CN": "zh"
 }.get(language, "en")
 
+# 语言切换配置
+language_links = {
+    "en": {
+        "zh_CN": "../zh_CN/",
+    },
+    "zh_CN": {
+        "en": "../en/",
+    }
+}
+
 html_context = {
+    "language": language,
+    "language_links": language_links.get(language, {}),
     "languages": {
         "en": "English",
         "zh_CN": "简体中文",
     },
-    "current_language": language,
-    "language_links": {
-        "en": "/persistent_ssh_agent/en/",
-        "zh_CN": "/persistent_ssh_agent/zh_CN/",
-    }
 }
 
 # Configure master document

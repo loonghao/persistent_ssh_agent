@@ -1,0 +1,13 @@
+{% if language == 'en_US' %}
+    <div class="language-switcher">
+        <strong>Language:</strong>
+        <span>English</span> |
+        <a href="{{ pathto('../zh/' + pagename + '.html', 1) }}">中文</a>
+    </div>
+{% elif language == 'zh_CN' %}
+    <div class="language-switcher">
+        <strong>语言：</strong>
+        <a href="{{ pathto('../en/' + pagename + '.html', 1) }}">English</a> |
+        <span>中文</span>
+    </div>
+{% endif %}

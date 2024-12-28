@@ -60,7 +60,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           publish_dir: ./docs/build/html
           destination_dir: ${{ github.ref_name }}  # Deploy to branch-specific directory
           keep_files: true  # Keep previously deployed files

@@ -337,6 +337,16 @@ def docs_i18n(session: Session) -> None:
 def docs_build(session: Session) -> None:
     """Build documentation for all languages.
 
+    The output structure will be:
+    build/html/
+    ├── en/         # English documentation
+    │   ├── index.html
+    │   └── ...
+    ├── zh_CN/      # Chinese documentation
+    │   ├── index.html
+    │   └── ...
+    └── index.html  # Language selection page
+
     Args:
         session: Nox session object
     """
@@ -346,19 +356,59 @@ def docs_build(session: Session) -> None:
     # Clean build directory first
     clean_docs(session)
 
-    # Build for each language
-    for lang in languages:
-        session.log(f"Building documentation for {lang}")
-        env = {"SPHINX_LANGUAGE": lang}
-        output_dir = f"build/html/{lang}"
-        with session.chdir(str(get_docs_dir())):
+    # First generate POT files
+    with session.chdir(str(get_docs_dir())):
+        session.run(
+            "sphinx-build",
+            "-b", "gettext",
+            "source",
+            "build/gettext"
+        )
+        
+        # Update PO files for each language
+        session.run("sphinx-intl", "update", "-p", "build/gettext", "-l", "zh_CN")
+        
+        # Build documentation for each language
+        for lang in ["en", "zh_CN"]:
+            session.log(f"Building documentation for {lang}")
+            output_dir = f"build/html/{lang}"
             session.run(
                 "sphinx-build",
                 "-b", "html",
                 "-D", f"language={lang}",
                 "source",
-                output_dir,
-                env=env
+                output_dir
             )
+
+    # Create a simple language selection page
+    index_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="0; url=en/">
+        <script>
+            var lang = navigator.language || navigator.userLanguage;
+            if (lang.toLowerCase().startsWith('zh')) {
+                window.location.href = 'zh_CN/';
+            } else {
+                window.location.href = 'en/';
+            }
+        </script>
+        <title>Redirecting...</title>
+    </head>
+    <body>
+        <h1>Redirecting...</h1>
+        <p>
+            <a href="en/">English</a><br>
+            <a href="zh_CN/">中文</a>
+        </p>
+    </body>
+    </html>
+    """
+    
+    # Write the language selection page
+    index_path = Path(get_docs_dir()) / "build" / "html" / "index.html"
+    index_path.write_text(index_html, encoding="utf-8")
 
     session.log("Documentation built successfully for all languages")
