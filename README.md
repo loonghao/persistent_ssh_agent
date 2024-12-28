@@ -80,8 +80,12 @@ config = SSHConfig(
     }
 )
 
-# Initialize with custom config
-ssh_agent = PersistentSSHAgent(config=config)
+# Initialize with custom config and agent reuse settings
+ssh_agent = PersistentSSHAgent(
+    config=config,
+    expiration_time=86400,  # Optional: Set agent expiration time (default 24 hours)
+    reuse_agent=True  # Optional: Control agent reuse behavior (default True)
+)
 
 # Set up SSH authentication
 if ssh_agent.setup_ssh('github.com'):
@@ -91,9 +95,28 @@ if ssh_agent.setup_ssh('github.com'):
         print("✅ Git SSH command ready!")
 ```
 
-### Multiple Host Configuration
+### Agent Reuse Behavior
 
-To configure SSH for multiple hosts:
+The `reuse_agent` parameter controls how the SSH agent handles existing sessions:
+
+- When `reuse_agent=True` (default):
+  - Attempts to reuse an existing SSH agent if available
+  - Reduces the number of agent startups and key additions
+  - Improves performance by avoiding unnecessary agent operations
+
+- When `reuse_agent=False`:
+  - Always starts a new SSH agent session
+  - Useful when you need a fresh agent state
+  - May be preferred in certain security-sensitive environments
+
+Example with agent reuse disabled:
+
+```python
+# Always start a new agent session
+ssh_agent = PersistentSSHAgent(reuse_agent=False)
+```
+
+### Multiple Host Configuration
 
 ```python
 from persistent_ssh_agent import PersistentSSHAgent
@@ -121,8 +144,6 @@ for host in hosts:
 ```
 
 ### Global SSH Configuration
-
-To set global SSH options:
 
 ```python
 from persistent_ssh_agent import PersistentSSHAgent
