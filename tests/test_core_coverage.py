@@ -3,14 +3,13 @@
 # Import built-in modules
 import json
 import os
-from pathlib import Path
 import subprocess
 import time
 from typing import Optional
 from unittest.mock import MagicMock
 from unittest.mock import mock_open
 from unittest.mock import patch
-
+from pathlib import Path
 # Import third-party modules
 from persistent_ssh_agent.core import PersistentSSHAgent
 import pytest
@@ -26,7 +25,7 @@ def _normalize_path(path: Optional[str]) -> Optional[str]:
     """Normalize path for cross-platform compatibility."""
     if path is None:
         return None
-    return str(Path(path)).replace("\\", "/")
+    return str(path).replace("\\", "/")
 
 
 def test_run_command_with_timeout(ssh_manager):
@@ -398,6 +397,7 @@ def test_ssh_key_management_edge_cases(ssh_manager):
             stderr=b"Invalid key"
         )
         assert not ssh_manager._add_ssh_key("test_key")
+
 
 def test_identity_file_resolution(ssh_manager):
     """Test identity file resolution."""
@@ -886,3 +886,95 @@ def test_hostname_validation(ssh_manager):
     assert not ssh_manager.is_valid_hostname("-example.com")  # Starts with hyphen
     assert not ssh_manager.is_valid_hostname("example-.com")  # Ends with hyphen
     assert not ssh_manager.is_valid_hostname("exam@ple.com")  # Invalid character
+
+
+def test_agent_reuse_enabled(tmp_path):
+    """Test SSH agent reuse when enabled."""
+    # Setup
+    ssh_dir = tmp_path / ".ssh"
+    ssh_dir.mkdir()
+    agent = PersistentSSHAgent(reuse_agent=True)
+    agent._ssh_dir = ssh_dir
+    agent._agent_info_file = ssh_dir / "agent_info.json"
+
+    # Create mock agent info
+    agent_info = {
+        "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+        "SSH_AGENT_PID": "12345",
+        "timestamp": time.time(),
+        "platform": "nt" if os.name == "nt" else "posix"
+    }
+    with open(agent._agent_info_file, 'w') as f:
+        json.dump(agent_info, f)
+
+    # Mock run_command to simulate running agent
+    def mock_run_command(command, **kwargs):
+        if command == ["ssh-add", "-l"]:
+            return subprocess.CompletedProcess(command, returncode=1, stdout="")
+        return subprocess.CompletedProcess(command, returncode=0, stdout="")
+
+    with patch.object(agent, 'run_command', side_effect=mock_run_command):
+        # Test loading existing agent
+        assert agent._load_agent_info() is True
+        assert os.environ.get("SSH_AUTH_SOCK") == agent_info["SSH_AUTH_SOCK"]
+        assert os.environ.get("SSH_AGENT_PID") == agent_info["SSH_AGENT_PID"]
+
+
+def test_agent_reuse_disabled(tmp_path):
+    """Test SSH agent reuse when disabled."""
+    # Setup
+    ssh_dir = tmp_path / ".ssh"
+    ssh_dir.mkdir()
+    agent = PersistentSSHAgent(reuse_agent=False)
+    agent._ssh_dir = ssh_dir
+    agent._agent_info_file = ssh_dir / "agent_info.json"
+
+    # Create mock agent info
+    agent_info = {
+        "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+        "SSH_AGENT_PID": "12345",
+        "timestamp": time.time(),
+        "platform": "nt" if os.name == "nt" else "posix"
+    }
+    with open(agent._agent_info_file, 'w') as f:
+        json.dump(agent_info, f)
+
+    # Mock _start_ssh_agent to verify it's called
+    original_start_ssh_agent = agent._start_ssh_agent
+    start_ssh_agent_called = False
+
+    def mock_start_ssh_agent(identity_file):
+        nonlocal start_ssh_agent_called
+        start_ssh_agent_called = True
+        return original_start_ssh_agent(identity_file)
+
+    agent._start_ssh_agent = mock_start_ssh_agent
+
+    # Test that a new agent is started
+    identity_file = ssh_dir / "id_rsa"
+    identity_file.touch()
+    agent._start_ssh_agent(str(identity_file))
+    assert start_ssh_agent_called is True
+
+
+def test_agent_reuse_expired(tmp_path):
+    """Test SSH agent reuse when agent info is expired."""
+    # Setup
+    ssh_dir = tmp_path / ".ssh"
+    ssh_dir.mkdir()
+    agent = PersistentSSHAgent(expiration_time=1, reuse_agent=True)
+    agent._ssh_dir = ssh_dir
+    agent._agent_info_file = ssh_dir / "agent_info.json"
+
+    # Create expired agent info
+    agent_info = {
+        "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+        "SSH_AGENT_PID": "12345",
+        "timestamp": time.time() - 2,  # Expired
+        "platform": "nt" if os.name == "nt" else "posix"
+    }
+    with open(agent._agent_info_file, 'w') as f:
+        json.dump(agent_info, f)
+
+    # Test that expired agent info is not loaded
+    assert agent._load_agent_info() is False
