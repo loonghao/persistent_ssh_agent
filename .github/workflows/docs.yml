@@ -1,0 +1,58 @@
+name: Documentation
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - '**.rst'
+      - 'nox_actions/docs.py'
+      - 'pyproject.toml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - '**.rst'
+      - 'nox_actions/docs.py'
+      - 'pyproject.toml'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nox
+          
+      - name: Run documentation linting
+        if: github.event_name == 'pull_request'
+        run: nox -s docs-lint
+        
+      - name: Generate translations
+        run: nox -s docs-i18n
+        
+      - name: Build documentation
+        run: nox -s docs-build
+
+      - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          destination_dir: ${{ github.ref_name }}  # Deploy to branch-specific directory
+          keep_files: true  # Keep previously deployed files
+          enable_jekyll: false  # Disable Jekyll processing

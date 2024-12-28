@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 *.py[cod]
+__pycache__/
 
 # PyCharm project files
 .idea/
@@ -9,15 +10,24 @@
 
 # Coverage output
 .coverage
+coverage.xml
 
-# Documentation build folders.
-docs/_*
-docs/src/*
-target/*
+# Documentation build
+docs/build/
+
+# Virtual environments and build
 /venv/
-/run_pycharm.bat
 /.nox/
 /build/
-/coverage.xml
 /.zip/
+
+# IDE and editor files
 /.windsurfrules
+/run_pycharm.bat
+
+# Temporary files
+*.swp
+*.swo
+*.swn
+*.bak
+/local-test.py

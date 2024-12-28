@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2023, persistent_ssh_agent
+# This file is distributed under the same license as the
+# persistent_ssh_agent package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: persistent_ssh_agent \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-28 19:50+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en_US\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: ../../source/readme_zh.rst:2
+msgid "概述"
+msgstr ""
+
+#: ../../source/readme_zh.rst:4
+msgid "persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python 包。"
+msgstr ""
+
+#: ../../source/readme_zh.rst:7
+msgid "特性"
+msgstr ""
+
+#: ../../source/readme_zh.rst:9
+msgid "自动 SSH agent 管理"
+msgstr ""
+
+#: ../../source/readme_zh.rst:10
+msgid "会话持久化"
+msgstr ""
+
+#: ../../source/readme_zh.rst:11
+msgid "跨平台支持"
+msgstr ""
+
+#: ../../source/readme_zh.rst:12
+msgid "简单配置"
+msgstr ""
+
+#: ../../source/readme_zh.rst:15
+msgid "安装"
+msgstr ""
+
+#: ../../source/readme_zh.rst:17
+msgid "你可以使用 pip 安装 persistent_ssh_agent："
+msgstr ""
+
+#: ../../source/readme_zh.rst:24
+msgid "使用方法"
+msgstr ""
+
+#: ../../source/readme_zh.rst:26
+msgid "基本用法："
+msgstr ""
+
+#: ../../source/readme_zh.rst:44
+msgid "配置"
+msgstr ""
+
+#: ../../source/readme_zh.rst:46
+msgid "你可以通过以下方式配置 agent 行为："
+msgstr ""
+
+#: ../../source/readme_zh.rst:48
+msgid "环境变量"
+msgstr ""
+
+#: ../../source/readme_zh.rst:49
+msgid "配置文件"
+msgstr ""
+
+#: ../../source/readme_zh.rst:50
+msgid "直接参数"
+msgstr ""
+
+#: ../../source/readme_zh.rst:52
+msgid "查看文档获取详细的配置选项。"
+msgstr ""
+

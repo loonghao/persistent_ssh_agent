@@ -1,0 +1,13 @@
+{%- if language %}
+<button class="language-switcher" id="language-switcher" title="{{ _('Switch Language') }}">
+  {%- if language == "zh_CN" %}
+    <a href="{{ pathto('../' + (pagename[6:] if pagename.startswith('zh_CN/') else pagename), 1) }}" style="color: inherit; text-decoration: none;">
+      <span>EN</span>
+    </a>
+  {%- else %}
+    <a href="{{ pathto('zh_CN/' + pagename, 1) }}" style="color: inherit; text-decoration: none;">
+      <span>中</span>
+    </a>
+  {%- endif %}
+</button>
+{%- endif %}

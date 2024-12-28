@@ -3,7 +3,6 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-      - 'docs/**'
       - '.github/**'
       - '!.github/workflows/**'
 
@@ -29,9 +28,37 @@ jobs:
         run: |
           nox -s lint
 
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.changed_files, 'docs/') ||
+      contains(github.event.pull_request.changed_files, '.rst') ||
+      contains(github.event.pull_request.changed_files, '.md') ||
+      contains(github.event.pull_request.changed_files, 'nox_actions/docs.py') ||
+      contains(github.event.pull_request.changed_files, 'pyproject.toml')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nox
+      
+      - name: Run documentation checks
+        run: |
+          nox -s docs-lint
+          nox -s docs-build
+
   test:
     name: Python ${{ matrix.python-version }} Tests
-    needs: lint
+    needs: [lint, docs]
     strategy:
       fail-fast: false
       matrix:
