@@ -755,7 +755,8 @@ def test_error_handling_edge_cases(ssh_manager):
     with patch.object(ssh_manager, "run_command") as mock_run, \
          patch("builtins.open", mock_open()) as mock_file, \
          patch("os.path.exists") as mock_exists, \
-         patch("json.load") as mock_load:
+         patch("json.load") as mock_load, \
+         patch("os.name", "nt"):  # Mock Windows platform for consistent testing
 
         # Test file read error with permission denied
         mock_exists.return_value = True
@@ -773,13 +774,22 @@ def test_error_handling_edge_cases(ssh_manager):
             "timestamp": time.time(),
             "SSH_AUTH_SOCK": "test_sock",
             "SSH_AGENT_PID": "test_pid",
-            "platform": "wrong_platform"  # Use wrong platform to trigger error
+            "platform": "nt"  # Match the mocked Windows platform
         }
         mock_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=0, stdout=b"", stderr=b""
+            args=[], returncode=2, stdout=b"", stderr=b""  # Return code 2 indicates agent not running
         )
         with patch.dict(os.environ, {}, clear=True):
             assert not ssh_manager._load_agent_info()
+
+        # Test platform mismatch error
+        mock_load.return_value = {
+            "timestamp": time.time(),
+            "SSH_AUTH_SOCK": "test_sock",
+            "SSH_AGENT_PID": "test_pid",
+            "platform": "posix"  # Mismatch with Windows platform
+        }
+        assert not ssh_manager._load_agent_info()
 
 
 def test_ssh_config_advanced_parsing(ssh_manager):
