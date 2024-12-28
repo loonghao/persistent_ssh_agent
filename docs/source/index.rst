@@ -1,11 +1,11 @@
 Welcome to persistent_ssh_agent's documentation!
-===============================================
+=================================================
 
 .. only:: language == 'zh_CN'
 
    .. include:: readme_zh.rst
 
-.. only:: language == 'en' or language is undefined
+.. only:: language == 'en_US' or language is undefined
 
    .. include:: readme.rst
 

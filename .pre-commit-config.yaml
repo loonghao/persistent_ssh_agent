@@ -10,3 +10,26 @@ repos:
       - id: check-toml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: local
+    hooks:
+      - id: docs-lint
+        name: Check documentation format
+        entry: nox -s docs-lint
+        language: system
+        types: [rst, markdown]
+        pass_filenames: false
+        stages: [commit]
+        # Only run when docs related files are changed
+        files: |
+          (?x)^(
+            docs/.*|
+            .*\.rst|
+            .*\.md|
+            nox_actions/docs\.py|
+            pyproject\.toml
+          )$
