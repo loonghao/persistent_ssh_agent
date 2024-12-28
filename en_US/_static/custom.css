@@ -1,0 +1,373 @@
+.language-switcher {
+    margin: 2em 0;
+}
+
+.lang-options {
+    display: inline-block;
+}
+
+.lang-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    background-color: var(--color-brand-primary);
+    color: white !important;
+    text-decoration: none !important;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.lang-button:hover {
+    background-color: var(--color-brand-content);
+    text-decoration: none !important;
+}
+
+.sidebar-tree .caption {
+    font-weight: 600;
+    font-size: var(--sidebar-caption-font-size);
+    color: var(--color-sidebar-caption-text);
+    margin: 0.5rem 0;
+}
+
+.sidebar-tree ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.sidebar-tree li {
+    margin: 0.25rem 0;
+    padding: 0;
+}
+
+.sidebar-tree li a {
+    display: block;
+    padding: 0.25rem 1rem;
+    font-size: var(--sidebar-item-font-size);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar-tree li a.reference.external {
+    color: var(--color-sidebar-link-text);
+}
+
+.sidebar-tree li a.reference.internal.current {
+    color: var(--color-brand-content);
+    font-weight: 600;
+    background: var(--color-sidebar-item-background--current);
+    border-left: 2px solid var(--color-brand-content);
+}
+
+.sidebar-tree li a:hover {
+    background: var(--color-sidebar-item-background--hover);
+    color: var(--color-sidebar-link-text--hover);
+}
+
+/* Language Switcher Styles - Furo Theme */
+.language-switcher {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 10;
+    font-size: var(--font-size--small);
+    color: var(--color-foreground-secondary);
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-background-border);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.language-switcher__label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: var(--color-foreground-muted);
+}
+
+.language-switcher__options {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.language-switcher__current {
+    font-weight: 500;
+    color: var(--color-foreground-primary);
+}
+
+.language-switcher__option {
+    color: var(--color-link);
+    text-decoration: none;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.125rem;
+    transition: background-color 0.2s ease;
+}
+
+.language-switcher__option:hover {
+    background-color: var(--color-background-hover);
+    text-decoration: none;
+}
+
+.language-switcher__option:not(:first-child)::before {
+    content: "|";
+    color: var(--color-background-border);
+    margin-right: 0.5rem;
+}
+
+/* Fix sidebar position to accommodate language switcher */
+.sidebar-container {
+    padding-bottom: 4rem;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .language-switcher:hover {
+    background-color: var(--color-background-hover);
+    color: var(--color-brand-primary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .language-switcher {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Place language switcher next to theme toggle */
+.theme-toggle-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Ensure icons are vertically aligned */
+.theme-toggle-container svg {
+    vertical-align: middle;
+}
+
+.sphinx-tabs {
+    margin: 1em 0;
+    padding: 0.5em;
+    border-radius: 4px;
+}
+
+.sphinx-tabs-tab {
+    padding: 0.5em 1em;
+    margin-right: 0.5em;
+    border: none;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+}
+
+.sphinx-tabs-tab[aria-selected="true"] {
+    background: var(--color-brand-primary);
+    color: white;
+}
+
+.sphinx-tabs-panel {
+    padding: 1em;
+    border: 1px solid var(--color-brand-primary);
+    border-radius: 0 4px 4px 4px;
+}
+
+/* Hide duplicate content */
+.toctree-wrapper .caption-text {
+    display: none;
+}
+
+/* General styling improvements */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+/* Improve readability */
+p {
+    line-height: 1.6;
+}
+
+/* Better code block styling */
+div[class^="highlight"] {
+    border-radius: 4px;
+    margin: 1em 0;
+}
+
+/* Improve table styling */
+table.docutils {
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+table.docutils th {
+    background: var(--color-brand-primary);
+    color: white;
+}
+
+/* Improve navigation */
+.sidebar-tree .toctree-l1 > .reference {
+    font-weight: 600;
+}
+
+/* Improve search box */
+.sidebar-search {
+    padding: 1em;
+}
+
+.sidebar-search-container {
+    border-radius: 4px;
+}
+
+/* Fix Markdown Rendering */
+.rst-content .section ul {
+    list-style: disc;
+    margin-left: 2em;
+}
+
+.rst-content .section ul li {
+    margin-bottom: 0.5em;
+}
+
+.rst-content .section ul li > p {
+    margin: 0;
+}
+
+.rst-content code {
+    padding: 2px 5px;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-background-border);
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.rst-content pre {
+    padding: 12px 15px;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-background-border);
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+/* Markdown Content Styles */
+.rst-content {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Links */
+.rst-content a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+.rst-content a:hover {
+    text-decoration: underline;
+}
+
+/* Lists */
+.rst-content ul {
+    margin-bottom: 1rem;
+}
+
+.rst-content ul li {
+    margin-bottom: 0.5rem;
+    list-style: disc;
+}
+
+/* Code */
+.rst-content code {
+    padding: 2px 5px;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-background-border);
+    border-radius: 3px;
+    font-size: 90%;
+}
+
+.rst-content pre {
+    padding: 1rem;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-background-border);
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+/* Badges */
+.rst-content img[src*="shields.io"],
+.rst-content img[src*="badge"],
+.rst-content img[src*="codecov.io"] {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2px;
+    max-height: 20px;
+}
+
+/* Badge Links */
+.rst-content a:has(img) {
+    display: inline-block;
+    text-decoration: none !important;
+    margin: 0 2px;
+}
+
+.rst-content a:has(img):hover {
+    opacity: 0.8;
+}
+
+/* Table of Contents */
+.rst-content .toctree-wrapper ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rst-content .toctree-wrapper li {
+    margin: 0;
+    padding: 0;
+}
+
+/* Emoji and Icons */
+.rst-content img[alt*="emoji"],
+.rst-content .emoji {
+    height: 1.2em;
+    width: 1.2em;
+    margin: 0 0.1em;
+    vertical-align: -0.2em;
+}
+
+/* Headings */
+.rst-content h1,
+.rst-content h2,
+.rst-content h3,
+.rst-content h4,
+.rst-content h5,
+.rst-content h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.rst-content h1 { font-size: 2em; }
+.rst-content h2 { font-size: 1.5em; }
+.rst-content h3 { font-size: 1.25em; }
+.rst-content h4 { font-size: 1em; }
+
+/* Paragraphs */
+.rst-content p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* Inline Elements */
+.rst-content strong {
+    font-weight: 600;
+}
+
+.rst-content em {
+    font-style: italic;
+}
