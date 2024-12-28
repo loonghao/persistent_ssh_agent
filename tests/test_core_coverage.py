@@ -501,7 +501,7 @@ def test_ssh_agent_info_handling(ssh_manager):
     """Test SSH agent info handling."""
     with patch("builtins.open", mock_open()), \
          patch("json.load") as mock_load, \
-         patch("os.path.exists") as mock_exists, \
+         patch("pathlib.Path.exists") as mock_exists, \
          patch.object(ssh_manager, "run_command") as mock_run:
 
         # Set up mocks for successful load
@@ -513,7 +513,7 @@ def test_ssh_agent_info_handling(ssh_manager):
             "platform": os.name
         }
         mock_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=0, stdout=b"", stderr=b""
+            args=["ssh-add", "-l"], returncode=0, stdout=b"", stderr=b""
         )
 
         # Test loading agent info
@@ -522,6 +522,39 @@ def test_ssh_agent_info_handling(ssh_manager):
         # Verify environment variables
         assert os.environ.get("SSH_AUTH_SOCK") == "test_sock"
         assert os.environ.get("SSH_AGENT_PID") == "test_pid"
+
+        # Test with missing fields
+        mock_load.return_value = {
+            "timestamp": time.time(),
+            "SSH_AUTH_SOCK": "test_sock"
+        }
+        assert not ssh_manager._load_agent_info()
+
+        # Test with expired timestamp
+        mock_load.return_value = {
+            "timestamp": time.time() - 90000,  # Expired
+            "SSH_AUTH_SOCK": "test_sock",
+            "SSH_AGENT_PID": "test_pid",
+            "platform": os.name
+        }
+        assert not ssh_manager._load_agent_info()
+
+        # Test with invalid JSON
+        mock_load.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
+        assert not ssh_manager._load_agent_info()
+
+        # Test with non-running agent
+        mock_load.side_effect = None
+        mock_load.return_value = {
+            "timestamp": time.time(),
+            "SSH_AUTH_SOCK": "test_sock",
+            "SSH_AGENT_PID": "test_pid",
+            "platform": os.name
+        }
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=["ssh-add", "-l"], returncode=2, stdout=b"", stderr=b""
+        )
+        assert not ssh_manager._load_agent_info()
 
 
 def test_ssh_connection_handling(ssh_manager):
@@ -637,16 +670,33 @@ def test_file_operation_errors(ssh_manager):
 
 def test_ssh_config_parsing_errors(ssh_manager):
     """Test SSH config parsing error scenarios."""
-    with patch("builtins.open", mock_open(read_data="""
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("builtins.open", mock_open(read_data="""
 Host test
-    Invalid Option
-    IdentityFile
-    Port abc
+    HostName test.example.com
+    User testuser
+    Port invalid_port
+    IdentityFile ~/.ssh/test_key
 """)):
+        mock_exists.return_value = True
         config = ssh_manager._parse_ssh_config()
+
+        # Verify that test host is in config despite invalid port
         assert "test" in config
-        assert "identityfile" not in config["test"]
-        assert "port" not in config["test"]
+        assert config["test"]["hostname"] == "test.example.com"
+        assert config["test"]["user"] == "testuser"
+        assert "port" not in config["test"]  # Invalid port should be ignored
+        assert "~/.ssh/test_key" in config["test"]["identityfile"]
+
+        # Test with invalid file content
+        with patch("builtins.open", mock_open(read_data="Invalid Config")):
+            config = ssh_manager._parse_ssh_config()
+            assert config == {}
+
+        # Test with file read error
+        with patch("builtins.open", side_effect=IOError("File read error")):
+            config = ssh_manager._parse_ssh_config()
+            assert config == {}
 
 
 def test_ssh_key_management_failures(ssh_manager):
@@ -748,43 +798,75 @@ def test_error_handling_edge_cases(ssh_manager):
 
 def test_ssh_config_advanced_parsing(ssh_manager):
     """Test advanced SSH config parsing scenarios."""
-    with patch("builtins.open", mock_open(read_data="""
+    with patch("pathlib.Path.exists") as mock_exists, \
+         patch("builtins.open", mock_open(read_data="""
 Host *
-    IdentityFile ~/.ssh/default_key
     Port 22
+    IdentityFile ~/.ssh/default_key
+    StrictHostKeyChecking no
 
 Host test1
     HostName test1.example.com
     User testuser
-    IdentityFile ~/.ssh/test1_key
     Port invalid_port
+    IdentityFile ~/.ssh/test1_key
 
 Host test2
     HostName test2.example.com
-    IdentityFile
-    Port
-    User
+    IdentityFile ~/.ssh/test2_key
+    Port 2222
+    User test2user
+
+Match host test3
+    HostName test3.example.com
+    User test3user
+    Port 2222
+
+Include ~/.ssh/config.d/*.conf
 """)):
-        config = ssh_manager._parse_ssh_config()
-        assert "*" in config
-        assert "test1" in config
-        assert "test2" in config
+        mock_exists.return_value = True
 
-        # Check default values
-        assert config["*"]["port"] == "22"
-        assert "~/.ssh/default_key" in config["*"]["identityfile"]
+        # Mock glob for Include directive
+        with patch("glob.glob") as mock_glob:
+            mock_glob.return_value = []
+            config = ssh_manager._parse_ssh_config()
 
-        # Check override values
-        assert config["test1"]["hostname"] == "test1.example.com"
-        assert config["test1"]["user"] == "testuser"
-        assert "~/.ssh/test1_key" in config["test1"]["identityfile"]
-        assert "port" not in config["test1"]  # Invalid port should be ignored
+            # Check wildcard host settings
+            assert "*" in config
+            assert config["*"]["port"] == "22"
+            assert "~/.ssh/default_key" in config["*"]["identityfile"]
+            assert config["*"]["stricthostkeychecking"] == "no"
 
-        # Check empty values
-        assert "hostname" in config["test2"]
-        assert "identityfile" not in config["test2"]
-        assert "port" not in config["test2"]
-        assert "user" not in config["test2"]
+            # Check specific host settings
+            assert "test1" in config
+            assert config["test1"]["hostname"] == "test1.example.com"
+            assert config["test1"]["user"] == "testuser"
+            assert "port" not in config["test1"]  # Invalid port should be ignored
+            assert "~/.ssh/test1_key" in config["test1"]["identityfile"]
+
+            assert "test2" in config
+            assert config["test2"]["hostname"] == "test2.example.com"
+            assert config["test2"]["user"] == "test2user"
+            assert config["test2"]["port"] == "2222"
+            assert "~/.ssh/test2_key" in config["test2"]["identityfile"]
+
+            # Check Match block parsing
+            assert "test3" in config
+            assert config["test3"]["hostname"] == "test3.example.com"
+            assert config["test3"]["user"] == "test3user"
+            assert config["test3"]["port"] == "2222"
+
+            # Test Include directive
+            mock_glob.return_value = ["/path/to/included.conf"]
+            with patch("builtins.open", mock_open(read_data="""
+Host included
+    HostName included.example.com
+    User includeduser
+""")):
+                config = ssh_manager._parse_ssh_config()
+                assert "included" in config
+                assert config["included"]["hostname"] == "included.example.com"
+                assert config["included"]["user"] == "includeduser"
 
 
 def test_url_hostname_extraction(ssh_manager):
