@@ -11,7 +11,6 @@ import re
 import socket
 import subprocess
 from subprocess import CompletedProcess
-import sys
 import tempfile
 from textwrap import dedent
 import time
@@ -24,18 +23,11 @@ from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
-
-if sys.version_info >= (3, 9):
-    pass
-else:
-    pass
-
 # Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
 
 
 logger = logging.getLogger(__name__)
-
 
 # Type definitions
 T = TypeVar("T")
@@ -47,6 +39,7 @@ StrictHostKeyCheckingOption = Literal["yes", "no", "accept-new", "off", "ask"]
 RequestTTYOption = Literal["yes", "no", "force", "auto"]
 ControlMasterOption = Literal["yes", "no", "ask", "auto", "autoask"]
 CanonicalizeHostnameOption = Literal["yes", "no", "always"]
+
 
 class SSHError(Exception):
     """Base exception for SSH-related errors."""
@@ -77,7 +70,8 @@ class PersistentSSHAgent:
 
     SSH_DEFAULT_KEY = "id_rsa"  # Fallback default key
 
-    def __init__(self, expiration_time: int = 86400, config: Optional[SSHConfig] = None,
+    def __init__(self, config: Optional[SSHConfig] = None,
+                 expiration_time: int = 86400,
                  reuse_agent: bool = True):
         """Initialize SSH manager.
 
@@ -97,7 +91,6 @@ class PersistentSSHAgent:
         self._config = config
         self._reuse_agent = reuse_agent
 
-
     @staticmethod
     def _ensure_home_env() -> None:
         """Ensure HOME environment variable is set correctly.
@@ -109,7 +102,6 @@ class PersistentSSHAgent:
             os.environ["HOME"] = os.path.expanduser("~")
 
         logger.debug("Set HOME environment variable: %s", os.environ.get("HOME"))
-
 
     def _save_agent_info(self, auth_sock: str, agent_pid: str) -> None:
         """Save SSH agent information to file.
@@ -151,20 +143,20 @@ class PersistentSSHAgent:
             required_fields = ("SSH_AUTH_SOCK", "SSH_AGENT_PID", "timestamp", "platform")
             if not all(key in agent_info for key in required_fields):
                 logger.debug("Missing required agent info fields: %s",
-                           [f for f in required_fields if f not in agent_info])
+                             [f for f in required_fields if f not in agent_info])
                 return False
 
             # Validate timestamp and platform
             current_time = time.time()
             if current_time - agent_info["timestamp"] > self._expiration_time:
                 logger.debug("Agent info expired: %d seconds old",
-                           current_time - agent_info["timestamp"])
+                             current_time - agent_info["timestamp"])
                 return False
 
             # Platform check is only enforced on Windows
             if os.name == "nt" and agent_info["platform"] != "nt":
                 logger.debug("Platform mismatch: expected 'nt', got '%s'",
-                           agent_info["platform"])
+                             agent_info["platform"])
                 return False
 
             # Set environment variables
@@ -193,7 +185,8 @@ class PersistentSSHAgent:
             logger.error("Failed to load agent info: %s", e)
             return False
 
-    def _parse_ssh_agent_output(self, output: str) -> Dict[str, str]:
+    @staticmethod
+    def _parse_ssh_agent_output(output: str) -> Dict[str, str]:
         """Parse SSH agent output to extract environment variables.
 
         Args:
@@ -289,7 +282,8 @@ class PersistentSSHAgent:
             logger.error("Failed to start SSH agent: %s", str(e))
             return False
 
-    def _create_ssh_add_process(self, identity_file: str) -> subprocess.Popen:
+    @staticmethod
+    def _create_ssh_add_process(identity_file: str) -> subprocess.Popen:
         """Create a subprocess for ssh-add command.
 
         Args:
@@ -527,7 +521,8 @@ class PersistentSSHAgent:
             logger.error("Failed to generate Git SSH command: %s", str(e))
             return None
 
-    def run_command(self, command: List[str], shell: bool = False,
+    @staticmethod
+    def run_command(command: List[str], shell: bool = False,
                     check_output: bool = True, timeout: Optional[int] = None,
                     env: Optional[Dict[str, str]] = None) -> Optional[CompletedProcess]:
         """Run a command and return its output.
@@ -560,7 +555,8 @@ class PersistentSSHAgent:
             logger.error("Command failed: %s - %s", command, e)
             return None
 
-    def _write_temp_key(self, key_content: Union[str, bytes]) -> Optional[str]:
+    @staticmethod
+    def _write_temp_key(key_content: Union[str, bytes]) -> Optional[str]:
         """Write key content to a temporary file.
 
         Args:
@@ -714,7 +710,9 @@ class PersistentSSHAgent:
             "kbdinteractiveauthentication": lambda x: x.lower() in YesNoOption.__args__,
             "hostbasedauthentication": lambda x: x.lower() in YesNoOption.__args__,
             "gssapiauthentication": lambda x: x.lower() in YesNoOption.__args__,
-            "preferredauthentications": lambda x: all(auth in ["gssapi-with-mic", "hostbased", "publickey", "keyboard-interactive", "password"] for auth in x.split(",")),
+            "preferredauthentications": lambda x: all(
+                auth in ["gssapi-with-mic", "hostbased", "publickey", "keyboard-interactive", "password"] for auth in
+                x.split(",")),
 
             # Connection optimization
             "compression": lambda x: x.lower() in YesNoOption.__args__,
