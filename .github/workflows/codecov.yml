@@ -1,57 +1,42 @@
 name: Codecov
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**'
+      - '!.github/workflows/codecov.yml'
+
 jobs:
-  run:
+  codecov:
+    name: Code Coverage
+    runs-on: ubuntu-latest
     strategy:
-      max-parallel: 10
       matrix:
-        target:
-          - os: 'ubuntu-latest'
-            triple: 'x86_64-unknown-linux-gnu'
-          - os: 'macos-latest'
-            triple: 'x86_64-apple-darwin'
-          - os: 'windows-latest'
-            triple: 'x86_64-pc-windows-msvc'
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-      fail-fast: false
-    runs-on: ${{ matrix.target.os }}
-    env:
-      PYTHONUNBUFFERED: "1"
-      FORCE_COLOR: "1"
+        python-version: ['3.8', '3.9', '3.10', '3.11', "3.12", "3.13"]
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get repository name
-        id: repo-name
-        uses: MariachiBear/get-repo-name-action@v1.3.0
-        with:
-          with-owner: 'true'
-          string-case: 'uppercase'
-
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: |
-            requirements*.txt
-            pyproject.toml
-            poetry.lock
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
-          poetry --version
+          pip install nox
 
-      - name: Run tests and collect coverage
+      - name: Run tests
         run: |
           nox -s pytest
 
-      - name: Upload overage reports to Codecov
+      - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
