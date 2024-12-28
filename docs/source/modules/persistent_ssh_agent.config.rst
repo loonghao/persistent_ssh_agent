@@ -1,5 +1,5 @@
 persistent_ssh_agent.config module
-=================================
+==================================
 
 .. automodule:: persistent_ssh_agent.config
    :members:

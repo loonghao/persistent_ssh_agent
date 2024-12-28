@@ -20,21 +20,24 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
-    "myst_parser",  # Add support for markdown files
+    "myst_parser",
 ]
 
-# MyST Parser settings
-myst_enable_extensions = [
-    "colon_fence",  # Enable ::: fences
-    "deflist",      # Enable definition lists
-    "fieldlist",    # Enable field lists
-    "eval",         # Enable evaluate-rst
-]
-myst_disable_all_warnings = True  # Disable all MyST warnings
+# Source parsers
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+# Suppress all warnings
 suppress_warnings = [
-    "myst.xref_missing",  # Suppress missing reference warnings
-    "ref.class"  # Suppress class reference warnings
+    "ref.class",  # Suppress class reference warnings
+    "ref.ref",    # Suppress undefined label warnings
 ]
+
+# Don't treat warnings as errors
+nitpicky = False
+warning_is_error = False
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "furo"

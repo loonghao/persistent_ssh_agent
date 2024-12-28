@@ -26,7 +26,7 @@ docs_dependencies = [
     "sphinx-copybutton",
     "doc8",
     "sphinx-intl",
-    "myst_parser"
+    "myst-parser>=2.0.0",
 ]
 
 

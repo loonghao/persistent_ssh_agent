@@ -11,12 +11,13 @@ python = "^3.8"
 
 [tool.poetry.optional-dependencies]
 docs = [
-    "sphinx",
+    "sphinx>=5.0",
     "furo",
     "sphinx-autobuild",
     "sphinx-copybutton",
-    "doc8",
+    "doc8>=1.1.1",
     "sphinx-intl",
+    "myst-parser>=2.0.0",
 ]
 test = [
     "pytest",

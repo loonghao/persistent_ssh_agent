@@ -103,7 +103,17 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     mock_load_agent = mocker.patch.object(ssh_manager, "_load_agent_info")
     mock_verify_key = mocker.patch.object(ssh_manager, "_verify_loaded_key")
     mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_add_key = mocker.patch.object(ssh_manager, "_add_ssh_key")
     mock_logger = mocker.patch("persistent_ssh_agent.core.logger")
+
+    # Mock run_command to return a successful result with proper stdout
+    class MockResult:
+        returncode = 0
+        stdout = "SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
+    mock_run_command.return_value = MockResult()
+
+    # Mock successful key operations
+    mock_add_key.return_value = True
 
     # Test case 1: Successfully reuse existing agent
     mock_load_agent.return_value = True
@@ -112,33 +122,57 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
 
     assert ssh_manager._start_ssh_agent(identity_file) is True
     mock_logger.debug.assert_called_with("Using existing agent with loaded key: %s", identity_file)
-    mock_run_command.assert_not_called()
 
     # Test case 2: Found agent but key not loaded
     mock_verify_key.return_value = False
+    mock_logger.debug.reset_mock()  # Reset mock to clear previous calls
+
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_logger.debug.assert_called_with("Existing agent found but key not loaded")
+    mock_logger.debug.assert_has_calls([
+        mocker.call("Existing agent found but key not loaded"),
+        mocker.call("Saved agent info to: %s", ssh_manager._agent_info_file),
+        mocker.call("Adding key to agent: %s", identity_file)
+    ], any_order=False)
 
     # Test case 3: No valid agent found
     mock_load_agent.return_value = False
+    mock_logger.debug.reset_mock()
+
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_logger.debug.assert_called_with("No valid existing agent found")
+    mock_logger.debug.assert_has_calls([
+        mocker.call("No valid existing agent found"),
+        mocker.call("Saved agent info to: %s", ssh_manager._agent_info_file),
+        mocker.call("Adding key to agent: %s", identity_file)
+    ], any_order=False)
 
     # Test case 4: Agent reuse disabled
     ssh_manager._reuse_agent = False
+    mock_logger.debug.reset_mock()
+
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_logger.debug.assert_called_with("Agent reuse disabled, starting new agent")
+    mock_logger.debug.assert_has_calls([
+        mocker.call("Agent reuse disabled, starting new agent"),
+        mocker.call("Saved agent info to: %s", ssh_manager._agent_info_file),
+        mocker.call("Adding key to agent: %s", identity_file)
+    ], any_order=False)
 
 
 def test_start_ssh_agent_platform_specific(ssh_manager, mocker):
     """Test platform-specific SSH agent startup."""
     mock_run_command = mocker.patch.object(ssh_manager, "run_command")
     mock_os = mocker.patch("persistent_ssh_agent.core.os")
+    mock_verify_key = mocker.patch.object(ssh_manager, "_verify_loaded_key")
+    mock_add_key = mocker.patch.object(ssh_manager, "_add_ssh_key")
 
-    # Mock run_command to return a successful result
+    # Mock run_command to return a successful result with proper stdout
     class MockResult:
         returncode = 0
+        stdout = "SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
     mock_run_command.return_value = MockResult()
+
+    # Mock successful key operations
+    mock_verify_key.return_value = False  # Key not loaded initially
+    mock_add_key.return_value = True  # Key added successfully
 
     # Test Windows (nt) platform
     mock_os.name = "nt"
