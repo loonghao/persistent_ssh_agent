@@ -4,7 +4,7 @@
 persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python 包。
 
 特性
-----
+====
 
 - 自动 SSH agent 管理
 - 会话持久化
@@ -12,7 +12,7 @@ persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python �
 - 简单配置
 
 安装
-----
+====
 
 你可以使用 pip 安装 persistent_ssh_agent：
 
@@ -21,7 +21,7 @@ persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python �
    pip install persistent_ssh_agent
 
 使用方法
--------
+====
 
 基本用法：
 
@@ -41,7 +41,7 @@ persistent_ssh_agent 是一个帮助管理 SSH agent 会话持久化的 Python �
    # agent 将在会话之间保持持久化
 
 配置
-----
+====
 
 你可以通过以下方式配置 agent 行为：
 

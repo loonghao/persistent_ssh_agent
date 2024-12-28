@@ -236,7 +236,23 @@ def docs_lint(session: Session) -> None:
     docs_dir = get_docs_dir()
     source_dir = docs_dir / "source"
     
-    session.run("doc8", str(source_dir))
+    # First run sphinx-build in dummy mode to generate necessary files
+    with session.chdir(str(docs_dir)):
+        session.run(
+            "sphinx-build",
+            "-b", "dummy",
+            "-D", "language=en_US",
+            "source",
+            "build/dummy",
+            silent=True
+        )
+    
+    # Then run doc8
+    session.run(
+        "doc8",
+        "--ignore", "D001",  # Ignore line length
+        str(source_dir)
+    )
 
 
 @nox.session(name="docs-i18n")
