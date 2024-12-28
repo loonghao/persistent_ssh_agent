@@ -1,3 +1,27 @@
+## v0.4.0 (2024-12-28)
+
+### Feat
+
+- **README.md**: Enhance documentation with multiple host configuration and global SSH options
+- **tests/test_core_coverage.py**: Enhance SSH agent tests with various scenarios Add tests for missing fields, expired timestamp, invalid JSON, non-running agent, and advanced SSH config parsing scenarios. Also, update tests for invalid file content and file read errors.
+- **README.md**: Add Chinese translation and update installation requirements
+- **persistent_ssh_agent**: Enhance SSH agent functionality with improved key handling and configuration options
+- **persistent_ssh_agent**: Enhance SSH agent functionality and add tests - Added pytest-timeout to test requirements - Improved SSH config parsing and added tests for invalid syntax - Refactored _run_command method for better readability and error handling - Added new SSHError exception class for SSH-related errors - Updated tests and core module to use pathlib for path handling
+- Add support for SSH key passphrase
+
+### Fix
+
+- Fix SSH key passphrase handling and path issues
+
+### Refactor
+
+- **persistent_ssh_agent/core.py**: Improve SSH config parsing and error handling Remove unused `config_file` parameter from `process_config_line` function. Normalize line endings and handle BOM if present. Update tests for array values in configuration.
+- **persistent_ssh_agent/core.py**: Improve SSH config parsing and error handling Add debug logs for missing SSH config file and invalid configuration keys/values. Normalize line endings and handle BOM if present. Update tests for array values in configuration.
+- **persistent_ssh_agent/core.py**: Improve SSH config parsing and add type definitions
+- **core.py**: Improve SSH config parsing and error handling
+- **persistent_ssh_agent/core.py**: Improve SSH config parsing and error handling
+- **persistent_ssh_agent/core.py**: Improve SSH config parsing and handling of include files and match blocks
+
 ## v0.3.0 (2024-12-22)
 
 ### Feat
