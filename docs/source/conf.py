@@ -4,39 +4,28 @@
 import os
 import sys
 
-
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath("../.."))
+
+from persistent_ssh_agent.__version__ import __version__  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 project = "persistent_ssh_agent"
 copyright = "2024, persistent_ssh_agent"
 author = "persistent_ssh_agent"
+release = __version__
+
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
-    "myst_parser",
+    "sphinx.ext.intersphinx",
     "sphinx_copybutton",
-    "sphinx_inline_tabs",
-]
-
-# Myst Parser settings
-myst_enable_extensions = [
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    "fieldlist",
-    "html_admonition",
-    "html_image",
-    "replacements",
-    "smartquotes",
-    "substitution",
-    "tasklist",
+    "myst_parser",
 ]
 
 # Source parsers
@@ -45,15 +34,10 @@ source_suffix = {
     ".md": "markdown",
 }
 
-# Prioritize .md over .rst for readme
-source_parsers = {
-    ".md": "markdown",
-}
-
 # Suppress all warnings
 suppress_warnings = [
     "ref.class",  # Suppress class reference warnings
-    "ref.ref",    # Suppress undefined label warnings
+    "ref.ref",  # Suppress undefined label warnings
 ]
 
 # Don't treat warnings as errors
@@ -64,63 +48,6 @@ warning_is_error = False
 html_theme = "furo"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
-
-# -- Language configuration -------------------------------------------------
-language = os.getenv("SPHINX_LANGUAGE", "en_US")
-
-# Mapping of supported languages and their display names
-supported_languages = {
-    "en_US": {
-        "name": "English",
-        "url_prefix": "en_US",
-        "sphinx_lang": "en",
-        "locale": "en_US",
-        "icon": ""
-    },
-    "zh_CN": {
-        "name": "中文",
-        "url_prefix": "zh_CN",
-        "sphinx_lang": "zh_CN",
-        "locale": "zh_CN",
-        "icon": ""
-    }
-}
-
-def get_alternate_languages():
-    """Get list of alternate languages for the current page.
-
-    Returns:
-        list: List of dictionaries containing language metadata
-              for languages other than the current one.
-    """
-    alternates = []
-    current_lang = language
-    for lang_code, lang_data in supported_languages.items():
-        if lang_code != current_lang:
-            alternates.append({
-                "code": lang_code,
-                "name": lang_data["name"],
-                "url_prefix": lang_data["url_prefix"],
-                "icon": lang_data["icon"]
-            })
-    return alternates
-
-# Locale directories for translations
-locale_dirs = ["locale/"]
-gettext_compact = False
-gettext_uuid = True
-gettext_location = True
-
-# Language to use for generating the HTML full-text search index.
-html_search_language = supported_languages[language]["sphinx_lang"]
-
-# Context for templates
-html_context = {
-    "current_language": language,
-    "current_language_name": supported_languages[language]["name"],
-    "alternate_languages": get_alternate_languages(),
-    "supported_languages": supported_languages
-}
 
 # Theme options
 html_theme_options = {
@@ -147,33 +74,71 @@ html_theme_options = {
     "source_repository": "https://github.com/loonghao/persistent_ssh_agent",
     "source_branch": "main",
     "source_directory": "docs/",
+    "sidebar_hide_name": False,
+    "navigation_with_keys": True,
+    "show_toc_level": 2,
 }
 
-# Configure templates
-templates_path = ["_templates"]
-
-# Configure master document
-master_doc = "index"
-
-# Configure sidebars
+# Sidebar configuration
 html_sidebars = {
     "**": [
         "sidebar/brand.html",
+        "language-switcher.html",
         "sidebar/search.html",
         "sidebar/scroll-start.html",
         "sidebar/navigation.html",
         "sidebar/ethical-ads.html",
         "sidebar/scroll-end.html",
-        "sidebar/variant-selector.html",
     ]
 }
+
+# Configure templates
+templates_path = ["_templates"]
+
+# -- Language configuration -------------------------------------------------
+language = os.getenv("SPHINX_LANGUAGE", "en")
+
+# Mapping of supported languages
+supported_languages = {
+    "en": "English",
+    "zh_CN": "简体中文"
+}
+
+# Locale directories for translations
+locale_dirs = ["locale/"]
+gettext_compact = False
+gettext_uuid = True
+gettext_location = True
+
+# Language to use for generating the HTML full-text search index.
+html_search_language = {
+    "en": "en",
+    "zh_CN": "zh"
+}.get(language, "en")
+
+# Language links configuration
+language_links = {
+    "en": {
+        "zh_CN": "../zh_CN/",
+    },
+    "zh_CN": {
+        "en": "../en/",
+    }
+}
+
+# HTML context for templates
+html_context = {
+    "current_language": language,
+    "current_language_name": supported_languages.get(language, "English"),
+    "available_languages": supported_languages,
+    "languages": supported_languages,  # 为了兼容性保留这个键
+    "project_root": "/persistent_ssh_agent",  # 添加项目根路径
+}
+
+# Configure master document
+master_doc = "index"
 
 # -- Custom configuration --------------------------------------------------
 def setup(app):
     """Setup Sphinx application."""
     app.add_css_file("custom.css")
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]

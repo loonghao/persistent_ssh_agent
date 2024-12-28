@@ -1,0 +1,11 @@
+{%- if current_language %}
+<div class="language-switcher">
+    {%- if current_language == "zh_CN" %}
+        <span class="current-lang">中文</span>
+        <a href="/persistent_ssh_agent/en/{{ pagename }}.html">English</a>
+    {%- else %}
+        <a href="/persistent_ssh_agent/zh_CN/{{ pagename }}.html">中文</a>
+        <span class="current-lang">English</span>
+    {%- endif %}
+</div>
+{%- endif %}
