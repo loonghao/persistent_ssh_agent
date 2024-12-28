@@ -42,12 +42,15 @@ def test_config_with_passphrase(ssh_manager, tmp_path):
                     stderr=b""
                 )
             elif args[0][0] == "ssh-add":
-                return subprocess.CompletedProcess(
-                    args=["ssh-add", "-l"],
-                    returncode=0,
-                    stdout=b"",
-                    stderr=b""
-                )
+                if len(args[0]) > 1 and args[0][1] == "-l":
+                    # First call to ssh-add -l should return 1 (no identities)
+                    # Subsequent calls should return 0 (identity added)
+                    return subprocess.CompletedProcess(
+                        args=["ssh-add", "-l"],
+                        returncode=1 if not ssh_manager._ssh_agent_started else 0,
+                        stdout=b"",
+                        stderr=b""
+                    )
             return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=b"", stderr=b"")
 
         mock_run.side_effect = mock_run_side_effect
@@ -81,21 +84,28 @@ def test_start_ssh_agent_unit(ssh_manager, tmp_path):
          patch("subprocess.Popen") as mock_popen:
 
         # Mock SSH agent startup
-        mock_run.side_effect = [
-            subprocess.CompletedProcess(
-                args=["ssh-agent", "-s"],
-                returncode=0,
-                stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
-                      "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
-                stderr=""
-            ),
-            subprocess.CompletedProcess(
-                args=["ssh-add", "-l"],
-                returncode=0,
-                stdout=b"",
-                stderr=b""
-            )
-        ]
+        def mock_run_side_effect(*args, **kwargs):
+            if args[0][0] == "ssh-agent":
+                return subprocess.CompletedProcess(
+                    args=["ssh-agent", "-s"],
+                    returncode=0,
+                    stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
+                          "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
+                    stderr=""
+                )
+            elif args[0][0] == "ssh-add":
+                if len(args[0]) > 1 and args[0][1] == "-l":
+                    # First call should return 1 (no identities)
+                    # Subsequent calls should return 0 (identity added)
+                    return subprocess.CompletedProcess(
+                        args=["ssh-add", "-l"],
+                        returncode=1 if not ssh_manager._ssh_agent_started else 0,
+                        stdout=b"",
+                        stderr=b""
+                    )
+            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=b"", stderr=b"")
+
+        mock_run.side_effect = mock_run_side_effect
 
         # Mock key addition
         mock_process = MagicMock()
@@ -116,21 +126,28 @@ def test_env_with_passphrase(ssh_manager, tmp_path):
          patch("subprocess.Popen") as mock_popen:
 
         # Mock SSH agent startup
-        mock_run.side_effect = [
-            subprocess.CompletedProcess(
-                args=["ssh-agent", "-s"],
-                returncode=0,
-                stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
-                      "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
-                stderr=""
-            ),
-            subprocess.CompletedProcess(
-                args=["ssh-add", "-l"],
-                returncode=0,
-                stdout=b"",
-                stderr=b""
-            )
-        ]
+        def mock_run_side_effect(*args, **kwargs):
+            if args[0][0] == "ssh-agent":
+                return subprocess.CompletedProcess(
+                    args=["ssh-agent", "-s"],
+                    returncode=0,
+                    stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
+                          "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
+                    stderr=""
+                )
+            elif args[0][0] == "ssh-add":
+                if len(args[0]) > 1 and args[0][1] == "-l":
+                    # First call should return 1 (no identities)
+                    # Subsequent calls should return 0 (identity added)
+                    return subprocess.CompletedProcess(
+                        args=["ssh-add", "-l"],
+                        returncode=1 if not ssh_manager._ssh_agent_started else 0,
+                        stdout=b"",
+                        stderr=b""
+                    )
+            return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=b"", stderr=b"")
+
+        mock_run.side_effect = mock_run_side_effect
 
         # Mock key addition with passphrase
         mock_process = MagicMock()
