@@ -6,17 +6,24 @@ import glob
 import json
 import logging
 import os
-from pathlib import Path
+import platform
 import re
 import socket
 import subprocess
 import tempfile
 import time
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from pathlib import Path
+from typing import (
+    Dict, 
+    List, 
+    Optional, 
+    Union, 
+    Callable,
+    TypeVar, 
+    Literal,
+    Any,
+    Tuple
+)
 
 # Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
@@ -24,6 +31,18 @@ from persistent_ssh_agent.config import SSHConfig
 
 logger = logging.getLogger(__name__)
 
+
+# Type definitions
+T = TypeVar('T')
+ValidatorFunc = Callable[[str], bool]
+SSHOptionValue = Union[str, List[str]]
+SSHConfig = Dict[str, Dict[str, SSHOptionValue]]
+YesNoOption = Literal["yes", "no"]
+ExtendedYesNoOption = Literal["yes", "no", "ask", "confirm"]
+StrictHostKeyCheckingOption = Literal["yes", "no", "accept-new", "off", "ask"]
+RequestTTYOption = Literal["yes", "no", "force", "auto"]
+ControlMasterOption = Literal["yes", "no", "ask", "auto", "autoask"]
+CanonicalizeHostnameOption = Literal["yes", "no", "always"]
 
 class SSHError(Exception):
     """Base exception for SSH-related errors."""
@@ -634,24 +653,90 @@ class PersistentSSHAgent:
         # Always return default key path, even if it doesn't exist
         return str(Path(os.path.join(self._ssh_dir, "id_rsa")))
 
-    def _parse_ssh_config(self) -> Dict[str, Dict[str, str]]:
-        """Parse SSH config file to get host-specific configurations."""
-        config = {}
-        current_host = None
-        current_match = None
+    def _parse_ssh_config(self) -> SSHConfig:
+        """Parse SSH config file to get host-specific configurations.
+        
+        Returns:
+            SSHConfig: A dictionary containing host-specific SSH configurations.
+            The outer dictionary maps host patterns to their configurations,
+            while the inner dictionary maps configuration keys to their values.
+            Values can be either strings or lists of strings for multi-value options.
+        """
+        config: SSHConfig = {}
+        current_host: Optional[str] = None
+        current_match: Optional[str] = None
         ssh_config_path = self._ssh_dir / "config"
 
         if not ssh_config_path.exists():
             return config
 
         # Define valid keys and their validation functions
-        valid_keys = {
+        valid_keys: Dict[str, ValidatorFunc] = {
+            # Connection settings
             "hostname": lambda x: True,  # Any string is valid for hostname
             "user": lambda x: True,  # Any string is valid for user
-            "port": lambda x: x.isdigit(),  # Must be numeric
+            "port": lambda x: x.isdigit() and 1 <= int(x) <= 65535,  # Valid port range
             "identityfile": lambda x: True,  # Any path is valid
-            "stricthostkeychecking": lambda x: x.lower() in ["yes", "no"],
-            # Add more keys as needed
+            "identitiesonly": lambda x: x.lower() in ["yes", "no"],
+            "addressfamily": lambda x: x.lower() in ["any", "inet", "inet6"],  # IPv4/IPv6 preference
+            "bindaddress": lambda x: True,  # Any address is valid
+            "connecttimeout": lambda x: x.isdigit() and int(x) >= 0,
+            "connectionattempts": lambda x: x.isdigit() and int(x) >= 1,
+            
+            # Security settings
+            "stricthostkeychecking": lambda x: x.lower() in ["yes", "no", "accept-new", "off", "ask"],
+            "userknownhostsfile": lambda x: True,  # Any path is valid
+            "batchmode": lambda x: x.lower() in ["yes", "no"],
+            "passwordauthentication": lambda x: x.lower() in ["yes", "no"],
+            "pubkeyauthentication": lambda x: x.lower() in ["yes", "no"],
+            "kbdinteractiveauthentication": lambda x: x.lower() in ["yes", "no"],
+            "hostbasedauthentication": lambda x: x.lower() in ["yes", "no"],
+            "gssapiauthentication": lambda x: x.lower() in ["yes", "no"],
+            "preferredauthentications": lambda x: all(auth in ["gssapi-with-mic", "hostbased", "publickey", "keyboard-interactive", "password"] for auth in x.split(",")),
+            
+            # Connection optimization
+            "compression": lambda x: x.lower() in ["yes", "no"],
+            "tcpkeepalive": lambda x: x.lower() in ["yes", "no"],
+            "serveralivecountmax": lambda x: x.isdigit() and int(x) >= 0,
+            "serveraliveinterval": lambda x: x.isdigit() and int(x) >= 0,
+            "rekeylimit": lambda x: any(limit.isdigit() for limit in x.split()),  # Size or time limit
+            
+            # Proxy and forwarding
+            "proxycommand": lambda x: True,  # Any command is valid
+            "proxyhost": lambda x: True,  # Any host is valid
+            "proxyport": lambda x: x.isdigit() and 1 <= int(x) <= 65535,
+            "proxyjump": lambda x: True,  # Any jump host specification is valid
+            "forwardagent": lambda x: x.lower() in ["yes", "no"],
+            "forwardx11": lambda x: x.lower() in ["yes", "no"],
+            "forwardx11trusted": lambda x: x.lower() in ["yes", "no"],
+            "dynamicforward": lambda x: all(p.isdigit() and 1 <= int(p) <= 65535 for p in x.split(":") if p.isdigit()),
+            "localforward": lambda x: True,  # Port forwarding specification
+            "remoteforward": lambda x: True,  # Port forwarding specification
+            
+            # Environment
+            "sendenv": lambda x: True,  # Any environment variable pattern is valid
+            "setenv": lambda x: True,  # Any environment variable setting is valid
+            "requesttty": lambda x: x.lower() in ["yes", "no", "force", "auto"],
+            "permittylocalcommand": lambda x: x.lower() in ["yes", "no"],
+            "typylocalcommand": lambda x: True,  # Any command is valid
+            
+            # Multiplexing
+            "controlmaster": lambda x: x.lower() in ["yes", "no", "ask", "auto", "autoask"],
+            "controlpath": lambda x: True,  # Any path is valid
+            "controlpersist": lambda x: x.lower() in ["yes", "no"] or x.isdigit() or any(x.endswith(unit) for unit in ["s", "m", "h", "d"]),
+            
+            # Misc
+            "addkeystoagent": lambda x: x.lower() in ["yes", "no", "ask", "confirm"],
+            "canonicaldomains": lambda x: True,  # Any domain list is valid
+            "canonicalizehostname": lambda x: x.lower() in ["yes", "no", "always"],
+            "canonicalizemaxdots": lambda x: x.isdigit() and int(x) >= 0,
+            "canonicalizepermittedcnames": lambda x: True,  # Any CNAME pattern is valid
+            "include": lambda x: True,  # Any path pattern is valid
+            "ipqos": lambda x: all(qos in ["af11", "af12", "af13", "af21", "af22", "af23", "af31", "af32", "af33", "af41", "af42", "af43", "cs0", "cs1", "cs2", "cs3", "cs4", "cs5", "cs6", "cs7", "ef", "lowdelay", "throughput", "reliability"] for qos in x.split()),
+            "pkcs11provider": lambda x: True,  # Any PKCS#11 provider path is valid
+            "revokedhostkeys": lambda x: True,  # Any revoked host keys file is valid
+            "streamlocalbindmask": lambda x: all(c in "01234567" for c in x),  # Octal file mask
+            "streamlocalbindunlink": lambda x: x.lower() in ["yes", "no"]
         }
 
         def is_valid_host_pattern(pattern: str) -> bool:
@@ -707,8 +792,59 @@ class PersistentSSHAgent:
 
             return True
 
+        def get_validation_error(key: str, value: str) -> Optional[str]:
+            """Get validation error message for a config key-value pair.
+            
+            Args:
+                key: Configuration key
+                value: Configuration value
+                
+            Returns:
+                Optional[str]: Error message if validation fails, None if valid
+            """
+            key = key.lower()
+            if key not in valid_keys:
+                return f"Invalid configuration key: {key}"
+                
+            if not valid_keys[key](value):
+                if key == "port" or key == "proxyport":
+                    return f"Invalid port number: {value}. Must be between 1 and 65535"
+                elif key == "connecttimeout":
+                    return f"Invalid timeout value: {value}. Must be a non-negative integer"
+                elif key == "serveralivecountmax" or key == "serveraliveinterval":
+                    return f"Invalid {key}: {value}. Must be a non-negative integer"
+                elif key == "canonicalizemaxdots":
+                    return f"Invalid {key}: {value}. Must be a non-negative integer"
+                elif key.endswith("authentication") or key in ["identitiesonly", "batchmode"]:
+                    return f"Invalid {key}: {value}. Must be 'yes' or 'no'"
+                elif key == "stricthostkeychecking":
+                    return f"Invalid {key}: {value}. Must be one of: yes, no, accept-new, off, ask"
+                elif key == "requesttty":
+                    return f"Invalid {key}: {value}. Must be one of: yes, no, force, auto"
+                elif key == "controlmaster":
+                    return f"Invalid {key}: {value}. Must be one of: yes, no, ask, auto, autoask"
+                elif key == "controlpersist":
+                    return f"Invalid {key}: {value}. Must be 'yes', 'no', or a time specification"
+                elif key == "addressfamily":
+                    return f"Invalid {key}: {value}. Must be one of: any, inet, inet6"
+                elif key == "preferredauthentications":
+                    return f"Invalid {key}: {value}. Must be comma-separated list of: gssapi-with-mic, hostbased, publickey, keyboard-interactive, password"
+                elif key == "ipqos":
+                    return f"Invalid {key}: {value}. Must be space-separated list of valid QoS values"
+                elif key == "streamlocalbindmask":
+                    return f"Invalid {key}: {value}. Must be an octal file mask"
+                else:
+                    return f"Invalid value for {key}: {value}"
+                    
+            return None
+
         def process_config_line(line: str, config_file: str = str(ssh_config_path)) -> None:
-            """Process a single line from SSH config file."""
+            """Process a single line from SSH config file.
+            
+            Args:
+                line: The line to process from the SSH config file
+                config_file: The path to the config file being processed
+            """
             nonlocal current_host, current_match, config
 
             line = line.strip()
@@ -771,13 +907,10 @@ class PersistentSSHAgent:
                 if not value:  # Skip empty values
                     return
 
-                # Skip invalid keys or values
-                if key not in valid_keys:
-                    logger.debug(f"Skipping invalid config key in {config_file}: {key}")
-                    return
-
-                if not valid_keys[key](value):
-                    logger.debug(f"Skipping invalid config value in {config_file}: {key}={value}")
+                # Validate key and value
+                error_msg = get_validation_error(key, value)
+                if error_msg:
+                    logger.debug(f"Config validation error in {config_file}: {error_msg}")
                     return
 
                 # Handle array values (e.g., multiple IdentityFile entries)
