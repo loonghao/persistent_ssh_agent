@@ -1,0 +1,25 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="0; url=en_US/">
+        <script>
+            var lang = navigator.language || navigator.userLanguage;
+            if (lang.toLowerCase().startsWith('zh')) {
+                window.location.href = 'zh_CN/';
+            } else {
+                window.location.href = 'en_US/';
+            }
+        </script>
+        <title>Redirecting...</title>
+    </head>
+    <body>
+        <h1>Redirecting...</h1>
+        <p>
+            <a href="en_US/">English</a><br>
+            <a href="zh_CN/">中文</a>
+        </p>
+    </body>
+    </html>
+    
