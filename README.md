@@ -72,12 +72,15 @@ from persistent_ssh_agent import PersistentSSHAgent
 from persistent_ssh_agent.config import SSHConfig
 
 # Create custom SSH configuration
-config = SSHConfig()
-config.add_host_config('github.com', {
-    'IdentityFile': '~/.ssh/github_key',
-    'User': 'git',
-    'Port': '22'
-})
+config = SSHConfig(
+    identity_file='~/.ssh/github_key',  # Optional specific identity file
+    identity_passphrase='your-passphrase',  # Optional passphrase
+    ssh_options={  # Optional SSH options
+        'StrictHostKeyChecking': 'yes',
+        'PasswordAuthentication': 'no',
+        'PubkeyAuthentication': 'yes'
+    }
+)
 
 # Initialize with custom config
 ssh_agent = PersistentSSHAgent(config=config)
@@ -88,6 +91,62 @@ if ssh_agent.setup_ssh('github.com'):
     ssh_command = ssh_agent.get_git_ssh_command('github.com')
     if ssh_command:
         print("✅ Git SSH command ready!")
+```
+
+### Multiple Host Configuration
+
+To configure SSH for multiple hosts:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# Create configuration with common options
+config = SSHConfig(
+    ssh_options={
+        'BatchMode': 'yes',
+        'StrictHostKeyChecking': 'yes',
+        'ServerAliveInterval': '60'
+    }
+)
+
+# Initialize agent
+agent = PersistentSSHAgent(config=config)
+
+# Set up SSH for multiple hosts
+hosts = ['github.com', 'gitlab.com', 'bitbucket.org']
+for host in hosts:
+    if agent.setup_ssh(host):
+        print(f"✅ SSH configured for {host}")
+    else:
+        print(f"❌ Failed to configure SSH for {host}")
+```
+
+### Global SSH Configuration
+
+To set global SSH options:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# Create configuration with global options
+config = SSHConfig(
+    # Set identity file (optional)
+    identity_file='~/.ssh/id_ed25519',
+
+    # Set global SSH options
+    ssh_options={
+        'StrictHostKeyChecking': 'yes',
+        'PasswordAuthentication': 'no',
+        'PubkeyAuthentication': 'yes',
+        'BatchMode': 'yes',
+        'ConnectTimeout': '30'
+    }
+)
+
+# Initialize agent with global configuration
+agent = PersistentSSHAgent(config=config)
 ```
 
 ### Asynchronous Support
@@ -152,19 +211,20 @@ asyncio.run(main())
 ### CI/CD Pipeline Integration
 
 ```python
-import os
 from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
 
 def setup_ci_ssh():
     """Set up SSH for CI environment."""
-    ssh_agent = PersistentSSHAgent()
+    # Create configuration with key content
+    config = SSHConfig(
+        identity_content=os.environ.get('SSH_PRIVATE_KEY'),
+        ssh_options={'BatchMode': 'yes'}
+    )
 
-    # Set up SSH key from environment
-    key_path = os.environ.get('SSH_PRIVATE_KEY_PATH')
-    if not key_path:
-        raise ValueError("SSH key path not provided")
+    ssh_agent = PersistentSSHAgent(config=config)
 
-    if ssh_agent.start_ssh_agent(key_path):
+    if ssh_agent.setup_ssh('github.com'):
         print("✅ SSH agent started successfully")
         return True
 
@@ -178,12 +238,12 @@ from git import Repo
 from persistent_ssh_agent import PersistentSSHAgent
 import os
 
-def clone_repo(repo_url: str, local_path: str, branch: str = None) -> Repo:
+def clone_repo(repo_url: str, local_path: str) -> Repo:
     """Clone a repository using persistent SSH authentication."""
     ssh_agent = PersistentSSHAgent()
 
-    # Extract hostname from URL and set up SSH
-    hostname = ssh_agent.extract_hostname(repo_url)
+    # Extract hostname and set up SSH
+    hostname = ssh_agent._extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("Failed to set up SSH authentication")
 
@@ -199,20 +259,8 @@ def clone_repo(repo_url: str, local_path: str, branch: str = None) -> Repo:
     return Repo.clone_from(
         repo_url,
         local_path,
-        branch=branch,
         env=env
     )
-
-# Usage example
-try:
-    repo = clone_repo(
-        'git@github.com:username/repo.git',
-        '/path/to/local/repo',
-        branch='main'
-    )
-    print("✅ Repository cloned successfully")
-except Exception as e:
-    print(f"❌ Error: {e}")
 ```
 
 ## 🌟 Advanced Features
@@ -245,24 +293,110 @@ agent = PersistentSSHAgent(config=config)
 
 ### Key Management
 
+The library automatically manages SSH keys based on your SSH configuration:
+
 ```python
 from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
 
+# Use specific key
+config = SSHConfig(identity_file='~/.ssh/id_ed25519')
+agent = PersistentSSHAgent(config=config)
+
+# Or let the library automatically detect and use available keys
 agent = PersistentSSHAgent()
+if agent.setup_ssh('github.com'):
+    print("✅ SSH key loaded and ready!")
+```
 
-# Add a key
-agent.add_key('~/.ssh/id_ed25519')
+The library supports the following key types in order of preference:
+- Ed25519 (recommended, most secure)
+- ECDSA
+- ECDSA with security key
+- Ed25519 with security key
+- RSA
+- DSA (legacy, not recommended)
 
-# List loaded keys
-keys = agent.list_keys()
-for key in keys:
-    print(f"Loaded key: {key}")
+### SSH Configuration Validation
 
-# Remove a specific key
-agent.remove_key('~/.ssh/id_ed25519')
+The library provides comprehensive SSH configuration validation with support for:
 
-# Clear all keys
-agent.clear_keys()
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+# Create custom SSH configuration with validation
+config = SSHConfig()
+
+# Add host configuration with various options
+config.add_host_config('github.com', {
+    # Connection Settings
+    'IdentityFile': '~/.ssh/github_key',
+    'User': 'git',
+    'Port': '22',
+
+    # Security Settings
+    'StrictHostKeyChecking': 'yes',
+    'PasswordAuthentication': 'no',
+    'PubkeyAuthentication': 'yes',
+
+    # Connection Optimization
+    'Compression': 'yes',
+    'ConnectTimeout': '60',
+    'ServerAliveInterval': '60',
+    'ServerAliveCountMax': '3',
+
+    # Proxy and Forwarding
+    'ProxyCommand': 'ssh -W %h:%p bastion',
+    'ForwardAgent': 'yes'
+})
+
+# Initialize with validated config
+ssh_agent = PersistentSSHAgent(config=config)
+```
+
+Supported configuration categories:
+- **Connection Settings**: Port, Hostname, User, IdentityFile
+- **Security Settings**: StrictHostKeyChecking, BatchMode, PasswordAuthentication
+- **Connection Optimization**: Compression, ConnectTimeout, ServerAliveInterval
+- **Proxy and Forwarding**: ProxyCommand, ForwardAgent, ForwardX11
+- **Environment Settings**: RequestTTY, SendEnv
+- **Multiplexing Options**: ControlMaster, ControlPath, ControlPersist
+
+For detailed validation rules and supported options, see [SSH Configuration Validation](docs/ssh_config_validation.md)
+
+### Security Features
+
+1. **SSH Key Management**:
+   - Automatic detection and loading of SSH keys (Ed25519, ECDSA, RSA)
+   - Support for key content injection (useful in CI/CD)
+   - Secure key file permissions handling
+   - Optional passphrase support
+
+2. **Configuration Security**:
+   - Strict hostname validation
+   - Secure default settings
+   - Support for security-focused SSH options
+
+3. **Session Management**:
+   - Secure storage of agent information
+   - Platform-specific security measures
+   - Automatic cleanup of expired sessions
+   - Cross-platform compatibility
+
+### Type Hints Support
+
+The library provides comprehensive type hints for all public interfaces:
+
+```python
+from typing import Optional
+from persistent_ssh_agent import PersistentSSHAgent
+from persistent_ssh_agent.config import SSHConfig
+
+def setup_ssh(hostname: str, key_file: Optional[str] = None) -> bool:
+    config = SSHConfig(identity_file=key_file)
+    agent = PersistentSSHAgent(config=config)
+    return agent.setup_ssh(hostname)
 ```
 
 ## 🤝 Contributing
