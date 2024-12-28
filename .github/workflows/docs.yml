@@ -53,12 +53,8 @@ jobs:
 
       - name: Build documentation
         run: |
-          # Build English documentation
-          sphinx-build -b html -D language=en docs/source docs/build/html/en
-
-          # Build Chinese documentation
-          sphinx-intl build
-          sphinx-build -b html -D language=zh_CN docs/source docs/build/html/zh_CN
+          # Build documentation for all languages
+          python -m nox -s docs-build
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
