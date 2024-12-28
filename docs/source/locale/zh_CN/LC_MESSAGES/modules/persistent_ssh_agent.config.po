@@ -35,4 +35,3 @@ msgstr ""
 #: of persistent_ssh_agent.config.SSHConfig:1
 msgid "SSH configuration class."
 msgstr ""
-

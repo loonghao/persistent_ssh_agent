@@ -18,6 +18,11 @@ on:
       - 'nox_actions/docs.py'
       - 'pyproject.toml'
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   docs:
     runs-on: ubuntu-latest
@@ -25,27 +30,33 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all history for proper versioning
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-          
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install nox
-          
+          pip install nox sphinx sphinx-intl
+
       - name: Run documentation linting
         if: github.event_name == 'pull_request'
         run: nox -s docs-lint
-        
+
       - name: Generate translations
         run: nox -s docs-i18n
-        
+
       - name: Build documentation
-        run: nox -s docs-build
+        run: |
+          # Build English documentation
+          sphinx-build -b html -D language=en docs/source docs/build/html/en
+          
+          # Build Chinese documentation
+          sphinx-intl build
+          sphinx-build -b html -D language=zh_CN docs/source docs/build/html/zh_CN
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -1,19 +1,22 @@
 """Nox actions for documentation tasks."""
 
 # Import built-in modules
+import errno
 import locale
 import os
+from pathlib import Path
 import shutil
 import stat
-from pathlib import Path
-from typing import Any, Callable
-import errno
+from typing import Any
+from typing import Callable
+from typing import Optional
 
 # Import third-party modules
 import nox
 from nox.sessions import Session
 
-languages = ['en_US', 'zh_CN']
+
+languages = ["en_US", "zh_CN"]
 
 # Documentation dependencies
 docs_dependencies = [
@@ -29,7 +32,7 @@ docs_dependencies = [
 
 def handle_remove_readonly(func: Callable, path: str, exc: Any) -> None:
     """Handle read-only files when removing directories.
-    
+
     Args:
         func: The function that failed
         path: The path that is being processed
@@ -45,13 +48,13 @@ def handle_remove_readonly(func: Callable, path: str, exc: Any) -> None:
 
 def install_docs_dependencies(session: Session) -> None:
     """Install all documentation dependencies.
-    
+
     Args:
         session: Nox session object
     """
     # Install the package in editable mode with docs dependencies
     session.install("-e", ".[docs]")
-    
+
     # Install documentation dependencies
     session.install(*docs_dependencies)
 
@@ -63,7 +66,7 @@ def get_docs_dir() -> Path:
 
 def get_system_language() -> str:
     """Get the system language.
-    
+
     Returns:
         str: Language code (e.g., 'en_US' or 'zh_CN')
     """
@@ -72,25 +75,25 @@ def get_system_language() -> str:
         system_locale = locale.getdefaultlocale()[0]
         if system_locale:
             # Map locale to our supported languages
-            if system_locale.startswith('zh'):
-                return 'zh_CN'
-            elif system_locale.startswith('en'):
-                return 'en_US'
+            if system_locale.startswith("zh"):
+                return "zh_CN"
+            elif system_locale.startswith("en"):
+                return "en_US"
     except Exception:
         pass
     # Default to English if detection fails or unsupported language
-    return 'en_US'
+    return "en_US"
 
 
 def clean_docs(session: Session) -> None:
     """Clean documentation build directory.
-    
+
     Args:
         session: Nox session object
     """
     docs_dir = get_docs_dir()
     build_dir = docs_dir / "build"
-    
+
     if build_dir.exists():
         session.log(f"Cleaning {build_dir}")
         try:
@@ -105,7 +108,7 @@ def clean_docs(session: Session) -> None:
 @nox.session(name="docs-clean")
 def docs_clean(session: Session) -> None:
     """Clean documentation build directory.
-    
+
     Args:
         session: Nox session object
     """
@@ -113,9 +116,9 @@ def docs_clean(session: Session) -> None:
 
 
 @nox.session(name="docs")
-def docs(session: Session, builder: str = "html", language: str = None) -> None:
+def docs(session: Session, builder: str = "html", language: Optional[str] = None) -> None:
     """Build documentation with sphinx.
-    
+
     Args:
         session: Nox session object
         builder: Sphinx builder to use
@@ -126,19 +129,19 @@ def docs(session: Session, builder: str = "html", language: str = None) -> None:
 
     # Clean build directory first
     clean_docs(session)
-    
+
     # Get docs directory
     docs_dir = get_docs_dir()
-    
+
     # Build for specified language or all languages
     build_languages = [language] if language else languages
-    
+
     with session.chdir(str(docs_dir)):
         for lang in build_languages:
             session.log(f"Building documentation for {lang}")
             env = {"SPHINX_LANGUAGE": lang}
             output_dir = f"build/html/{lang}"
-            
+
             session.run(
                 "sphinx-build",
                 "-b", builder,
@@ -147,14 +150,14 @@ def docs(session: Session, builder: str = "html", language: str = None) -> None:
                 output_dir,
                 env=env
             )
-    
+
     session.log("Documentation built successfully")
 
 
 @nox.session(name="docs-live")
-def docs_live(session: Session, language: str = None) -> None:
+def docs_live(session: Session, language: Optional[str] = None) -> None:
     """Build documentation with live reload using sphinx-autobuild.
-    
+
     Args:
         session: Nox session object
         language: Target language for live preview (default: system language)
@@ -165,21 +168,21 @@ def docs_live(session: Session, language: str = None) -> None:
     # Determine language
     if language is None:
         language = get_system_language()
-    
+
     # Validate language
     if language not in languages:
         session.error(f"Unsupported language: {language}")
-    
+
     # Set up environment
     env = os.environ.copy()
     env["SPHINX_LANGUAGE"] = language
-    
+
     # Clean build directory first
     clean_docs(session)
-    
+
     # Get docs directory
     docs_dir = get_docs_dir()
-    
+
     # First build all languages
     for lang in languages:
         session.log(f"Building documentation for {lang}")
@@ -192,7 +195,7 @@ def docs_live(session: Session, language: str = None) -> None:
                 f"build/html/{lang}",
                 env={"SPHINX_LANGUAGE": lang}
             )
-    
+
     # Then start autobuild for the selected language
     with session.chdir(str(docs_dir)):
         output_dir = f"build/html/{language}"
@@ -226,16 +229,16 @@ def docs_live(session: Session, language: str = None) -> None:
 @nox.session(name="docs-lint")
 def docs_lint(session: Session) -> None:
     """Run documentation linting.
-    
+
     Args:
         session: Nox session object
     """
     # Install dependencies
     install_docs_dependencies(session)
-    
+
     docs_dir = get_docs_dir()
     source_dir = docs_dir / "source"
-    
+
     # First run sphinx-build in dummy mode to generate necessary files
     with session.chdir(str(docs_dir)):
         session.run(
@@ -246,7 +249,7 @@ def docs_lint(session: Session) -> None:
             "build/dummy",
             silent=True
         )
-    
+
     # Then run doc8
     session.run(
         "doc8",
@@ -258,12 +261,12 @@ def docs_lint(session: Session) -> None:
 @nox.session(name="docs-i18n")
 def docs_i18n(session: Session) -> None:
     """Generate and update translation files.
-    
+
     This function will:
     1. Extract messages from source files to .pot files
     2. Update or create .po files for each language
     3. Compile .po files to .mo files
-    
+
     The translation files will be organized as:
     docs/source/locale/
     ├── en_US/
@@ -276,17 +279,17 @@ def docs_i18n(session: Session) -> None:
             ├── *.pot  # Translation templates
             ├── *.po   # Translation files
             └── *.mo   # Compiled translation files
-    
+
     Args:
         session: Nox session object
     """
     # Install dependencies
     install_docs_dependencies(session)
-    
+
     docs_dir = get_docs_dir()
     source_dir = docs_dir / "source"
     locale_dir = source_dir / "locale"
-    
+
     with session.chdir(str(docs_dir)):
         # Extract messages to .pot files
         session.run(
@@ -295,13 +298,13 @@ def docs_i18n(session: Session) -> None:
             "source",
             "build/gettext"
         )
-        
+
         # Update .po files for all supported languages
         for lang in languages:
             # Create language directories if they don't exist
             lang_dir = locale_dir / lang / "LC_MESSAGES"
             lang_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Update .po files
             session.run(
                 "sphinx-intl",
@@ -310,35 +313,35 @@ def docs_i18n(session: Session) -> None:
                 "-d", str(locale_dir),
                 "-l", lang
             )
-            
+
             # Compile .po files to .mo files
             session.run(
                 "sphinx-intl",
                 "build",
                 "-d", str(locale_dir)
             )
-    
+
     # Clean up temporary gettext files
     gettext_dir = docs_dir / "build" / "gettext"
     if gettext_dir.exists():
         shutil.rmtree(str(gettext_dir))
-    
+
     session.log("Translation files updated successfully")
 
 
 @nox.session(name="docs-build")
 def docs_build(session: Session) -> None:
     """Build documentation for all languages.
-    
+
     Args:
         session: Nox session object
     """
     # Install dependencies
     install_docs_dependencies(session)
-    
+
     # Clean build directory first
     clean_docs(session)
-    
+
     # Build for each language
     for lang in languages:
         session.log(f"Building documentation for {lang}")
@@ -353,5 +356,5 @@ def docs_build(session: Session) -> None:
                 output_dir,
                 env=env
             )
-    
+
     session.log("Documentation built successfully for all languages")
