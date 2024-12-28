@@ -69,12 +69,14 @@ class PersistentSSHAgent:
 
     SSH_DEFAULT_KEY = "id_rsa"  # Fallback default key
 
-    def __init__(self, expiration_time: int = 86400, config: Optional[SSHConfig] = None):
+    def __init__(self, expiration_time: int = 86400, config: Optional[SSHConfig] = None,
+                 reuse_agent: bool = True):
         """Initialize SSH manager.
 
         Args:
             expiration_time: Time in seconds before agent info expires
             config: Optional SSH configuration
+            reuse_agent: Whether to attempt reusing existing SSH agent
         """
         self._ensure_home_env()
 
@@ -85,6 +87,7 @@ class PersistentSSHAgent:
         self._ssh_agent_started = False
         self._expiration_time = expiration_time
         self._config = config
+        self._reuse_agent = reuse_agent
 
 
     @staticmethod
@@ -215,6 +218,9 @@ class PersistentSSHAgent:
     def _start_ssh_agent(self, identity_file: str) -> bool:
         """Start SSH agent and add identity.
 
+        This method first attempts to load an existing SSH agent if reuse_agent is True.
+        If that fails or if the agent is not running, it starts a new agent.
+
         Args:
             identity_file: Path to SSH key
 
@@ -222,9 +228,21 @@ class PersistentSSHAgent:
             bool: True if successful
         """
         try:
-            # Check if key is already loaded
+            # Try to load existing agent if reuse is enabled
+            if self._reuse_agent:
+                if self._load_agent_info():
+                    if self._verify_loaded_key(identity_file):
+                        logger.debug("Using existing agent with loaded key: %s", identity_file)
+                        return True
+                    logger.debug("Existing agent found but key not loaded")
+                else:
+                    logger.debug("No valid existing agent found")
+            else:
+                logger.debug("Agent reuse disabled, starting new agent")
+
+            # Check if key is already loaded in current session
             if self._ssh_agent_started and self._verify_loaded_key(identity_file):
-                logger.debug("Key already loaded: %s", identity_file)
+                logger.debug("Key already loaded in current session: %s", identity_file)
                 return True
 
             # Start SSH agent with platform-specific command
