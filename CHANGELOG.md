@@ -1,3 +1,9 @@
+## v0.5.1 (2024-12-28)
+
+### Refactor
+
+- **persistent_ssh_agent/core.py**: Refactor and clean up PersistentSSHAgent class
+
 ## v0.5.0 (2024-12-28)
 
 ### Feat
