@@ -65,60 +65,32 @@
     color: var(--color-sidebar-link-text--hover);
 }
 
-/* Language Switcher Styles - Furo Theme */
-.language-switcher {
-    position: fixed;
-    left: 1rem;
-    bottom: 1rem;
-    z-index: 10;
-    font-size: var(--font-size--small);
-    color: var(--color-foreground-secondary);
-    background: var(--color-background-primary);
-    border: 1px solid var(--color-background-border);
-    border-radius: 0.25rem;
-    padding: 0.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.language-switcher__label {
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-    color: var(--color-foreground-muted);
-}
-
-.language-switcher__options {
+/* Language switcher styles */
+.language-switcher-container {
     display: flex;
-    gap: 0.5rem;
+    justify-content: flex-start;
     align-items: center;
+    padding: 0.5rem 1rem;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--color-background-border);
 }
 
-.language-switcher__current {
-    font-weight: 500;
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
     color: var(--color-foreground-primary);
-}
-
-.language-switcher__option {
-    color: var(--color-link);
     text-decoration: none;
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.125rem;
-    transition: background-color 0.2s ease;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-.language-switcher__option:hover {
+.language-switcher:hover {
     background-color: var(--color-background-hover);
+    color: var(--color-brand-primary);
     text-decoration: none;
-}
-
-.language-switcher__option:not(:first-child)::before {
-    content: "|";
-    color: var(--color-background-border);
-    margin-right: 0.5rem;
-}
-
-/* Fix sidebar position to accommodate language switcher */
-.sidebar-container {
-    padding-bottom: 4rem;
 }
 
 /* Dark mode support */
@@ -217,157 +189,69 @@ table.docutils th {
 
 /* Improve search box */
 .sidebar-search {
-    padding: 1em;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
 }
 
 .sidebar-search-container {
+    display: flex;
+    align-items: center;
+    background: var(--color-sidebar-search-background);
+    border: 1px solid var(--color-sidebar-search-border);
     border-radius: 4px;
-}
-
-/* Fix Markdown Rendering */
-.rst-content .section ul {
-    list-style: disc;
-    margin-left: 2em;
-}
-
-.rst-content .section ul li {
-    margin-bottom: 0.5em;
-}
-
-.rst-content .section ul li > p {
+    padding: 0.5rem;
     margin: 0;
 }
 
-.rst-content code {
-    padding: 2px 5px;
-    background: var(--color-background-secondary);
-    border: 1px solid var(--color-background-border);
-    border-radius: 3px;
+.sidebar-search input {
+    border: none;
+    background: transparent;
+    color: var(--color-sidebar-search-text);
+    width: 100%;
+    padding: 0.2rem 0.5rem;
     font-size: 0.9em;
 }
 
-.rst-content pre {
-    padding: 12px 15px;
-    background: var(--color-background-secondary);
-    border: 1px solid var(--color-background-border);
+.sidebar-search input:focus {
+    outline: none;
+}
+
+.sidebar-search input::placeholder {
+    color: var(--color-sidebar-search-text);
+    opacity: 0.7;
+}
+
+/* Language Switcher Styles */
+.language-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem 1rem;
+    background-color: var(--color-sidebar-background);
     border-radius: 4px;
-    overflow-x: auto;
+    font-size: 0.9em;
+    border: 1px solid var(--color-sidebar-background-border);
 }
 
-/* Markdown Content Styles */
-.rst-content {
-    max-width: 100%;
-    overflow-x: auto;
+.language-switcher a {
+    color: var(--color-sidebar-link-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
 }
 
-/* Links */
-.rst-content a {
-    color: var(--color-link);
+.language-switcher a:hover {
+    color: var(--color-sidebar-link-text--hover);
+    background-color: var(--color-sidebar-item-background--hover);
     text-decoration: none;
 }
 
-.rst-content a:hover {
-    text-decoration: underline;
-}
-
-/* Lists */
-.rst-content ul {
-    margin-bottom: 1rem;
-}
-
-.rst-content ul li {
-    margin-bottom: 0.5rem;
-    list-style: disc;
-}
-
-/* Code */
-.rst-content code {
-    padding: 2px 5px;
-    background: var(--color-background-secondary);
-    border: 1px solid var(--color-background-border);
+.language-switcher .current-lang {
+    font-weight: 600;
+    color: var(--color-sidebar-current-text);
+    padding: 0.2rem 0.5rem;
+    background-color: var(--color-sidebar-item-background--current);
     border-radius: 3px;
-    font-size: 90%;
-}
-
-.rst-content pre {
-    padding: 1rem;
-    background: var(--color-background-secondary);
-    border: 1px solid var(--color-background-border);
-    border-radius: 4px;
-    overflow-x: auto;
-}
-
-/* Badges */
-.rst-content img[src*="shields.io"],
-.rst-content img[src*="badge"],
-.rst-content img[src*="codecov.io"] {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 2px;
-    max-height: 20px;
-}
-
-/* Badge Links */
-.rst-content a:has(img) {
-    display: inline-block;
-    text-decoration: none !important;
-    margin: 0 2px;
-}
-
-.rst-content a:has(img):hover {
-    opacity: 0.8;
-}
-
-/* Table of Contents */
-.rst-content .toctree-wrapper ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.rst-content .toctree-wrapper li {
-    margin: 0;
-    padding: 0;
-}
-
-/* Emoji and Icons */
-.rst-content img[alt*="emoji"],
-.rst-content .emoji {
-    height: 1.2em;
-    width: 1.2em;
-    margin: 0 0.1em;
-    vertical-align: -0.2em;
-}
-
-/* Headings */
-.rst-content h1,
-.rst-content h2,
-.rst-content h3,
-.rst-content h4,
-.rst-content h5,
-.rst-content h6 {
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-.rst-content h1 { font-size: 2em; }
-.rst-content h2 { font-size: 1.5em; }
-.rst-content h3 { font-size: 1.25em; }
-.rst-content h4 { font-size: 1em; }
-
-/* Paragraphs */
-.rst-content p {
-    margin-bottom: 1rem;
-    line-height: 1.6;
-}
-
-/* Inline Elements */
-.rst-content strong {
-    font-weight: 600;
-}
-
-.rst-content em {
-    font-style: italic;
 }

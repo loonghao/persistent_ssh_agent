@@ -1,0 +1,15 @@
+{% if languages %}
+<div class="language-switcher-container">
+  {% for lang_code, lang_name in languages.items() %}
+    {% if lang_code != current_language %}
+      <a href="{{ language_links[lang_code] }}" class="language-switcher">
+        {% if lang_code == 'en' %}
+        <span>English</span>
+        {% else %}
+        <span>中文</span>
+        {% endif %}
+      </a>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
