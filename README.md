@@ -1,31 +1,29 @@
 # persistent-ssh-agent
 
-<div align="center">
-
-[![Python Version](https://img.shields.io/pypi/pyversions/persistent_ssh_agent)](https://img.shields.io/pypi/pyversions/persistent_ssh_agent)
-[![Nox](https://img.shields.io/badge/%F0%9F%A6%8A-Nox-D85E00.svg)](https://github.com/wntrblm/nox)
-[![PyPI Version](https://img.shields.io/pypi/v/persistent_ssh_agent?color=green)](https://pypi.org/project/persistent_ssh_agent/)
-[![Downloads](https://static.pepy.tech/badge/persistent_ssh_agent)](https://pepy.tech/project/persistent_ssh_agent)
-[![Downloads](https://static.pepy.tech/badge/persistent_ssh_agent/month)](https://pepy.tech/project/persistent_ssh_agent)
-[![Downloads](https://static.pepy.tech/badge/persistent_ssh_agent/week)](https://pepy.tech/project/persistent_ssh_agent)
-[![License](https://img.shields.io/pypi/l/persistent_ssh_agent)](https://pypi.org/project/persistent_ssh_agent/)
-[![PyPI Format](https://img.shields.io/pypi/format/persistent_ssh_agent)](https://pypi.org/project/persistent_ssh_agent/)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/loonghao/persistent_ssh_agent/graphs/commit-activity)
-![Codecov](https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)
+[Python Version](https://img.shields.io/pypi/pyversions/persistent_ssh_agent)
+[Nox](https://img.shields.io/badge/%F0%9F%A6%8A-Nox-D85E00.svg)
+[PyPI Version](https://img.shields.io/pypi/v/persistent_ssh_agent?color=green)
+[Downloads](https://static.pepy.tech/badge/persistent_ssh_agent)
+[Downloads](https://static.pepy.tech/badge/persistent_ssh_agent/month)
+[Downloads](https://static.pepy.tech/badge/persistent_ssh_agent/week)
+[License](https://img.shields.io/pypi/l/persistent_ssh_agent)
+[PyPI Format](https://img.shields.io/pypi/format/persistent_ssh_agent)
+[Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
+[Codecov](https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)
 
 [English](README.md) | [中文](README_zh.md)
 
-</div>
-
 🔐 A modern Python library for persistent SSH agent management across sessions.
 
-[Key Features](#key-features) •
-[Installation](#installation) •
-[Documentation](#usage) •
-[Examples](#examples) •
-[Contributing](#contributing)
+## 📚 Table of Contents
 
-## ✨ Key Features
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Security](#security-features)
+- [Contributing](#contributing)
+
+## ✨ Features
 
 - 🔄 Persistent SSH agent management across sessions
 - 🔑 Automatic SSH key loading and caching
@@ -184,6 +182,7 @@ asyncio.run(main())
    - Keep private keys protected (600 permissions)
 
 2. **Error Handling**:
+
    ```python
    try:
        ssh_agent = PersistentSSHAgent()
@@ -310,6 +309,7 @@ if agent.setup_ssh('github.com'):
 ```
 
 The library supports the following key types in order of preference:
+
 - Ed25519 (recommended, most secure)
 - ECDSA
 - ECDSA with security key
@@ -356,6 +356,7 @@ ssh_agent = PersistentSSHAgent(config=config)
 ```
 
 Supported configuration categories:
+
 - **Connection Settings**: Port, Hostname, User, IdentityFile
 - **Security Settings**: StrictHostKeyChecking, BatchMode, PasswordAuthentication
 - **Connection Optimization**: Compression, ConnectTimeout, ServerAliveInterval
@@ -368,17 +369,20 @@ For detailed validation rules and supported options, see [SSH Configuration Vali
 ### Security Features
 
 1. **SSH Key Management**:
+
    - Automatic detection and loading of SSH keys (Ed25519, ECDSA, RSA)
    - Support for key content injection (useful in CI/CD)
    - Secure key file permissions handling
    - Optional passphrase support
 
 2. **Configuration Security**:
+
    - Strict hostname validation
    - Secure default settings
    - Support for security-focused SSH options
 
 3. **Session Management**:
+
    - Secure storage of agent information
    - Platform-specific security measures
    - Automatic cleanup of expired sessions
