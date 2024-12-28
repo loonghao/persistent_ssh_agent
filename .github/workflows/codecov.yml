@@ -51,20 +51,8 @@ jobs:
         run: |
           nox -s pytest
 
-      - name: Upload coverage reports to Codecov
+      - name: Upload overage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
-          slug: loonghao/${{ steps.repo-name.outputs.repository-name }}
-          files: 'coverage.xml'
-          fail_ci_if_error: true
-          verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-data-${{ matrix.target.os }}-py${{ matrix.python-version }}
-          path: coverage.xml
-          retention-days: 7
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: loonghao/persistent_ssh_agent
