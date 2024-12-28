@@ -1,13 +1,14 @@
 Welcome to persistent_ssh_agent's documentation!
 =================================================
 
-.. only:: language == 'zh_CN'
+.. only:: language == 'zh'
 
    .. include:: readme_zh.rst
 
-.. only:: language == 'en_US' or language is undefined
+.. only:: language != 'zh'
 
-   .. include:: readme.rst
+   .. include:: readme.md
+   :parser: myst_parser.sphinx_
 
 .. toctree::
    :maxdepth: 2

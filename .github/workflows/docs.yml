@@ -9,6 +9,7 @@ on:
       - '**.rst'
       - 'nox_actions/docs.py'
       - 'pyproject.toml'
+      - '.github/workflows/docs.yml'
   push:
     branches: [ main ]
     paths:
@@ -17,6 +18,7 @@ on:
       - '**.rst'
       - 'nox_actions/docs.py'
       - 'pyproject.toml'
+      - '.github/workflows/docs.yml'
 
 permissions:
   contents: write
@@ -53,7 +55,7 @@ jobs:
         run: |
           # Build English documentation
           sphinx-build -b html -D language=en docs/source docs/build/html/en
-          
+
           # Build Chinese documentation
           sphinx-intl build
           sphinx-build -b html -D language=zh_CN docs/source docs/build/html/zh_CN

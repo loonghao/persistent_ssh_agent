@@ -11,7 +11,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/loonghao/persistent_ssh_agent/graphs/commit-activity)
 [![Codecov](https://img.shields.io/codecov/c/github/loonghao/persistent_ssh_agent)](https://codecov.io/gh/loonghao/persistent_ssh_agent)
 
-[English](README.md) | [中文](README_zh.md)
+[English](./README.md) | [中文](./README_zh.md)
 
 🔐 A modern Python library for persistent SSH agent management across sessions.
 
@@ -20,7 +20,7 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Security](#security-features)
+- [Security Features](#security-features)
 - [Contributing](#contributing)
 
 ## ✨ Features
@@ -385,7 +385,7 @@ Supported configuration categories:
 - **Environment Settings**: RequestTTY, SendEnv
 - **Multiplexing Options**: ControlMaster, ControlPath, ControlPersist
 
-For detailed validation rules and supported options, see [SSH Configuration Validation](docs/ssh_config_validation.md)
+For detailed validation rules and supported options, see [SSH Configuration Validation](#ssh-configuration-validation)
 
 ### Security Features
 
@@ -436,4 +436,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](#license) file for details.
