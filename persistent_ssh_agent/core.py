@@ -11,6 +11,7 @@ import re
 import socket
 import subprocess
 import tempfile
+from textwrap import dedent
 import time
 from typing import Callable
 from typing import Dict
@@ -800,12 +801,11 @@ class PersistentSSHAgent:
 
             return None
 
-        def process_config_line(line: str, config_file: str = str(ssh_config_path)) -> None:
+        def process_config_line(line: str) -> None:
             """Process a single line from SSH config file.
 
             Args:
                 line: The line to process from the SSH config file
-                config_file: The path to the config file being processed
             """
             nonlocal current_host, current_match, config
 
@@ -822,7 +822,7 @@ class PersistentSSHAgent:
 
                 # Support both absolute and relative paths
                 if not os.path.isabs(include_path):
-                    include_path = os.path.join(os.path.dirname(config_file), include_path)
+                    include_path = os.path.join(os.path.dirname(str(ssh_config_path)), include_path)
 
                 # Expand glob patterns
                 include_files = glob.glob(include_path)
@@ -831,7 +831,7 @@ class PersistentSSHAgent:
                         try:
                             with open(include_file) as inc_f:
                                 for inc_line in inc_f:
-                                    process_config_line(inc_line, include_file)
+                                    process_config_line(inc_line.strip())
                         except Exception as e:
                             logger.debug(f"Failed to read include file {include_file}: {e}")
                 return
@@ -854,7 +854,7 @@ class PersistentSSHAgent:
                         config[current_host] = {}
                     current_match = None
                 else:
-                    logger.debug(f"Invalid host pattern in {config_file}: {current_host}")
+                    logger.debug(f"Invalid host pattern in {ssh_config_path}: {current_host}")
                 return
 
             # Parse key-value pairs
@@ -891,7 +891,7 @@ class PersistentSSHAgent:
                         config[current_host][key] = value
 
                 except Exception as e:
-                    logger.debug(f"Error processing line in {config_file}: {line.strip()}, Error: {e}")
+                    logger.debug(f"Error processing line in {ssh_config_path}: {line.strip()}, Error: {e}")
 
         try:
             with open(ssh_config_path, encoding="utf-8-sig") as f:
@@ -900,20 +900,16 @@ class PersistentSSHAgent:
                 current_host = None
                 current_match = None
 
-                lines = [line.rstrip("\r\n") for line in f.readlines()]
+                # Read and normalize the entire file content
+                content = f.read()
+                lines = dedent(content).strip().split("\n")
 
-                # 处理每一行
+                # Process each line
                 for line in lines:
                     try:
-                        # 移除前导空格但保留缩进结构
-                        stripped_line = line.lstrip()
-                        if not stripped_line:  # 跳过空行
-                            continue
-
-                        process_config_line(stripped_line)
+                        process_config_line(line)
                     except Exception as e:
                         logger.debug(f"Error processing line: {line.strip()}, Error: {e}")
-                        continue  # Continue processing remaining lines
 
         except Exception as e:
             logger.error(f"Failed to parse SSH config: {e}")

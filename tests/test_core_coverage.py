@@ -392,30 +392,39 @@ def test_ssh_key_management_edge_cases(ssh_manager):
         # Test add key with invalid process
         mock_run.side_effect = None
         mock_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=1, stdout=b"", stderr=b"Invalid key"
+            args=[],
+            returncode=1,
+            stdout=b"",
+            stderr=b"Invalid key"
         )
         assert not ssh_manager._add_ssh_key("test_key")
 
 
 def test_ssh_config_parsing_edge_cases(ssh_manager):
     """Test edge cases in SSH config parsing."""
-    with patch("builtins.open", mock_open(read_data="""
-Host test
-    HostName test.example.com
-    User testuser
-    Port 2222
-    IdentityFile ~/.ssh/invalid_key
-Host *
-    IdentityFile ~/.ssh/default_key
-""")):
+    # Import built-in modules
+    from textwrap import dedent
+    config_data = dedent("""
+        Host test
+            HostName test.example.com
+            User testuser
+            Port 2222
+            IdentityFile ~/.ssh/invalid_key
+        Host *
+            IdentityFile ~/.ssh/default_key
+    """).lstrip()
+
+    with patch("builtins.open", mock_open(read_data=config_data)):
         config = ssh_manager._parse_ssh_config()
         assert "test" in config
         assert config["test"]["hostname"] == "test.example.com"
         assert config["test"]["user"] == "testuser"
         assert config["test"]["port"] == "2222"
+        assert isinstance(config["test"]["identityfile"], list)
         assert "~/.ssh/invalid_key" in config["test"]["identityfile"]
         assert "*" in config
         assert "identityfile" in config["*"]
+        assert isinstance(config["*"]["identityfile"], list)
         assert "~/.ssh/default_key" in config["*"]["identityfile"]
 
 
@@ -670,14 +679,18 @@ def test_file_operation_errors(ssh_manager):
 
 def test_ssh_config_parsing_errors(ssh_manager):
     """Test SSH config parsing error scenarios."""
+    # Import built-in modules
+    from textwrap import dedent
+    config_data = dedent("""
+        Host test
+            HostName test.example.com
+            User testuser
+            Port invalid_port
+            IdentityFile ~/.ssh/test_key
+    """).lstrip()
+
     with patch("pathlib.Path.exists") as mock_exists, \
-         patch("builtins.open", mock_open(read_data="""
-Host test
-    HostName test.example.com
-    User testuser
-    Port invalid_port
-    IdentityFile ~/.ssh/test_key
-""")):
+         patch("builtins.open", mock_open(read_data=config_data)):
         mock_exists.return_value = True
         config = ssh_manager._parse_ssh_config()
 
@@ -686,6 +699,7 @@ Host test
         assert config["test"]["hostname"] == "test.example.com"
         assert config["test"]["user"] == "testuser"
         assert "port" not in config["test"]  # Invalid port should be ignored
+        assert isinstance(config["test"]["identityfile"], list)
         assert "~/.ssh/test_key" in config["test"]["identityfile"]
 
         # Test with invalid file content
@@ -798,32 +812,36 @@ def test_error_handling_edge_cases(ssh_manager):
 
 def test_ssh_config_advanced_parsing(ssh_manager):
     """Test advanced SSH config parsing scenarios."""
+    # Import built-in modules
+    from textwrap import dedent
+    config_data = dedent("""
+        Host *
+            Port 22
+            IdentityFile ~/.ssh/default_key
+            StrictHostKeyChecking no
+
+        Host test1
+            HostName test1.example.com
+            User testuser
+            Port invalid_port
+            IdentityFile ~/.ssh/test1_key
+
+        Host test2
+            HostName test2.example.com
+            IdentityFile ~/.ssh/test2_key
+            Port 2222
+            User test2user
+
+        Match host test3
+            HostName test3.example.com
+            User test3user
+            Port 2222
+
+        Include ~/.ssh/config.d/*.conf
+    """).lstrip()
+
     with patch("pathlib.Path.exists") as mock_exists, \
-         patch("builtins.open", mock_open(read_data="""
-Host *
-    Port 22
-    IdentityFile ~/.ssh/default_key
-    StrictHostKeyChecking no
-
-Host test1
-    HostName test1.example.com
-    User testuser
-    Port invalid_port
-    IdentityFile ~/.ssh/test1_key
-
-Host test2
-    HostName test2.example.com
-    IdentityFile ~/.ssh/test2_key
-    Port 2222
-    User test2user
-
-Match host test3
-    HostName test3.example.com
-    User test3user
-    Port 2222
-
-Include ~/.ssh/config.d/*.conf
-""")):
+         patch("builtins.open", mock_open(read_data=config_data)):
         mock_exists.return_value = True
 
         # Mock glob for Include directive
@@ -834,6 +852,7 @@ Include ~/.ssh/config.d/*.conf
             # Check wildcard host settings
             assert "*" in config
             assert config["*"]["port"] == "22"
+            assert isinstance(config["*"]["identityfile"], list)
             assert "~/.ssh/default_key" in config["*"]["identityfile"]
             assert config["*"]["stricthostkeychecking"] == "no"
 
@@ -842,12 +861,14 @@ Include ~/.ssh/config.d/*.conf
             assert config["test1"]["hostname"] == "test1.example.com"
             assert config["test1"]["user"] == "testuser"
             assert "port" not in config["test1"]  # Invalid port should be ignored
+            assert isinstance(config["test1"]["identityfile"], list)
             assert "~/.ssh/test1_key" in config["test1"]["identityfile"]
 
             assert "test2" in config
             assert config["test2"]["hostname"] == "test2.example.com"
             assert config["test2"]["user"] == "test2user"
             assert config["test2"]["port"] == "2222"
+            assert isinstance(config["test2"]["identityfile"], list)
             assert "~/.ssh/test2_key" in config["test2"]["identityfile"]
 
             # Check Match block parsing
