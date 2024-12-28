@@ -663,6 +663,7 @@ class PersistentSSHAgent:
         ssh_config_path = self._ssh_dir / "config"
 
         if not ssh_config_path.exists():
+            logger.debug("SSH config file does not exist: %s", ssh_config_path)
             return config
 
         # Define valid keys and their validation functions
@@ -702,6 +703,7 @@ class PersistentSSHAgent:
             "dynamicforward": lambda x: all(p.isdigit() and 1 <= int(p) <= 65535 for p in x.split(":") if p.isdigit()),
             "localforward": lambda x: True,  # Port forwarding specification
             "remoteforward": lambda x: True,  # Port forwarding specification
+            "forwardagent": lambda x: x.lower() in YesNoOption.__args__,
 
             # Environment
             "sendenv": lambda x: True,  # Any environment variable pattern is valid
@@ -722,26 +724,6 @@ class PersistentSSHAgent:
             "canonicalizehostname": lambda x: x.lower() in CanonicalizeHostnameOption.__args__,
             "canonicalizemaxdots": lambda x: x.isdigit() and int(x) >= 0,
             "canonicalizepermittedcnames": lambda x: True,  # Any CNAME specification is valid
-            "fingerprinthash": lambda x: x.lower() in ["md5", "sha256"],
-            "forwardagent": lambda x: x.lower() in YesNoOption.__args__,
-            "forwardx11": lambda x: x.lower() in YesNoOption.__args__,
-            "forwardx11trusted": lambda x: x.lower() in YesNoOption.__args__,
-            "forwardx11timeout": lambda x: x.isdigit() and int(x) >= 0,
-            "include": lambda x: True,  # Any path is valid
-            "ipqos": lambda x: True,  # Any QoS specification is valid
-            "logverbose": lambda x: True,  # Any log specification is valid
-            "macs": lambda x: True,  # Any MAC algorithm list is valid
-            "pkcs11provider": lambda x: True,  # Any PKCS#11 provider path is valid
-            "protocol": lambda x: x in ["1", "2"],
-            "proxyusefdpass": lambda x: x.lower() in YesNoOption.__args__,
-            "pubkeyacceptedkeytypes": lambda x: True,  # Any key type list is valid
-            "remotecommand": lambda x: True,  # Any command is valid
-            "streamlocalbindmask": lambda x: all(c in "01234567" for c in x),  # Octal file mask
-            "streamlocalbindunlink": lambda x: x.lower() in YesNoOption.__args__,
-            "syslogfacility": lambda x: x.lower() in ["auth", "daemon", "user", "local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7"],
-            "verifyhostkeydns": lambda x: x.lower() in YesNoOption.__args__,
-            "visualhostkey": lambda x: x.lower() in YesNoOption.__args__,
-            "updatehostkeys": lambda x: x.lower() in YesNoOption.__args__,
         }
 
         def is_valid_host_pattern(pattern: str) -> bool:
@@ -809,35 +791,12 @@ class PersistentSSHAgent:
             """
             key = key.lower()
             if key not in valid_keys:
+                logger.debug(f"Invalid configuration key: {key}")
                 return f"Invalid configuration key: {key}"
 
             if not valid_keys[key](value):
-                if key == "port" or key == "proxyport":
-                    return f"Invalid port number: {value}. Must be between 1 and 65535"
-                elif key == "connecttimeout":
-                    return f"Invalid timeout value: {value}. Must be a non-negative integer"
-                elif key == "serveralivecountmax" or key == "serveraliveinterval" or key == "canonicalizemaxdots":
-                    return f"Invalid {key}: {value}. Must be a non-negative integer"
-                elif key.endswith("authentication") or key in ["identitiesonly", "batchmode"]:
-                    return f"Invalid {key}: {value}. Must be 'yes' or 'no'"
-                elif key == "stricthostkeychecking":
-                    return f"Invalid {key}: {value}. Must be one of: yes, no, accept-new, off, ask"
-                elif key == "requesttty":
-                    return f"Invalid {key}: {value}. Must be one of: yes, no, force, auto"
-                elif key == "controlmaster":
-                    return f"Invalid {key}: {value}. Must be one of: yes, no, ask, auto, autoask"
-                elif key == "controlpersist":
-                    return f"Invalid {key}: {value}. Must be 'yes', 'no', or a time specification"
-                elif key == "addressfamily":
-                    return f"Invalid {key}: {value}. Must be one of: any, inet, inet6"
-                elif key == "preferredauthentications":
-                    return f"Invalid {key}: {value}. Must be comma-separated list of: gssapi-with-mic, hostbased, publickey, keyboard-interactive, password"
-                elif key == "ipqos":
-                    return f"Invalid {key}: {value}. Must be space-separated list of valid QoS values"
-                elif key == "streamlocalbindmask":
-                    return f"Invalid {key}: {value}. Must be an octal file mask"
-                else:
-                    return f"Invalid value for {key}: {value}"
+                logger.debug(f"Invalid value for {key}: {value}")
+                return f"Invalid value for {key}: {value}"
 
             return None
 
@@ -850,7 +809,8 @@ class PersistentSSHAgent:
             """
             nonlocal current_host, current_match, config
 
-            line = line.strip()
+            # Normalize line endings and remove BOM if present
+            line = line.replace("\ufeff", "").strip()
             if not line or line.startswith("#"):
                 return
 
@@ -887,63 +847,80 @@ class PersistentSSHAgent:
                 return
 
             # Handle Host blocks
-            if line.lower().strip().startswith("host "):
+            if line.lower().startswith("host "):
                 current_host = line.split(None, 1)[1].strip()
                 if is_valid_host_pattern(current_host):
                     if current_host not in config:
                         config[current_host] = {}
                     current_match = None
+                else:
+                    logger.debug(f"Invalid host pattern in {config_file}: {current_host}")
                 return
 
             # Parse key-value pairs
             if current_host is not None:
-                # Split line into key and value
-                line = line.strip()  # Strip whitespace from both ends
-                if not line:  # Skip empty lines
-                    return
-
-                if "=" in line:
-                    key, value = [x.strip() for x in line.split("=", 1)]
-                else:
-                    parts = line.split(None, 1)
-                    if len(parts) < 2:
-                        return
-                    key, value = parts[0].strip(), parts[1].strip()
-
-                key = key.lower()
-                if not value:  # Skip empty values
-                    return
-
-                # Validate key and value
-                error_msg = get_validation_error(key, value)
-                if error_msg:
-                    logger.debug(f"Config validation error in {config_file}: {error_msg}")
-                    return
-
-                # Handle array values (e.g., multiple IdentityFile entries)
-                if key in ["identityfile", "localforward", "remoteforward", "dynamicforward", "sendenv", "setenv"]:
-                    if key not in config[current_host]:
-                        config[current_host][key] = value
+                try:
+                    # Split line into key and value, supporting both space and = separators
+                    if "=" in line:
+                        key, value = [x.strip() for x in line.split("=", 1)]
                     else:
-                        if not isinstance(config[current_host][key], list):
-                            config[current_host][key] = [config[current_host][key]]
-                        if value not in config[current_host][key]:  # Avoid duplicates
-                            config[current_host][key].append(value)
-                else:
-                    config[current_host][key] = value
+                        parts = line.split(None, 1)
+                        if len(parts) < 2:
+                            return
+                        key, value = parts[0].strip(), parts[1].strip()
+
+                    key = key.lower()
+                    if not value:  # Skip empty values
+                        return
+
+                    # Validate key and value
+                    error_msg = get_validation_error(key, value)
+                    if error_msg:
+                        return
+
+                    # Handle array values
+                    if key in ["identityfile", "localforward", "remoteforward", "dynamicforward", "sendenv", "setenv"]:
+                        if key not in config[current_host]:
+                            config[current_host][key] = [value]
+                        elif isinstance(config[current_host][key], list):
+                            if value not in config[current_host][key]:  # Avoid duplicates
+                                config[current_host][key].append(value)
+                        else:
+                            config[current_host][key] = [config[current_host][key], value]
+                    else:
+                        config[current_host][key] = value
+
+                except Exception as e:
+                    logger.debug(f"Error processing line in {config_file}: {line.strip()}, Error: {e}")
 
         try:
-            with open(ssh_config_path) as f:
+            with open(ssh_config_path, encoding="utf-8-sig") as f:
                 # Reset config for each parse attempt
                 config.clear()
                 current_host = None
                 current_match = None
 
-                for line in f:
-                    process_config_line(line)
+                lines = [line.rstrip("\r\n") for line in f.readlines()]
+
+                # 处理每一行
+                for line in lines:
+                    try:
+                        # 移除前导空格但保留缩进结构
+                        stripped_line = line.lstrip()
+                        if not stripped_line:  # 跳过空行
+                            continue
+
+                        process_config_line(stripped_line)
+                    except Exception as e:
+                        logger.debug(f"Error processing line: {line.strip()}, Error: {e}")
+                        continue  # Continue processing remaining lines
+
         except Exception as e:
-            logger.debug(f"Failed to parse SSH config: {e}")
+            logger.error(f"Failed to parse SSH config: {e}")
             config.clear()  # Clear config on error
+
+        if not config:
+            logger.debug("No valid configuration found in SSH config file")
 
         return config
 

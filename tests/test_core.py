@@ -50,11 +50,13 @@ def test_parse_ssh_config(ssh_manager, mock_ssh_config, monkeypatch):
     config = ssh_manager._parse_ssh_config()
 
     assert "github.com" in config
-    assert config["github.com"]["identityfile"] == "~/.ssh/id_ed25519"
+    assert isinstance(config["github.com"]["identityfile"], list)
+    assert config["github.com"]["identityfile"] == ["~/.ssh/id_ed25519"]
     assert config["github.com"]["user"] == "git"
 
     assert "*.gitlab.com" in config
-    assert config["*.gitlab.com"]["identityfile"] == "gitlab_key"  # Relative path as specified in config
+    assert isinstance(config["*.gitlab.com"]["identityfile"], list)
+    assert config["*.gitlab.com"]["identityfile"] == ["gitlab_key"]
     assert config["*.gitlab.com"]["user"] == "git"
 
 
