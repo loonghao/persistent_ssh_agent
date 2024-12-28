@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   run:
     strategy:
-      max-parallel: 3
+      max-parallel: 10
       matrix:
         target:
           - os: 'ubuntu-latest'
