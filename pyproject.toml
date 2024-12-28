@@ -9,23 +9,21 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 
-[tool.poetry.optional-dependencies]
-docs = [
-    "sphinx>=5.0",
-    "furo",
-    "sphinx-autobuild",
-    "sphinx-copybutton",
-    "doc8>=1.1.1",
-    "sphinx-intl",
-    "myst-parser>=2.0.0",
-]
-test = [
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-benchmark",
-    "pytest-timeout",
-]
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=5.0"
+furo = "*"
+sphinx-autobuild = "*"
+sphinx-copybutton = "*"
+doc8 = ">=1.1.1"
+sphinx-intl = "*"
+myst-parser = ">=2.0.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-benchmark = "*"
+pytest-timeout = "*"
 
 [build-system]
 requires = ["poetry-core"]
