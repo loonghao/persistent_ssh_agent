@@ -6,15 +6,13 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from click.testing import CliRunner
-
-# Import local modules
 from persistent_ssh_agent.cli import export_config
 from persistent_ssh_agent.cli import import_config
 from persistent_ssh_agent.cli import main
 from persistent_ssh_agent.cli import remove_key
 from persistent_ssh_agent.cli import setup_config
+import pytest
 
 
 def test_import_config_error():

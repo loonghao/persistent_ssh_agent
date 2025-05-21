@@ -8,13 +8,11 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
-
-# Import local modules
 from persistent_ssh_agent.cli import Args
 from persistent_ssh_agent.cli import ConfigManager
-from persistent_ssh_agent.cli import setup_config
 from persistent_ssh_agent.cli import run_ssh_connection_test
+from persistent_ssh_agent.cli import setup_config
+import pytest
 
 
 def test_args_class():

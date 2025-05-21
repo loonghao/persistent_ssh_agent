@@ -4,16 +4,15 @@
 import json
 import os
 from pathlib import Path
-from unittest.mock import MagicMock
 from unittest.mock import mock_open
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from persistent_ssh_agent.cli import Args
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import export_config
 from persistent_ssh_agent.cli import import_config
+import pytest
 
 
 @pytest.fixture
@@ -271,7 +270,7 @@ def test_import_config_import_error(config_manager):
                             import_config(args)
 
                             # Verify logger was called with the expected error message
-                            assert any("Failed to import configuration" == call[0][0]
+                            assert any(call[0][0] == "Failed to import configuration"
                                        for call in mock_logger.error.call_args_list)
 
                             # Verify sys.exit was called with exit code 1
