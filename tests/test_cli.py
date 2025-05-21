@@ -10,9 +10,12 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
+import click
+from click.testing import CliRunner
 import pytest
 
 # Import local modules
+from persistent_ssh_agent.cli import Args
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import export_config
 from persistent_ssh_agent.cli import import_config
@@ -87,12 +90,12 @@ def test_config_manager_get_set_identity_file(config_manager):
     assert identity_file.endswith(".ssh/id_rsa") or identity_file.endswith(".ssh\\id_rsa")
 
 
-def test_config_manager_obfuscate_deobfuscate(config_manager):
-    """Test obfuscation and deobfuscation of passphrase."""
+def test_config_manager_encrypt_decrypt(config_manager):
+    """Test encryption and decryption of passphrase."""
     passphrase = "test_passphrase"
-    obfuscated = config_manager._obfuscate_passphrase(passphrase)
-    deobfuscated = config_manager._deobfuscate_passphrase(obfuscated)
-    assert deobfuscated == passphrase
+    encrypted = config_manager._encrypt_passphrase(passphrase)
+    decrypted = config_manager._deobfuscate_passphrase(encrypted)
+    assert decrypted == passphrase
 
 
 @patch("persistent_ssh_agent.cli.ConfigManager")
@@ -104,6 +107,9 @@ def test_setup_config_identity_file(mock_exists, mock_config_manager):
     args.identity_file = "~/.ssh/id_rsa"
     args.passphrase = None
     args.prompt_passphrase = False
+    # Add expiration and reuse_agent attributes
+    args.expiration = None
+    args.reuse_agent = None
 
     # Create mock config manager
     mock_manager = MagicMock()
@@ -129,6 +135,9 @@ def test_setup_config_passphrase(mock_exists, mock_config_manager):
     args.identity_file = None
     args.passphrase = "test"
     args.prompt_passphrase = False
+    # Add expiration and reuse_agent attributes
+    args.expiration = None
+    args.reuse_agent = None
 
     # Create mock config manager
     mock_manager = MagicMock()
@@ -151,6 +160,10 @@ def test_test_connection(mock_exists, mock_agent, mock_config_manager):
     args = MagicMock()
     args.hostname = "github.com"
     args.identity_file = "~/.ssh/id_rsa"
+    # Add new attributes
+    args.expiration = None
+    args.reuse_agent = None
+    args.verbose = False
 
     # Create mock config manager
     mock_manager = MagicMock()
@@ -170,26 +183,148 @@ def test_test_connection(mock_exists, mock_agent, mock_config_manager):
     mock_agent_instance.setup_ssh.assert_called_once_with("github.com")
 
 
-@patch("persistent_ssh_agent.cli.argparse.ArgumentParser")
-def test_main(mock_parser):
+def test_main():
     """Test the main function."""
-    # Create mock parser
-    mock_parser_instance = MagicMock()
-    mock_parser.return_value = mock_parser_instance
+    runner = CliRunner()
+    result = runner.invoke(main, ["--help"])
 
-    # Create mock arguments
-    mock_args = MagicMock()
-    mock_args.command = None
-    mock_parser_instance.parse_args.return_value = mock_args
+    # Verify the command ran successfully
+    assert result.exit_code == 0
 
-    # Call main with sys.exit mocked
-    with patch("persistent_ssh_agent.cli.sys.exit") as mock_exit:
-        main()
-        mock_exit.assert_called_once_with(1)
+    # Verify the help text contains our commands
+    assert "Commands:" in result.output
+    assert "config" in result.output
+    assert "test" in result.output
+    assert "list" in result.output
+    assert "remove" in result.output
+    assert "export" in result.output
+    assert "import" in result.output
 
-    # Verify the parser was created and parse_args was called
-    mock_parser.assert_called_once()
-    mock_parser_instance.parse_args.assert_called_once()
+
+def test_config_command():
+    """Test the config command."""
+    runner = CliRunner()
+
+    # Test with identity file
+    with patch("persistent_ssh_agent.cli.setup_config") as mock_setup_config:
+        result = runner.invoke(main, ["config", "--identity-file", "~/.ssh/id_rsa"])
+        assert result.exit_code == 0
+        mock_setup_config.assert_called_once()
+        args = mock_setup_config.call_args[0][0]
+        assert args.identity_file == "~/.ssh/id_rsa"
+
+    # Test with passphrase
+    with patch("persistent_ssh_agent.cli.setup_config") as mock_setup_config:
+        result = runner.invoke(main, ["config", "--passphrase", "test"])
+        assert result.exit_code == 0
+        mock_setup_config.assert_called_once()
+        args = mock_setup_config.call_args[0][0]
+        assert args.passphrase == "test"
+
+    # Test with prompt passphrase
+    with patch("persistent_ssh_agent.cli.setup_config") as mock_setup_config:
+        result = runner.invoke(main, ["config", "--prompt-passphrase"])
+        assert result.exit_code == 0
+        mock_setup_config.assert_called_once()
+        args = mock_setup_config.call_args[0][0]
+        assert args.prompt_passphrase is True
+
+
+def test_test_command():
+    """Test the test command."""
+    runner = CliRunner()
+
+    # Test with hostname
+    with patch("persistent_ssh_agent.cli.run_ssh_connection_test") as mock_test:
+        result = runner.invoke(main, ["test", "github.com"])
+        assert result.exit_code == 0
+        mock_test.assert_called_once()
+        args = mock_test.call_args[0][0]
+        assert args.hostname == "github.com"
+
+    # Test with identity file
+    with patch("persistent_ssh_agent.cli.run_ssh_connection_test") as mock_test:
+        result = runner.invoke(main, ["test", "github.com", "--identity-file", "~/.ssh/id_rsa"])
+        assert result.exit_code == 0
+        mock_test.assert_called_once()
+        args = mock_test.call_args[0][0]
+        assert args.hostname == "github.com"
+        assert args.identity_file == "~/.ssh/id_rsa"
+
+
+def test_list_command():
+    """Test the list command."""
+    runner = CliRunner()
+
+    with patch("persistent_ssh_agent.cli.list_keys") as mock_list:
+        result = runner.invoke(main, ["list"])
+        assert result.exit_code == 0
+        mock_list.assert_called_once_with(None)
+
+
+def test_remove_command():
+    """Test the remove command."""
+    runner = CliRunner()
+
+    # Test with name
+    with patch("persistent_ssh_agent.cli.remove_key") as mock_remove:
+        result = runner.invoke(main, ["remove", "--name", "github"])
+        assert result.exit_code == 0
+        mock_remove.assert_called_once()
+        args = mock_remove.call_args[0][0]
+        assert args.name == "github"
+        assert args.all is False
+
+    # Test with all
+    with patch("persistent_ssh_agent.cli.remove_key") as mock_remove:
+        result = runner.invoke(main, ["remove", "--all"])
+        assert result.exit_code == 0
+        mock_remove.assert_called_once()
+        args = mock_remove.call_args[0][0]
+        assert args.name is None
+        assert args.all is True
+
+
+def test_export_command():
+    """Test the export command."""
+    runner = CliRunner()
+
+    # Test without options
+    with patch("persistent_ssh_agent.cli.export_config") as mock_export:
+        result = runner.invoke(main, ["export"])
+        assert result.exit_code == 0
+        mock_export.assert_called_once()
+        args = mock_export.call_args[0][0]
+        assert args.output is None
+        assert args.include_sensitive is False
+
+    # Test with output file
+    with patch("persistent_ssh_agent.cli.export_config") as mock_export:
+        result = runner.invoke(main, ["export", "--output", "config.json"])
+        assert result.exit_code == 0
+        mock_export.assert_called_once()
+        args = mock_export.call_args[0][0]
+        assert args.output == "config.json"
+
+    # Test with include sensitive
+    with patch("persistent_ssh_agent.cli.export_config") as mock_export:
+        result = runner.invoke(main, ["export", "--include-sensitive"])
+        assert result.exit_code == 0
+        mock_export.assert_called_once()
+        args = mock_export.call_args[0][0]
+        assert args.include_sensitive is True
+
+
+def test_import_command():
+    """Test the import command."""
+    runner = CliRunner()
+
+    with patch("persistent_ssh_agent.cli.import_config") as mock_import:
+        result = runner.invoke(main, ["import", "config.json"])
+        assert result.exit_code == 0
+        mock_import.assert_called_once()
+        args = mock_import.call_args[0][0]
+        assert args.input == "config.json"
 
 
 @patch("persistent_ssh_agent.cli.ConfigManager")
@@ -325,7 +460,7 @@ def test_import_config(mock_config_manager):
 
     # Call import_config
     with patch("builtins.open", return_value=mock_file) as mock_open:
-        with patch("json.load", return_value={"identity_file": "~/.ssh/id_rsa"}) as mock_json_load:
+        with patch("json.load", return_value={"identity_file": "~/.ssh/id_rsa"}):
             with patch("persistent_ssh_agent.cli.logger") as mock_logger:
                 import_config(args)
 

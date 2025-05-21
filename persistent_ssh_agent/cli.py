@@ -1,7 +1,6 @@
 """Command-line interface for persistent-ssh-agent."""
 
 # Import built-in modules
-import argparse
 import base64
 import ctypes
 import getpass
@@ -21,6 +20,7 @@ from typing import Tuple
 from typing import Union
 
 # Import third-party modules
+import click
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher
@@ -45,6 +45,19 @@ SALT_SIZE = 16
 IV_SIZE = 16
 KEY_SIZE = 32  # 256 bits
 ITERATIONS = 100000
+
+
+class Args:
+    """Simple class to mimic argparse namespace for compatibility with existing functions."""
+
+    def __init__(self, **kwargs):
+        """Initialize with keyword arguments.
+
+        Args:
+            **kwargs: Attributes to set on the instance
+        """
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class ConfigManager:
@@ -417,27 +430,25 @@ class ConfigManager:
 
         except Exception as e:
             logger.error(f"Failed to encrypt passphrase: {e}")
-            # Fall back to simple obfuscation if encryption fails
-            return self._legacy_obfuscate_passphrase(passphrase)
+            raise
 
     def _deobfuscate_passphrase(self, encrypted_data: str) -> str:
-        """Decrypt or deobfuscate passphrase.
+        """Decrypt passphrase.
 
         Args:
-            encrypted_data: Encrypted or obfuscated passphrase
+            encrypted_data: Encrypted passphrase
 
         Returns:
             str: Plain text passphrase
         """
-        # Try to decrypt using AES-256
         try:
             # Check if this is a base64-encoded string (AES encryption)
             data = base64.b64decode(encrypted_data)
 
             # Extract salt, IV, and ciphertext
             salt = data[:SALT_SIZE]
-            iv = data[SALT_SIZE:SALT_SIZE+IV_SIZE]
-            ciphertext = data[SALT_SIZE+IV_SIZE:]
+            iv = data[SALT_SIZE:SALT_SIZE + IV_SIZE]
+            ciphertext = data[SALT_SIZE + IV_SIZE:]
 
             # Derive key using the extracted salt
             kdf = PBKDF2HMAC(
@@ -455,7 +466,9 @@ class ConfigManager:
                 "username": os.getlogin() if hasattr(os, "getlogin") else getpass.getuser(),
                 "home": str(Path.home())
             }
-            password = f"{system_info['hostname']}:{system_info['machine_id']}:{system_info['home']}"
+            password = (
+                f"{system_info['hostname']}:{system_info['machine_id']}:{system_info['home']}"
+            )
             key = kdf.derive(password.encode())
 
             # Create a decryptor
@@ -472,52 +485,8 @@ class ConfigManager:
             return plaintext.decode()
 
         except Exception as e:
-            # If AES decryption fails, try legacy XOR deobfuscation
-            logger.debug(f"AES decryption failed, trying legacy deobfuscation: {e}")
-            return self._legacy_deobfuscate_passphrase(encrypted_data)
-
-    @staticmethod
-    def _legacy_obfuscate_passphrase(passphrase: str) -> str:
-        """Legacy obfuscation for passphrase (not secure encryption).
-
-        Args:
-            passphrase: Plain text passphrase
-
-        Returns:
-            str: Obfuscated passphrase
-        """
-        # Simple XOR with a fixed key (not secure, just obfuscation)
-        key = b"persistent_ssh_agent_key"
-        result = bytearray()
-
-        for i, char in enumerate(passphrase.encode()):
-            result.append(char ^ key[i % len(key)])
-
-        return result.hex()
-
-    @staticmethod
-    def _legacy_deobfuscate_passphrase(obfuscated: str) -> str:
-        """Legacy deobfuscation for passphrase.
-
-        Args:
-            obfuscated: Obfuscated passphrase
-
-        Returns:
-            str: Plain text passphrase
-        """
-        # Reverse the XOR operation
-        key = b"persistent_ssh_agent_key"
-        result = bytearray()
-
-        try:
-            data = bytes.fromhex(obfuscated)
-            for i, char in enumerate(data):
-                result.append(char ^ key[i % len(key)])
-
-            return result.decode()
-        except (ValueError, UnicodeDecodeError) as e:
-            logger.error(f"Failed to deobfuscate passphrase: {e}")
-            return ""
+            logger.error(f"Failed to decrypt passphrase: {e}")
+            raise
 
     @staticmethod
     def secure_delete_from_memory(data: Union[str, bytes, bytearray]) -> None:
@@ -643,7 +612,7 @@ def run_ssh_connection_test(args):
         # Check stored configuration
         stored_expiration = config_manager.get_expiration_time()
         if stored_expiration:
-            logger.debug(f"Using expiration time from config: {stored_expiration/3600} hours")
+            logger.debug(f"Using expiration time from config: {stored_expiration / 3600} hours")
             # We don't need to set it in ssh_config as it's not used there
 
     # Get reuse agent setting and add to SSH config if available
@@ -672,7 +641,12 @@ def run_ssh_connection_test(args):
         logger.remove()
         logger.add(
             sys.stderr,
-            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+            format=(
+                "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+                "<level>{level: <8}</level> | "
+                "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+                "<level>{message}</level>"
+            ),
             level="DEBUG"
         )
 
@@ -788,100 +762,92 @@ def import_config(args):
         logger.error("Failed to import configuration")
         sys.exit(1)
 
+@click.group(help="Persistent SSH Agent CLI")
 def main():
     """Main entry point for CLI."""
-    parser = argparse.ArgumentParser(
-        description="Persistent SSH Agent CLI",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    # This function serves as the entry point for the CLI
+    # The actual functionality is implemented in the command functions
+
+
+@main.command("config", help="Configure SSH agent")
+@click.option("--identity-file", help="Path to SSH identity file")
+@click.option(
+    "--passphrase",
+    help="SSH key passphrase (not recommended, use --prompt-passphrase instead)"
+)
+@click.option("--prompt-passphrase", is_flag=True, help="Prompt for SSH key passphrase")
+@click.option("--expiration", type=int, help="Expiration time in hours")
+@click.option("--reuse-agent", type=bool, help="Whether to reuse existing SSH agent")
+def config_cmd(identity_file, passphrase, prompt_passphrase, expiration, reuse_agent):
+    """Configure SSH agent settings."""
+    args = Args(
+        identity_file=identity_file,
+        passphrase=passphrase,
+        prompt_passphrase=prompt_passphrase,
+        expiration=expiration,
+        reuse_agent=reuse_agent
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+    setup_config(args)
 
-    # Config command
-    config_parser = subparsers.add_parser("config", help="Configure SSH agent")
-    config_parser.add_argument("--identity-file", help="Path to SSH identity file")
-    passphrase_group = config_parser.add_mutually_exclusive_group()
-    passphrase_group.add_argument(
-        "--passphrase",
-        help="SSH key passphrase (not recommended, use --prompt instead)"
-    )
-    passphrase_group.add_argument(
-        "--prompt-passphrase",
-        action="store_true",
-        help="Prompt for SSH key passphrase"
-    )
-    config_parser.add_argument(
-        "--expiration",
-        type=int,
-        help="Expiration time in hours"
-    )
-    config_parser.add_argument(
-        "--reuse-agent",
-        type=bool,
-        help="Whether to reuse existing SSH agent"
+
+@main.command("test", help="Test SSH connection")
+@click.argument("hostname")
+@click.option("--identity-file", help="Path to SSH identity file (overrides config)")
+@click.option("--expiration", type=int, help="Expiration time in hours (overrides config)")
+@click.option(
+    "--reuse-agent",
+    type=bool,
+    help="Whether to reuse existing SSH agent (overrides config)"
+)
+@click.option("--verbose", is_flag=True, help="Enable verbose output")
+def test_cmd(hostname, identity_file, expiration, reuse_agent, verbose):
+    """Test SSH connection to a host."""
+    args = Args(
+        hostname=hostname,
+        identity_file=identity_file,
+        expiration=expiration,
+        reuse_agent=reuse_agent,
+        verbose=verbose
     )
 
-    # Test command
-    test_parser = subparsers.add_parser("test", help="Test SSH connection")
-    test_parser.add_argument("hostname", help="Hostname to test connection with")
-    test_parser.add_argument("--identity-file", help="Path to SSH identity file (overrides config)")
-    test_parser.add_argument(
-        "--expiration",
-        type=int,
-        help="Expiration time in hours (overrides config)"
-    )
-    test_parser.add_argument(
-        "--reuse-agent",
-        type=bool,
-        help="Whether to reuse existing SSH agent (overrides config)"
-    )
-    test_parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    run_ssh_connection_test(args)
 
-    # List command
-    subparsers.add_parser("list", help="List configured SSH keys")
 
-    # Remove command
-    remove_parser = subparsers.add_parser("remove", help="Remove configured SSH keys")
-    remove_group = remove_parser.add_mutually_exclusive_group(required=True)
-    remove_group.add_argument("--name", help="Name of the key to remove")
-    remove_group.add_argument("--all", action="store_true", help="Remove all keys")
+@main.command("list", help="List configured SSH keys")
+def list_cmd():
+    """List all configured SSH keys."""
+    list_keys(None)
 
-    # Export command
-    export_parser = subparsers.add_parser("export", help="Export configuration")
-    export_parser.add_argument("--output", help="Output file path")
-    export_parser.add_argument(
-        "--include-sensitive",
-        action="store_true",
-        help="Include sensitive information in export"
-    )
 
-    # Import command
-    import_parser = subparsers.add_parser("import", help="Import configuration")
-    import_parser.add_argument("input", help="Input file path")
-
-    # Parse arguments
-    args = parser.parse_args()
-
-    # Execute command
-    if args.command == "config":
-        setup_config(args)
-    elif args.command == "test":
-        run_ssh_connection_test(args)
-    elif args.command == "list":
-        list_keys(args)
-    elif args.command == "remove":
-        remove_key(args)
-    elif args.command == "export":
-        export_config(args)
-    elif args.command == "import":
-        import_config(args)
-    else:
-        parser.print_help()
+@main.command("remove", help="Remove configured SSH keys")
+@click.option("--name", help="Name of the key to remove")
+@click.option("--all", "all_keys", is_flag=True, help="Remove all keys")
+def remove(name, all_keys):
+    """Remove configured SSH keys."""
+    if not name and not all_keys:
+        click.echo("Error: Either --name or --all must be specified")
         sys.exit(1)
+
+    args = Args(name=name, all=all_keys)
+    remove_key(args)
+
+
+@main.command("export", help="Export configuration")
+@click.option("--output", help="Output file path")
+@click.option("--include-sensitive", is_flag=True, help="Include sensitive information in export")
+def export_cmd(output, include_sensitive):
+    """Export configuration."""
+    args = Args(output=output, include_sensitive=include_sensitive)
+    export_config(args)
+
+
+@main.command("import", help="Import configuration")
+@click.argument("input_file")
+def import_config_cmd(input_file):
+    """Import configuration from a file."""
+    args = Args(input=input_file)
+    import_config(args)
 
 
 if __name__ == "__main__":

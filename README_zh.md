@@ -227,14 +227,14 @@ uvx persistent_ssh_agent remove --name github
 uvx persistent_ssh_agent export --output ~/.ssh/config.json
 
 # 从文件导入配置
-uvx persistent_ssh_agent import ~/.ssh/config.json
+uvx persistent_ssh_agent import config.json
 ```
 
 可用命令：
 
 - `config`：配置 SSH agent 设置
   - `--identity-file`：SSH 身份文件路径
-  - `--passphrase`：SSH 密钥密码短语（不推荐，请使用 --prompt 代替）
+  - `--passphrase`：SSH 密钥密码短语（不推荐，请使用 --prompt-passphrase 代替）
   - `--prompt-passphrase`：提示输入 SSH 密钥密码短语
   - `--expiration`：过期时间（小时）
   - `--reuse-agent`：是否复用现有的 SSH agent
@@ -257,7 +257,7 @@ uvx persistent_ssh_agent import ~/.ssh/config.json
   - `--include-sensitive`：在导出中包含敏感信息
 
 - `import`：导入配置
-  - `input`：输入文件路径
+  - `input_file`：输入文件路径
 
 ### CI/CD 流水线集成
 
