@@ -16,33 +16,17 @@ jobs:
       contents: write
 
     steps:
+    # This step is kept for backward compatibility
     - name: Set tag variable
       id: set_tag
       run: |
         if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
-          echo "TAG=${{ github.event.client_payload.tag }}" >> $GITHUB_ENV
           echo "VERSION=${{ github.event.client_payload.version }}" >> $GITHUB_ENV
-          echo "RELEASE_TAG=${{ github.event.client_payload.tag }}" >> $GITHUB_ENV
-          echo "Using tag from repository_dispatch: ${{ github.event.client_payload.tag }}"
         else
-          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-          echo "Using tag from push event: ${GITHUB_REF#refs/tags/}"
         fi
 
-        # Fallback for tag if environment variables are not available
-        if [[ -z "$TAG" ]]; then
-          echo "TAG not set, using GITHUB_REF directly"
-          REF_TAG=${GITHUB_REF#refs/tags/}
-          echo "RELEASE_TAG=$REF_TAG" >> $GITHUB_ENV
-        fi
 
-    - name: Debug environment variables
-      run: |
-        echo "TAG: ${{ env.TAG }}"
-        echo "VERSION: ${{ env.VERSION }}"
-        echo "GITHUB_REF: ${{ github.ref }}"
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       with:
@@ -54,11 +38,7 @@ jobs:
       with:
         tagRegex: "v(?<version>.*)"
 
-    - name: Debug get-tag output
-      run: |
-        echo "GIT_TAG_NAME: ${{ env.GIT_TAG_NAME }}"
-        echo "get_tag_name.outputs.tag: ${{ steps.get_tag_name.outputs.tag }}"
-        echo "get_tag_name.outputs.version: ${{ steps.get_tag_name.outputs.version }}"
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -74,12 +54,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: dist
-    - name: Debug tag information
-      run: |
-        echo "GITHUB_REF: ${{ github.ref }}"
-        echo "TAG env: ${{ env.TAG }}"
-        echo "VERSION env: ${{ env.VERSION }}"
-        echo "RELEASE_TAG env: ${{ env.RELEASE_TAG }}"
+
 
     - name: Generate changelog
       id: changelog
@@ -99,35 +74,22 @@ jobs:
           {{chore,style,ci||🔶 Nothing change}}
           ## Unknown
           {{__unknown__}}
-    # Set final tag for release using get-tag output as primary source
+    # Set final tag for release using get-tag output
     - name: Set final tag for release
       id: set_final_tag
       run: |
-        # Try to get tag from get-tag output first
+        # Use get-tag output or fallback to github.ref_name
         if [[ -n "${{ steps.get_tag_name.outputs.tag }}" ]]; then
           FINAL_TAG="${{ steps.get_tag_name.outputs.tag }}"
-          echo "Using get_tag_name.outputs.tag: $FINAL_TAG"
-        elif [[ -n "${{ env.GIT_TAG_NAME }}" ]]; then
-          FINAL_TAG="${{ env.GIT_TAG_NAME }}"
-          echo "Using GIT_TAG_NAME: $FINAL_TAG"
-        elif [[ -n "${{ env.RELEASE_TAG }}" ]]; then
-          FINAL_TAG="${{ env.RELEASE_TAG }}"
-          echo "Using RELEASE_TAG: $FINAL_TAG"
-        elif [[ -n "${{ env.TAG }}" ]]; then
-          FINAL_TAG="${{ env.TAG }}"
-          echo "Using TAG: $FINAL_TAG"
         elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
           FINAL_TAG="${GITHUB_REF#refs/tags/}"
-          echo "Using GITHUB_REF: $FINAL_TAG"
         else
           FINAL_TAG="${{ github.ref_name }}"
-          echo "Using github.ref_name: $FINAL_TAG"
         fi
 
         # Set output and environment variable
         echo "FINAL_TAG=$FINAL_TAG" >> $GITHUB_OUTPUT
         echo "FINAL_TAG=$FINAL_TAG" >> $GITHUB_ENV
-        echo "Final tag for release: $FINAL_TAG"
 
     - uses: ncipollo/release-action@v1
       with:
