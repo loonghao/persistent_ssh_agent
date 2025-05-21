@@ -1,3 +1,10 @@
+## v0.7.5 (2025-05-21)
+
+### Fix
+
+- update commitizen workflow configuration to fix tag format issue
+- update release workflow with proper permissions and configuration
+
 ## v0.7.4 (2025-05-21)
 
 ### Fix
