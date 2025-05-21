@@ -1,3 +1,10 @@
+## v0.7.1 (2025-05-21)
+
+### Fix
+
+- ensure tag push triggers python-publish workflow
+- ensure tag push triggers python-publish workflow
+
 ## v0.7.0 (2025-05-21)
 
 ### Feat
