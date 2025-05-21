@@ -42,7 +42,7 @@ jobs:
       id: changelog
       uses: jaywcjlove/changelog-generator@main
       with:
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        token: ${{ github.token }}
         filter-author: (|dependabot|renovate\\[bot\\]|dependabot\\[bot\\]|Renovate Bot)
         filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
         template: |
@@ -59,7 +59,7 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "dist/*"
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        token: ${{ github.token }}
         body: |
           Comparing Changes: ${{ steps.changelog.outputs.compareurl }}
 
