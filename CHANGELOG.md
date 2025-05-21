@@ -1,3 +1,9 @@
+## v0.7.6 (2025-05-21)
+
+### Fix
+
+- Update PyPI publishing config
+
 ## v0.7.5 (2025-05-21)
 
 ### Fix
