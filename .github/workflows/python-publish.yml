@@ -93,20 +93,36 @@ jobs:
           {{chore,style,ci||🔶 Nothing change}}
           ## Unknown
           {{__unknown__}}
-    # Extract tag from ref as a fallback
-    - name: Extract tag from ref
-      id: get_ref_tag
+    # Extract tag from ref as a fallback and set final tag
+    - name: Set final tag for release
+      id: set_final_tag
       run: |
-        REF_TAG="${GITHUB_REF#refs/tags/}"
-        echo "REF_TAG=$REF_TAG" >> $GITHUB_OUTPUT
-        echo "Extracted tag from ref: $REF_TAG"
+        # Try to get tag from environment variables first
+        if [[ -n "${{ env.RELEASE_TAG }}" ]]; then
+          FINAL_TAG="${{ env.RELEASE_TAG }}"
+          echo "Using RELEASE_TAG: $FINAL_TAG"
+        elif [[ -n "${{ env.TAG }}" ]]; then
+          FINAL_TAG="${{ env.TAG }}"
+          echo "Using TAG: $FINAL_TAG"
+        elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          FINAL_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Using GITHUB_REF: $FINAL_TAG"
+        else
+          FINAL_TAG="${{ github.ref_name }}"
+          echo "Using github.ref_name: $FINAL_TAG"
+        fi
+
+        # Set output and environment variable
+        echo "FINAL_TAG=$FINAL_TAG" >> $GITHUB_OUTPUT
+        echo "FINAL_TAG=$FINAL_TAG" >> $GITHUB_ENV
+        echo "Final tag for release: $FINAL_TAG"
 
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "dist/*"
         token: ${{ github.token }}
-        tag: ${{ env.RELEASE_TAG || steps.get_ref_tag.outputs.REF_TAG || github.ref_name }}
-        name: "Release ${{ env.RELEASE_TAG || steps.get_ref_tag.outputs.REF_TAG || github.ref_name }}"
+        tag: ${{ steps.set_final_tag.outputs.FINAL_TAG }}
+        name: "Release ${{ steps.set_final_tag.outputs.FINAL_TAG }}"
         allowUpdates: true
         body: |
           Comparing Changes: ${{ steps.changelog.outputs.compareurl }}
