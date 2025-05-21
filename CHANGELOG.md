@@ -1,3 +1,9 @@
+## v0.7.7 (2025-05-21)
+
+### Fix
+
+- use client_payload.version as tag in release workflow
+
 ## v0.7.6 (2025-05-21)
 
 ### Fix
