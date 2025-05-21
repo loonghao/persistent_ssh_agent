@@ -94,7 +94,7 @@ class PersistentSSHAgent:
         # Initialize paths and state
         self._ssh_dir = Path.home() / ".ssh"
         self._agent_info_file = self._ssh_dir / "agent_info.json"
-        self._ssh_config_cache = {}
+        self._ssh_config_cache: Dict[str, Dict[str, str]] = {}
         self._ssh_agent_started = False
         self._expiration_time = expiration_time
         self._config = config
@@ -401,7 +401,7 @@ class PersistentSSHAgent:
                         cli_passphrase = config_manager.get_passphrase()
                         if cli_passphrase:
                             logger.debug("Using passphrase from CLI config")
-                            deobfuscated = config_manager._deobfuscate_passphrase(cli_passphrase)
+                            deobfuscated = config_manager.deobfuscate_passphrase(cli_passphrase)
                             return self._add_key_with_passphrase(identity_file, deobfuscated)
                     except Exception as e:
                         logger.debug("Failed to get passphrase from CLI config: %s", e)
@@ -674,48 +674,132 @@ class PersistentSSHAgent:
     def _get_identity_file(self, hostname: str) -> Optional[str]:
         """Get the identity file to use for a given hostname.
 
+        This method tries multiple sources to find an appropriate SSH identity file,
+        checking them in the following order of priority:
+        1. CLI configuration (if available)
+        2. SSH_IDENTITY_FILE environment variable
+        3. Available SSH keys in the user's .ssh directory
+        4. Default key path (~/.ssh/id_rsa) as a fallback
+
         Args:
             hostname: The hostname to get the identity file for.
 
         Returns:
             Optional[str]: Path to the identity file, or None if not found.
+
+        Note:
+            Even if no identity file is found in any of the sources, this method
+            will still return a default path to ~/.ssh/id_rsa, which may not exist.
         """
-        # Check if we have a config from CLI
-        if _has_cli:
-            try:
-                config_manager = ConfigManager()
-                cli_identity_file = config_manager.get_identity_file()
-                if cli_identity_file and os.path.exists(os.path.expanduser(cli_identity_file)):
-                    logger.debug("Using identity file from CLI config: %s", cli_identity_file)
-                    return os.path.expanduser(cli_identity_file)
-            except Exception as e:
-                logger.debug("Failed to get identity file from CLI config: %s", e)
+        # Try to get identity file from different sources in order of priority
+        identity_file = self._get_identity_from_cli()
+        if identity_file:
+            return identity_file
 
-        # Check environment variable
-        if "SSH_IDENTITY_FILE" in os.environ:
-            identity_file = os.environ["SSH_IDENTITY_FILE"]
-            if os.path.exists(identity_file):
-                return str(Path(identity_file))
+        identity_file = self._get_identity_from_env()
+        if identity_file:
+            return identity_file
 
-        # Check available keys
-        available_keys = self._get_available_keys()
-        if available_keys:
-            # Use the first available key (highest priority)
-            return available_keys[0]  # Already a full path
+        identity_file = self._get_identity_from_available_keys()
+        if identity_file:
+            return identity_file
 
         # Always return default key path, even if it doesn't exist
         return str(Path(os.path.join(self._ssh_dir, "id_rsa")))
 
-    def _parse_ssh_config(self) -> SSHConfig:
+    def _get_identity_from_cli(self) -> Optional[str]:
+        """Get identity file from CLI configuration.
+
+        This method attempts to retrieve the identity file path from the CLI configuration
+        manager if available. It checks if the CLI module is loaded, creates a ConfigManager
+        instance, and retrieves the identity file path. It also verifies that the file exists.
+
+        Returns:
+            Optional[str]: Path to identity file or None if not found, CLI module is not
+            available, or an error occurs during retrieval.
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> identity_file = agent._get_identity_from_cli()
+            >>> if identity_file:
+            ...     print(f"Using identity file: {identity_file}")
+        """
+        if not _has_cli:
+            return None
+
+        try:
+            config_manager = ConfigManager()
+            cli_identity_file = config_manager.get_identity_file()
+            if cli_identity_file and os.path.exists(os.path.expanduser(cli_identity_file)):
+                logger.debug("Using identity file from CLI config: %s", cli_identity_file)
+                return os.path.expanduser(cli_identity_file)
+        except Exception as e:
+            logger.debug("Failed to get identity file from CLI config: %s", e)
+
+        return None
+
+    def _get_identity_from_env(self) -> Optional[str]:
+        """Get identity file from environment variable.
+
+        This method checks for the SSH_IDENTITY_FILE environment variable and verifies
+        that the file exists at the specified path. If the environment variable is not set
+        or the file doesn't exist, it returns None.
+
+        Returns:
+            Optional[str]: Path to identity file or None if not found or file doesn't exist
+
+        Example:
+            >>> # With SSH_IDENTITY_FILE set to an existing file
+            >>> os.environ["SSH_IDENTITY_FILE"] = "/path/to/key"
+            >>> agent = PersistentSSHAgent()
+            >>> identity_file = agent._get_identity_from_env()
+            >>> print(identity_file)  # "/path/to/key"
+        """
+        if "SSH_IDENTITY_FILE" in os.environ:
+            identity_file = os.environ["SSH_IDENTITY_FILE"]
+            if os.path.exists(identity_file):
+                logger.debug("Using identity file from environment: %s", identity_file)
+                return str(Path(identity_file))
+
+        return None
+
+    def _get_identity_from_available_keys(self) -> Optional[str]:
+        """Get identity file from available keys in .ssh directory.
+
+        This method searches for available SSH keys in the user's .ssh directory
+        using the _get_available_keys method. It returns the first available key
+        based on the priority order defined in SSH_KEY_TYPES (e.g., Ed25519 keys
+        have higher priority than RSA keys).
+
+        Returns:
+            Optional[str]: Path to identity file or None if no keys are found
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> identity_file = agent._get_identity_from_available_keys()
+            >>> if identity_file:
+            ...     print(f"Using key: {identity_file}")
+            ... else:
+            ...     print("No SSH keys found")
+        """
+        available_keys = self._get_available_keys()
+        if available_keys:
+            # Use the first available key (highest priority)
+            logger.debug("Using first available key: %s", available_keys[0])
+            return available_keys[0]  # Already a full path
+
+        return None
+
+    def _parse_ssh_config(self) -> Dict[str, Dict[str, SSHOptionValue]]:
         """Parse SSH config file to get host-specific configurations.
 
         Returns:
-            SSHConfig: A dictionary containing host-specific SSH configurations.
+            Dict[str, Dict[str, SSHOptionValue]]: A dictionary containing host-specific SSH configurations.
             The outer dictionary maps host patterns to their configurations,
             while the inner dictionary maps configuration keys to their values.
             Values can be either strings or lists of strings for multi-value options.
         """
-        config: SSHConfig = {}
+        config: Dict[str, Dict[str, SSHOptionValue]] = {}
         current_host: Optional[str] = None
         current_match: Optional[str] = None
         ssh_config_path = self._ssh_dir / "config"
@@ -731,27 +815,27 @@ class PersistentSSHAgent:
             "port": lambda x: x.isdigit() and 1 <= int(x) <= 65535,
             "user": lambda x: True,  # Any username is valid
             "identityfile": lambda x: True,  # Any path is valid
-            "identitiesonly": lambda x: x.lower() in YesNoOption.__args__,
-            "batchmode": lambda x: x.lower() in YesNoOption.__args__,
+            "identitiesonly": lambda x: x.lower() in ("yes", "no"),
+            "batchmode": lambda x: x.lower() in ("yes", "no"),
             "bindaddress": lambda x: True,  # Any address is valid
             "connecttimeout": lambda x: x.isdigit() and int(x) >= 0,
             "connectionattempts": lambda x: x.isdigit() and int(x) >= 1,
 
             # Security settings
-            "stricthostkeychecking": lambda x: x.lower() in StrictHostKeyCheckingOption.__args__,
+            "stricthostkeychecking": lambda x: x.lower() in ("yes", "no", "accept-new", "off", "ask"),
             "userknownhostsfile": lambda x: True,  # Any path is valid
-            "passwordauthentication": lambda x: x.lower() in YesNoOption.__args__,
-            "pubkeyauthentication": lambda x: x.lower() in YesNoOption.__args__,
-            "kbdinteractiveauthentication": lambda x: x.lower() in YesNoOption.__args__,
-            "hostbasedauthentication": lambda x: x.lower() in YesNoOption.__args__,
-            "gssapiauthentication": lambda x: x.lower() in YesNoOption.__args__,
+            "passwordauthentication": lambda x: x.lower() in ("yes", "no"),
+            "pubkeyauthentication": lambda x: x.lower() in ("yes", "no"),
+            "kbdinteractiveauthentication": lambda x: x.lower() in ("yes", "no"),
+            "hostbasedauthentication": lambda x: x.lower() in ("yes", "no"),
+            "gssapiauthentication": lambda x: x.lower() in ("yes", "no"),
             "preferredauthentications": lambda x: all(
                 auth in ["gssapi-with-mic", "hostbased", "publickey", "keyboard-interactive", "password"] for auth in
                 x.split(",")),
 
             # Connection optimization
-            "compression": lambda x: x.lower() in YesNoOption.__args__,
-            "tcpkeepalive": lambda x: x.lower() in YesNoOption.__args__,
+            "compression": lambda x: x.lower() in ("yes", "no"),
+            "tcpkeepalive": lambda x: x.lower() in ("yes", "no"),
             "serveralivecountmax": lambda x: x.isdigit() and int(x) >= 0,
             "serveraliveinterval": lambda x: x.isdigit() and int(x) >= 0,
 
@@ -763,25 +847,25 @@ class PersistentSSHAgent:
             "dynamicforward": lambda x: all(p.isdigit() and 1 <= int(p) <= 65535 for p in x.split(":") if p.isdigit()),
             "localforward": lambda x: True,  # Port forwarding specification
             "remoteforward": lambda x: True,  # Port forwarding specification
-            "forwardagent": lambda x: x.lower() in YesNoOption.__args__,
+            "forwardagent": lambda x: x.lower() in ("yes", "no"),
 
             # Environment
             "sendenv": lambda x: True,  # Any environment variable pattern is valid
             "setenv": lambda x: True,  # Any environment variable setting is valid
-            "requesttty": lambda x: x.lower() in RequestTTYOption.__args__,
-            "permittylocalcommand": lambda x: x.lower() in YesNoOption.__args__,
+            "requesttty": lambda x: x.lower() in ("yes", "no", "force", "auto"),
+            "permittylocalcommand": lambda x: x.lower() in ("yes", "no"),
             "typylocalcommand": lambda x: True,  # Any command is valid
 
             # Multiplexing
-            "controlmaster": lambda x: x.lower() in ControlMasterOption.__args__,
+            "controlmaster": lambda x: x.lower() in ("yes", "no", "ask", "auto", "autoask"),
             "controlpath": lambda x: True,  # Any path is valid
             "controlpersist": lambda x: True,  # Any time specification is valid
 
             # Misc
-            "addkeystoagent": lambda x: x.lower() in ExtendedYesNoOption.__args__,
+            "addkeystoagent": lambda x: x.lower() in ("yes", "no", "ask", "confirm"),
             "canonicaldomains": lambda x: True,  # Any domain list is valid
-            "canonicalizefallbacklocal": lambda x: x.lower() in YesNoOption.__args__,
-            "canonicalizehostname": lambda x: x.lower() in CanonicalizeHostnameOption.__args__,
+            "canonicalizefallbacklocal": lambda x: x.lower() in ("yes", "no"),
+            "canonicalizehostname": lambda x: x.lower() in ("yes", "no", "always"),
             "canonicalizemaxdots": lambda x: x.isdigit() and int(x) >= 0,
             "canonicalizepermittedcnames": lambda x: True,  # Any CNAME specification is valid
         }
@@ -902,7 +986,7 @@ class PersistentSSHAgent:
                     current_match = parts[2]
                     current_host = current_match
                     if current_host not in config:
-                        config[current_host] = {}
+                        config[current_host] = {}  # type: ignore
                 return
 
             # Handle Host blocks
@@ -910,7 +994,7 @@ class PersistentSSHAgent:
                 current_host = line.split(None, 1)[1].strip()
                 if is_valid_host_pattern(current_host):
                     if current_host not in config:
-                        config[current_host] = {}
+                        config[current_host] = {}  # type: ignore
                     current_match = None
                 else:
                     logger.debug(f"Invalid host pattern in {ssh_config_path}: {current_host}")
@@ -940,12 +1024,14 @@ class PersistentSSHAgent:
                     # Handle array values
                     if key in ["identityfile", "localforward", "remoteforward", "dynamicforward", "sendenv", "setenv"]:
                         if key not in config[current_host]:
-                            config[current_host][key] = [value]
+                            config[current_host][key] = [value]  # type: ignore
                         elif isinstance(config[current_host][key], list):
                             if value not in config[current_host][key]:  # Avoid duplicates
-                                config[current_host][key].append(value)
+                                (config[current_host][key]).append(value)  # type: ignore
                         else:
-                            config[current_host][key] = [config[current_host][key], value]
+                            # Convert single value to list with new value
+                            single_value = config[current_host][key]
+                            config[current_host][key] = [single_value, value]  # type: ignore
                     else:
                         config[current_host][key] = value
 
@@ -955,7 +1041,7 @@ class PersistentSSHAgent:
         try:
             with open(ssh_config_path, encoding="utf-8-sig") as f:
                 # Reset config for each parse attempt
-                config.clear()
+                config.clear()  # type: ignore
                 current_host = None
                 current_match = None
 
@@ -972,7 +1058,7 @@ class PersistentSSHAgent:
 
         except Exception as e:
             logger.error(f"Failed to parse SSH config: {e}")
-            config.clear()  # Clear config on error
+            config.clear()  # type: ignore  # Clear config on error
 
         if not config:
             logger.debug("No valid configuration found in SSH config file")
@@ -982,8 +1068,12 @@ class PersistentSSHAgent:
     def _extract_hostname(self, url: str) -> Optional[str]:
         """Extract hostname from SSH URL.
 
+        This method extracts the hostname from an SSH URL using a regular expression.
+        It validates both the URL format and the extracted hostname. The method
+        supports standard SSH URL formats used by Git and other services.
+
         Args:
-            url: SSH URL to extract hostname from
+            url: SSH URL to extract hostname from (e.g., git@github.com:user/repo.git)
 
         Returns:
             str: Hostname if valid URL, None otherwise
@@ -992,42 +1082,36 @@ class PersistentSSHAgent:
             Valid formats:
             - git@github.com:user/repo.git
             - git@host.example.com:user/repo.git
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> hostname = agent._extract_hostname("git@github.com:user/repo.git")
+            >>> print(hostname)  # "github.com"
+            >>> hostname = agent._extract_hostname("invalid-url")
+            >>> print(hostname)  # None
         """
         if not url or not isinstance(url, str):
             return None
 
-        # Check for basic URL structure
-        if ":" not in url or "@" not in url:
+        # Use regex to extract hostname from SSH URL
+        # Pattern matches: username@hostname:path
+        match = re.match(r"^([^@]+)@([a-zA-Z0-9][-a-zA-Z0-9._]*[a-zA-Z0-9]):(.+)$", url)
+        if not match:
             return None
 
-        # Split URL into user@host and path parts
-        try:
-            user_host, path = url.split(":", 1)
-        except ValueError:
-            return None
+        # Extract hostname from match
+        hostname = match.group(2)
+        path = match.group(3)
 
-        # Validate path part
+        # Validate path and hostname
         if not path or not path.strip("/"):
             return None
 
-        # Extract hostname
-        try:
-            parts = user_host.split("@")
-            if len(parts) != 2 or not parts[0] or not parts[1]:
-                return None
-            hostname = parts[1]
-
-            # Basic hostname validation
-            if not hostname or hostname.startswith(".") or hostname.endswith("."):
-                return None
-
-            # Allow only valid hostname characters
-            if not re.match(r"^[a-zA-Z0-9][-a-zA-Z0-9._]*[a-zA-Z0-9]$", hostname):
-                return None
-
-            return hostname
-        except Exception:
+        # Validate hostname
+        if not self.is_valid_hostname(hostname):
             return None
+
+        return hostname
 
     def is_valid_hostname(self, hostname: str) -> bool:
         """Check if a hostname is valid according to RFC 1123 and supports IPv6.
