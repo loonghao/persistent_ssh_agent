@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.cli - persistent_ssh_agent 0.5.1 文档</title>
+        <title>persistent_ssh_agent.cli - persistent_ssh_agent 0.6.0 文档</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -174,7 +174,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.5.1 文档</div></a>
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.6.0 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -198,7 +198,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.5.1 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.6.0 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -273,6 +273,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
@@ -384,6 +385,32 @@
             <span class="k">return</span> <span class="kc">False</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_config_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a value from the configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Configuration key</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[Any]: Configuration value or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_config_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set a value in the configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Configuration key</span>
+<span class="sd">            value: Configuration value</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
 <div class="viewcode-block" id="ConfigManager.get_passphrase">
 <a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.get_passphrase">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -392,11 +419,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Optional[str]: Stored passphrase or None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="n">encrypted_data</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;passphrase&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">encrypted_data</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="n">encrypted_data</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_config_value</span><span class="p">(</span><span class="s2">&quot;passphrase&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.set_passphrase">
@@ -410,10 +433,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
         <span class="c1"># Use AES-256 encryption</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;passphrase&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encrypt_passphrase</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+        <span class="n">encrypted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encrypt_passphrase</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_config_value</span><span class="p">(</span><span class="s2">&quot;passphrase&quot;</span><span class="p">,</span> <span class="n">encrypted</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.get_identity_file">
@@ -424,8 +446,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Optional[str]: Stored identity file path or None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_config_value</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.set_identity_file">
@@ -439,9 +460,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+        <span class="n">expanded_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_config_value</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">,</span> <span class="n">expanded_path</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.get_expiration_time">
@@ -452,8 +472,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Optional[int]: Expiration time in seconds or None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_config_value</span><span class="p">(</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.set_expiration_time">
@@ -467,9 +486,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hours</span> <span class="o">*</span> <span class="mi">3600</span>  <span class="c1"># Convert to seconds</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">hours</span> <span class="o">*</span> <span class="mi">3600</span>  <span class="c1"># Convert to seconds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_config_value</span><span class="p">(</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">,</span> <span class="n">seconds</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.get_reuse_agent">
@@ -480,8 +498,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Optional[bool]: Reuse agent setting or None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_config_value</span><span class="p">(</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.set_reuse_agent">
@@ -495,9 +512,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reuse</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_config_value</span><span class="p">(</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">,</span> <span class="n">reuse</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.list_keys">
@@ -511,11 +526,15 @@
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="s2">&quot;identity_file&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span>
+        <span class="c1"># Add default key if exists</span>
+        <span class="n">identity_file</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identity_file</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">identity_file</span>
 
-        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
+        <span class="c1"># Add named keys if exist</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">result</span></div>
 
@@ -534,6 +553,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
 
+        <span class="c1"># Handle default key</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_identity_file</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+
+        <span class="c1"># Handle named keys</span>
         <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -553,16 +577,23 @@
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># Handle default key</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span> <span class="ow">and</span> <span class="s2">&quot;identity_file&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
             <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]:</span>
+        <span class="c1"># Handle named keys</span>
+        <span class="k">elif</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="kc">False</span></div>
+            <span class="c1"># Clean up empty keys dictionary</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]:</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;keys&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">if</span> <span class="n">updated</span> <span class="k">else</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.clear_config">
@@ -590,18 +621,13 @@
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
         <span class="n">export</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># Always include non-sensitive information</span>
-        <span class="k">if</span> <span class="s2">&quot;identity_file&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span>
+        <span class="c1"># Define non-sensitive keys</span>
+        <span class="n">non_sensitive_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="s2">&quot;expiration_time&quot;</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="s2">&quot;expiration_time&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="s2">&quot;reuse_agent&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span>
+        <span class="c1"># Copy non-sensitive keys</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">non_sensitive_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">export</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
         <span class="c1"># Include sensitive information if requested</span>
         <span class="k">if</span> <span class="n">include_sensitive</span> <span class="ow">and</span> <span class="s2">&quot;passphrase&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
@@ -621,11 +647,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate input data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid configuration data: not a dictionary&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Get current configuration</span>
         <span class="n">current_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
 
         <span class="c1"># Update current configuration with imported data</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">current_config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">current_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config_data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">current_config</span><span class="p">)</span></div>
 
@@ -638,17 +669,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get system-specific information</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Try multiple methods to get username, with fallbacks for CI environments</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">username</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getlogin</span><span class="p">()</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">username</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="c1"># Last resort fallback for CI environments</span>
-                    <span class="n">user</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-                    <span class="n">username</span> <span class="o">=</span> <span class="n">user</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USERNAME&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_user&quot;</span><span class="p">)</span>
+            <span class="c1"># Get username with fallbacks for CI environments</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_username</span><span class="p">()</span>
 
+            <span class="c1"># Get system information</span>
             <span class="n">system_info</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span>
                 <span class="s2">&quot;machine_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_machine_id</span><span class="p">(),</span>
@@ -684,6 +708,22 @@
 
         <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="n">salt</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_username</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get current username with fallbacks for CI environments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Username</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getlogin</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># Last resort fallback for CI environments</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">user</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USERNAME&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_user&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_machine_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a unique machine identifier.</span>
 
@@ -709,17 +749,6 @@
                 <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span>
                                     <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Cryptography&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
                     <span class="n">machine_id</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;MachineGuid&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
-                <span class="k">pass</span>
-
-        <span class="c1"># macOS</span>
-        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;/Library/Preferences/SystemConfiguration/com.apple.computer.plist&quot;</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Import built-in modules</span>
-                <span class="kn">import</span><span class="w"> </span><span class="nn">plistlib</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/Library/Preferences/SystemConfiguration/com.apple.computer.plist&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">plist</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                    <span class="n">machine_id</span> <span class="o">=</span> <span class="n">plist</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LocalHostName&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
                 <span class="k">pass</span>
 
@@ -750,9 +779,7 @@
             <span class="n">encryptor</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="n">encryptor</span><span class="p">()</span>
 
             <span class="c1"># Pad the plaintext to a multiple of 16 bytes (AES block size)</span>
-            <span class="n">plaintext</span> <span class="o">=</span> <span class="n">passphrase</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="n">padding_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plaintext</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span><span class="p">)</span>
-            <span class="n">plaintext</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">padding_length</span><span class="p">])</span> <span class="o">*</span> <span class="n">padding_length</span>
+            <span class="n">plaintext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_data</span><span class="p">(</span><span class="n">passphrase</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
 
             <span class="c1"># Encrypt the padded plaintext</span>
             <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">encryptor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plaintext</span><span class="p">)</span> <span class="o">+</span> <span class="n">encryptor</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
@@ -767,7 +794,33 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to encrypt passphrase: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">raise</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_deobfuscate_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encrypted_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pad_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pad data to a multiple of 16 bytes (AES block size) using PKCS7 padding.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Data to pad</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bytes: Padded data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">padding_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">padding_length</span><span class="p">])</span> <span class="o">*</span> <span class="n">padding_length</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unpad_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padded_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove PKCS7 padding from data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            padded_data: Padded data</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bytes: Unpadded data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">padding_length</span> <span class="o">=</span> <span class="n">padded_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">padded_data</span><span class="p">[:</span><span class="o">-</span><span class="n">padding_length</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ConfigManager.deobfuscate_passphrase">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.deobfuscate_passphrase">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deobfuscate_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encrypted_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Decrypt passphrase.</span>
 
 <span class="sd">        Args:</span>
@@ -777,7 +830,7 @@
 <span class="sd">            str: Plain text passphrase</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Check if this is a base64-encoded string (AES encryption)</span>
+            <span class="c1"># Decode base64 data</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">encrypted_data</span><span class="p">)</span>
 
             <span class="c1"># Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)</span>
@@ -795,14 +848,14 @@
             <span class="n">padded_plaintext</span> <span class="o">=</span> <span class="n">decryptor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span> <span class="o">+</span> <span class="n">decryptor</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
             <span class="c1"># Remove padding</span>
-            <span class="n">padding_length</span> <span class="o">=</span> <span class="n">padded_plaintext</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">plaintext</span> <span class="o">=</span> <span class="n">padded_plaintext</span><span class="p">[:</span><span class="o">-</span><span class="n">padding_length</span><span class="p">]</span>
+            <span class="n">plaintext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpad_data</span><span class="p">(</span><span class="n">padded_plaintext</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">plaintext</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to decrypt passphrase: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">raise</span>
+            <span class="k">raise</span></div>
+
 
 <div class="viewcode-block" id="ConfigManager.secure_delete_from_memory">
 <a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.secure_delete_from_memory">[文档]</a>
@@ -821,7 +874,7 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">):</span>
             <span class="c1"># For bytearrays, we can modify in place</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">return</span>
 
@@ -843,58 +896,109 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
 
-    <span class="c1"># Handle identity file</span>
-    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">:</span>
-        <span class="n">identity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file not found: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Process configuration options</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Handle identity file</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">:</span>
+            <span class="n">_set_identity_file</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_identity_file</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file set to: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set identity file&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Handle passphrase</span>
+        <span class="n">_set_passphrase</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 
-    <span class="c1"># Handle passphrase</span>
+        <span class="c1"># Handle expiration time</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;expiration&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_set_expiration_time</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="p">)</span>
+
+        <span class="c1"># Handle reuse agent</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_set_reuse_agent</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">SystemExit</span><span class="p">:</span>
+        <span class="c1"># Re-raise any SystemExit exceptions</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to set up configuration: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_identity_file</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">identity_file_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set identity file in configuration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+<span class="sd">        identity_file_path: Path to identity file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">identity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file not found: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_identity_file</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file set to: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set identity file&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_passphrase</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set passphrase in configuration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get passphrase from arguments or prompt</span>
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">passphrase</span><span class="p">:</span>
         <span class="n">passphrase</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">passphrase</span>
     <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">prompt_passphrase</span><span class="p">:</span>
         <span class="n">passphrase</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter SSH key passphrase: &quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">passphrase</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>  <span class="c1"># No passphrase to set</span>
 
-    <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Set passphrase</span>
         <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_passphrase</span><span class="p">(</span><span class="n">passphrase</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Passphrase set successfully&quot;</span><span class="p">)</span>
-            <span class="c1"># Securely delete passphrase from memory</span>
-            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set passphrase&quot;</span><span class="p">)</span>
-            <span class="c1"># Securely delete passphrase from memory</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># Always securely delete passphrase from memory</span>
+        <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
             <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># Handle expiration time</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;expiration&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Expiration time must be a positive number&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_expiration_time</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expiration time set to: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set expiration time&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_expiration_time</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">expiration_hours</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set expiration time in configuration.</span>
 
-    <span class="c1"># Handle reuse agent</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_reuse_agent</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reuse agent set to: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set reuse agent&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+<span class="sd">    Args:</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+<span class="sd">        expiration_hours: Expiration time in hours</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">expiration_hours</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Expiration time must be a positive number&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_expiration_time</span><span class="p">(</span><span class="n">expiration_hours</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expiration time set to: </span><span class="si">{</span><span class="n">expiration_hours</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set expiration time&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_reuse_agent</span><span class="p">(</span><span class="n">config_manager</span><span class="p">,</span> <span class="n">reuse_agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set reuse agent setting in configuration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+<span class="sd">        reuse_agent: Whether to reuse existing SSH agent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_reuse_agent</span><span class="p">(</span><span class="n">reuse_agent</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reuse agent set to: </span><span class="si">{</span><span class="n">reuse_agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set reuse agent&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="run_ssh_connection_test">
@@ -906,8 +1010,58 @@
 <span class="sd">        args: Command line arguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+    <span class="n">passphrase</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="c1"># Get stored configuration</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get and validate identity file</span>
+        <span class="n">identity_file</span> <span class="o">=</span> <span class="n">_get_and_validate_identity_file</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">config_manager</span><span class="p">)</span>
+
+        <span class="c1"># Get passphrase if available</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="n">_get_passphrase_for_test</span><span class="p">(</span><span class="n">config_manager</span><span class="p">)</span>
+
+        <span class="c1"># Log configuration settings</span>
+        <span class="n">_log_test_configuration</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">config_manager</span><span class="p">)</span>
+
+        <span class="c1"># Set up verbosity level if requested</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">_configure_verbose_logging</span><span class="p">()</span>
+
+        <span class="c1"># Create SSH configuration and agent</span>
+        <span class="n">ssh_config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
+            <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
+            <span class="n">identity_passphrase</span><span class="o">=</span><span class="n">passphrase</span>
+        <span class="p">)</span>
+        <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">ssh_config</span><span class="p">)</span>
+
+        <span class="c1"># Test connection</span>
+        <span class="n">hostname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hostname</span>
+        <span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ SSH connection to </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2"> successful&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ SSH connection to </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SSH connection test failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># Always clean up sensitive data</span>
+        <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
+            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_and_validate_identity_file</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">config_manager</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get and validate identity file from args or config.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to identity file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get identity file from args or config</span>
     <span class="n">identity_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span> <span class="ow">or</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_identity_file</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">identity_file</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No identity file specified or found in configuration&quot;</span><span class="p">)</span>
@@ -921,77 +1075,62 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file not found: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># Get passphrase</span>
+    <span class="k">return</span> <span class="n">identity_file</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_passphrase_for_test</span><span class="p">(</span><span class="n">config_manager</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get passphrase from config if available.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[str]: Passphrase or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stored_passphrase</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_passphrase</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">stored_passphrase</span><span class="p">:</span>
-        <span class="n">passphrase</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">_deobfuscate_passphrase</span><span class="p">(</span><span class="n">stored_passphrase</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">passphrase</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Use deobfuscate_passphrase method to get plain text passphrase</span>
+        <span class="k">return</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">deobfuscate_passphrase</span><span class="p">(</span><span class="n">stored_passphrase</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="c1"># Get expiration time and add to SSH config if available</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_test_configuration</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">config_manager</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Log test configuration settings.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">        config_manager: ConfigManager instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Log expiration time</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;expiration&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Use command line argument</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using expiration time from command line: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
-        <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Check stored configuration</span>
         <span class="n">stored_expiration</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_expiration_time</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">stored_expiration</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using expiration time from config: </span><span class="si">{</span><span class="n">stored_expiration</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3600</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
-            <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
 
-    <span class="c1"># Get reuse agent setting and add to SSH config if available</span>
+    <span class="c1"># Log reuse agent setting</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Use command line argument</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using reuse agent setting from command line: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Check stored configuration</span>
         <span class="n">stored_reuse</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_reuse_agent</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">stored_reuse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using reuse agent setting from config: </span><span class="si">{</span><span class="n">stored_reuse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
 
-    <span class="c1"># Create SSH configuration</span>
-    <span class="n">ssh_config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
-        <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
-        <span class="n">identity_passphrase</span><span class="o">=</span><span class="n">passphrase</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_configure_verbose_logging</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure verbose logging with detailed format.&quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &quot;</span>
+            <span class="s2">&quot;&lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt; | &quot;</span>
+            <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
+            <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
+        <span class="p">),</span>
+        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
     <span class="p">)</span>
-
-    <span class="c1"># Initialize SSH agent</span>
-    <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">ssh_config</span><span class="p">)</span>
-
-    <span class="c1"># Set verbosity level</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-            <span class="nb">format</span><span class="o">=</span><span class="p">(</span>
-                <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &quot;</span>
-                <span class="s2">&quot;&lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt; | &quot;</span>
-                <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
-                <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
-            <span class="p">),</span>
-            <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
-        <span class="p">)</span>
-
-    <span class="c1"># Test connection</span>
-    <span class="n">hostname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hostname</span>
-    <span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ SSH connection to </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2"> successful&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Clean up sensitive data</span>
-        <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
-            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ SSH connection to </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Clean up sensitive data</span>
-        <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
-            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
-
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="list_keys">
@@ -1003,15 +1142,55 @@
 <span class="sd">        _: Command line arguments (unused)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
-    <span class="n">keys</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">list_keys</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No SSH keys configured&quot;</span><span class="p">)</span>
-        <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">list_keys</span><span class="p">()</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configured SSH keys:&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No SSH keys configured&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configured SSH keys:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to list SSH keys: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_key">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.add_key">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_key</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a configured SSH key.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+
+    <span class="c1"># Check required arguments</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No key name specified&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;identity_file&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No identity file specified&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">identity_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Add key</span>
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">add_key</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SSH key &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; added&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to add SSH key &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to add SSH key &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 
@@ -1083,6 +1262,7 @@
 <span class="sd">        args: Command line arguments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Initialize config to avoid UnboundLocalError</span>
 
     <span class="c1"># Read configuration</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1159,6 +1339,15 @@
     <span class="n">list_keys</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
 
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add a configured SSH key&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the key to add&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--identity-file&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to SSH identity file&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a configured SSH key.&quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">)</span>
+    <span class="n">add_key</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
 <span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove configured SSH keys&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the key to remove&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--all&quot;</span><span class="p">,</span> <span class="s2">&quot;all_keys&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove all keys&quot;</span><span class="p">)</span>
@@ -1230,7 +1419,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=a91b451b"></script>
+</div><script src="../../_static/documentation_options.js?v=042f48c9"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

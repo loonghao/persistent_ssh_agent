@@ -6,7 +6,7 @@
 <link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" /><link rel="prev" title="persistent_ssh_agent.config module" href="persistent_ssh_agent.config.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.cli module - persistent_ssh_agent 0.5.1 文档</title>
+        <title>persistent_ssh_agent.cli module - persistent_ssh_agent 0.6.0 文档</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">persistent_ssh_agent 0.5.1 文档</div></a>
+      <a href="index.html"><div class="brand">persistent_ssh_agent 0.6.0 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.5.1 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.6.0 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -317,6 +317,23 @@
 </dd>
 <dt class="field-even">返回类型<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="persistent_ssh_agent.cli.ConfigManager.deobfuscate_passphrase">
+<span class="sig-name descname"><span class="pre">deobfuscate_passphrase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/persistent_ssh_agent/cli.html#ConfigManager.deobfuscate_passphrase"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.cli.ConfigManager.deobfuscate_passphrase" title="Link to this definition">¶</a></dt>
+<dd><p>Decrypt passphrase.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encrypted_data</strong> -- Encrypted passphrase</p>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>Plain text passphrase</p>
+</dd>
+<dt class="field-odd">返回类型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -555,6 +572,17 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="persistent_ssh_agent.cli.add_key">
+<span class="sig-prename descclassname"><span class="pre">persistent_ssh_agent.cli.</span></span><span class="sig-name descname"><span class="pre">add_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/persistent_ssh_agent/cli.html#add_key"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.cli.add_key" title="Link to this definition">¶</a></dt>
+<dd><p>Add a configured SSH key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> -- Command line arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="persistent_ssh_agent.cli.export_config">
 <span class="sig-prename descclassname"><span class="pre">persistent_ssh_agent.cli.</span></span><span class="sig-name descname"><span class="pre">export_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/persistent_ssh_agent/cli.html#export_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.cli.export_config" title="Link to this definition">¶</a></dt>
 <dd><p>Export configuration.</p>
@@ -681,6 +709,7 @@
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager"><code class="docutils literal notranslate"><span class="pre">ConfigManager</span></code></a><ul>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.add_key"><code class="docutils literal notranslate"><span class="pre">ConfigManager.add_key()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.clear_config"><code class="docutils literal notranslate"><span class="pre">ConfigManager.clear_config()</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.deobfuscate_passphrase"><code class="docutils literal notranslate"><span class="pre">ConfigManager.deobfuscate_passphrase()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.export_config"><code class="docutils literal notranslate"><span class="pre">ConfigManager.export_config()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.get_expiration_time"><code class="docutils literal notranslate"><span class="pre">ConfigManager.get_expiration_time()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.get_identity_file"><code class="docutils literal notranslate"><span class="pre">ConfigManager.get_identity_file()</span></code></a></li>
@@ -698,6 +727,7 @@
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.ConfigManager.set_reuse_agent"><code class="docutils literal notranslate"><span class="pre">ConfigManager.set_reuse_agent()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#persistent_ssh_agent.cli.add_key"><code class="docutils literal notranslate"><span class="pre">add_key()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.export_config"><code class="docutils literal notranslate"><span class="pre">export_config()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.import_config"><code class="docutils literal notranslate"><span class="pre">import_config()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.cli.list_keys"><code class="docutils literal notranslate"><span class="pre">list_keys()</span></code></a></li>
@@ -715,7 +745,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=a91b451b"></script>
+</div><script src="_static/documentation_options.js?v=042f48c9"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
