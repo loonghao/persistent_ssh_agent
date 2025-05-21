@@ -1,3 +1,25 @@
+## v0.6.0 (2025-05-21)
+
+### Feat
+
+- enhance CLI with security and additional commands
+- add CLI interface for persistent_ssh_agent
+
+### Fix
+
+- update all GitHub Actions workflows to use github.token instead of PERSONAL_ACCESS_TOKEN
+- update GitHub Actions workflow to use github.token with proper permissions
+- improve test coverage to 79%
+- fix lint issues in test files
+- make tests compatible with non-Windows platforms
+- improve test coverage and fix docs lint issues
+- resolve CI test failures and improve test coverage
+- improve CI compatibility for encryption tests
+
+### Refactor
+
+- migrate CLI from argparse to Click
+
 ## v0.5.1 (2024-12-28)
 
 ### Refactor
