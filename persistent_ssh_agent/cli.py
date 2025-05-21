@@ -325,12 +325,32 @@ class ConfigManager:
             Tuple[bytes, bytes]: (key, salt)
         """
         # Get system-specific information
-        system_info = {
-            "hostname": socket.gethostname(),
-            "machine_id": self._get_machine_id(),
-            "username": os.getlogin() if hasattr(os, "getlogin") else getpass.getuser(),
-            "home": str(Path.home())
-        }
+        try:
+            # Try multiple methods to get username, with fallbacks for CI environments
+            try:
+                username = os.getlogin()
+            except (AttributeError, OSError):
+                try:
+                    username = getpass.getuser()
+                except Exception:
+                    # Last resort fallback for CI environments
+                    username = os.environ.get("USER", os.environ.get("USERNAME", "unknown_user"))
+
+            system_info = {
+                "hostname": socket.gethostname(),
+                "machine_id": self._get_machine_id(),
+                "username": username,
+                "home": str(Path.home())
+            }
+        except Exception as e:
+            # If all else fails, use a default set of values
+            logger.warning(f"Failed to get system info: {e}, using fallback values")
+            system_info = {
+                "hostname": "unknown_host",
+                "machine_id": "unknown_machine",
+                "username": "unknown_user",
+                "home": "/unknown_home"
+            }
 
         # Create a deterministic salt from system info
         salt_base = f"{system_info['hostname']}:{system_info['machine_id']}:{system_info['username']}"
@@ -373,7 +393,7 @@ class ConfigManager:
             try:
                 import winreg
                 with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                   r"SOFTWARE\Microsoft\Cryptography") as key:
+                                    r"SOFTWARE\Microsoft\Cryptography") as key:
                     machine_id = winreg.QueryValueEx(key, "MachineGuid")[0]
             except (ImportError, OSError):
                 pass
@@ -761,6 +781,7 @@ def import_config(args):
     else:
         logger.error("Failed to import configuration")
         sys.exit(1)
+
 
 @click.group(help="Persistent SSH Agent CLI")
 def main():
