@@ -8,9 +8,6 @@ from unittest.mock import patch
 
 # Import third-party modules
 from click.testing import CliRunner
-import pytest
-
-# Import local modules
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import export_config
 from persistent_ssh_agent.cli import import_config
@@ -19,6 +16,7 @@ from persistent_ssh_agent.cli import main
 from persistent_ssh_agent.cli import remove_key
 from persistent_ssh_agent.cli import run_ssh_connection_test
 from persistent_ssh_agent.cli import setup_config
+import pytest
 
 
 @pytest.fixture
@@ -79,7 +77,7 @@ def test_config_manager_get_set_passphrase(config_manager):
         # Verify the passphrase can be decrypted
         mock_derive.reset_mock()
         mock_derive.return_value = (b"0" * 32, b"1" * 16)
-        deobfuscated = config_manager._deobfuscate_passphrase(passphrase)
+        deobfuscated = config_manager.deobfuscate_passphrase(passphrase)
         assert deobfuscated == "test"
 
 
@@ -108,7 +106,7 @@ def test_config_manager_encrypt_decrypt(config_manager):
         mock_derive.reset_mock()
         mock_derive.return_value = (b"0" * 32, b"1" * 16)
 
-        decrypted = config_manager._deobfuscate_passphrase(encrypted)
+        decrypted = config_manager.deobfuscate_passphrase(encrypted)
         assert decrypted == passphrase
 
 

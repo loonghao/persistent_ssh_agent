@@ -3,20 +3,18 @@
 # Import built-in modules
 import json
 import os
-import tempfile
 from pathlib import Path
+import tempfile
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from click.testing import CliRunner
-
-# Import local modules
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import export_config
 from persistent_ssh_agent.cli import run_ssh_connection_test
 from persistent_ssh_agent.cli import setup_config
+import pytest
 
 
 @pytest.fixture

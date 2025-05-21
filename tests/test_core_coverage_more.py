@@ -5,7 +5,7 @@ import subprocess
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
-# Import local modules
+# Import third-party modules
 from persistent_ssh_agent.core import PersistentSSHAgent
 
 

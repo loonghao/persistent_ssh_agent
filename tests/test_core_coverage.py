@@ -12,8 +12,8 @@ from unittest.mock import mock_open
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from persistent_ssh_agent.core import PersistentSSHAgent
+import pytest
 
 
 @pytest.fixture

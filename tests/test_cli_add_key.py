@@ -1,17 +1,15 @@
 """Tests for add_key functionality in CLI module."""
 
 # Import built-in modules
-import os
-import sys
+from contextlib import suppress
 from pathlib import Path
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from persistent_ssh_agent.cli import Args
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import add_key
+import pytest
 
 
 @pytest.fixture
@@ -131,11 +129,9 @@ def test_add_key_missing_name(config_manager):
                 # Set side effect to raise an exception to stop execution
                 mock_exit.side_effect = SystemExit(1)
 
-                try:
+                with suppress(SystemExit):
                     # Call add_key
                     add_key(args)
-                except SystemExit:
-                    pass  # Expected behavior
 
                 # Verify logger was called with the expected error message
                 mock_logger.error.assert_called_once_with("No key name specified")
@@ -158,11 +154,9 @@ def test_add_key_missing_identity_file(config_manager):
                 # Set side effect to raise an exception to stop execution
                 mock_exit.side_effect = SystemExit(1)
 
-                try:
+                with suppress(SystemExit):
                     # Call add_key
                     add_key(args)
-                except SystemExit:
-                    pass  # Expected behavior
 
                 # Verify logger was called with the expected error message
                 mock_logger.error.assert_called_once_with("No identity file specified")

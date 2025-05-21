@@ -1,17 +1,14 @@
 """Tests for list_keys functionality in CLI module."""
 
 # Import built-in modules
-import os
-import sys
 from pathlib import Path
-from unittest.mock import mock_open
 from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from persistent_ssh_agent.cli import Args
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import list_keys
+import pytest
 
 
 @pytest.fixture

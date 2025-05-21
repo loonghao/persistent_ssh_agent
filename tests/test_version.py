@@ -3,7 +3,7 @@
 # Import built-in modules
 import re
 
-# Import local modules
+# Import third-party modules
 from persistent_ssh_agent.__version__ import __version__
 
 

@@ -6,8 +6,6 @@ from unittest.mock import patch
 
 # Import third-party modules
 from click.testing import CliRunner
-
-# Import local modules
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import main
 
@@ -32,7 +30,7 @@ def test_config_manager_encrypt_decrypt():
 
             # Test decrypt
             with patch.object(manager, "_derive_key_from_system", return_value=(key, salt)):
-                decrypted = manager._deobfuscate_passphrase(encrypted)
+                decrypted = manager.deobfuscate_passphrase(encrypted)
                 assert decrypted == plaintext
 
 
