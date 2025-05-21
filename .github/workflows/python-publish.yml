@@ -33,9 +33,21 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
           echo "VERSION=${{ github.event.client_payload.version }}" >> $GITHUB_ENV
+          echo "TAG=v${{ github.event.client_payload.version }}" >> $GITHUB_ENV
+          echo "Using version from repository_dispatch: ${{ github.event.client_payload.version }}"
         else
           echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "Using version from tag: ${GITHUB_REF#refs/tags/v}"
         fi
+
+    - name: Debug variables
+      run: |
+        echo "Event name: ${{ github.event_name }}"
+        echo "Client payload version: ${{ github.event.client_payload.version }}"
+        echo "VERSION env: ${{ env.VERSION }}"
+        echo "TAG env: ${{ env.TAG }}"
+        echo "GITHUB_REF: ${{ github.ref }}"
 
     - name: Checkout code
       uses: actions/checkout@v4
@@ -85,9 +97,14 @@ jobs:
           ## Unknown
           {{__unknown__}}
 
-    - uses: ncipollo/release-action@v1
+    - name: Create GitHub Release
+      uses: ncipollo/release-action@v1
       with:
         artifacts: "dist/*"
+        token: ${{ github.token }}
+        tag: ${{ env.TAG || steps.get_tag_name.outputs.tag }}
+        name: "Release ${{ env.TAG || steps.get_tag_name.outputs.tag }}"
+        allowUpdates: true
         body: |
           Comparing Changes: ${{ steps.changelog.outputs.compareurl }}
 
