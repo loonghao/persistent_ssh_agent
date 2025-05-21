@@ -1,3 +1,13 @@
+## v0.7.4 (2025-05-21)
+
+### Fix
+
+- improve tag detection in release workflow using olegtarasov/get-tag output
+
+### Refactor
+
+- clean up debug steps in release workflow
+
 ## v0.7.3 (2025-05-21)
 
 ### Fix
