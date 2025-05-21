@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import tempfile
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -13,9 +14,13 @@ import pytest
 
 # Import local modules
 from persistent_ssh_agent.cli import ConfigManager
+from persistent_ssh_agent.cli import export_config
+from persistent_ssh_agent.cli import import_config
+from persistent_ssh_agent.cli import list_keys
 from persistent_ssh_agent.cli import main
-from persistent_ssh_agent.cli import setup_config
+from persistent_ssh_agent.cli import remove_key
 from persistent_ssh_agent.cli import run_ssh_connection_test
+from persistent_ssh_agent.cli import setup_config
 
 
 @pytest.fixture
@@ -185,3 +190,150 @@ def test_main(mock_parser):
     # Verify the parser was created and parse_args was called
     mock_parser.assert_called_once()
     mock_parser_instance.parse_args.assert_called_once()
+
+
+@patch("persistent_ssh_agent.cli.ConfigManager")
+def test_list_keys(mock_config_manager):
+    """Test listing SSH keys."""
+    # Create mock config manager
+    mock_manager = MagicMock()
+    mock_manager.list_keys.return_value = {
+        "default": "~/.ssh/id_rsa",
+        "github": "~/.ssh/github_key"
+    }
+    mock_config_manager.return_value = mock_manager
+
+    # Call list_keys
+    with patch("persistent_ssh_agent.cli.logger") as mock_logger:
+        list_keys(None)
+
+        # Verify logger was called with the correct messages
+        mock_logger.info.assert_any_call("Configured SSH keys:")
+        mock_logger.info.assert_any_call("  default: ~/.ssh/id_rsa")
+        mock_logger.info.assert_any_call("  github: ~/.ssh/github_key")
+
+
+@patch("persistent_ssh_agent.cli.ConfigManager")
+def test_list_keys_empty(mock_config_manager):
+    """Test listing SSH keys when none are configured."""
+    # Create mock config manager
+    mock_manager = MagicMock()
+    mock_manager.list_keys.return_value = {}
+    mock_config_manager.return_value = mock_manager
+
+    # Call list_keys
+    with patch("persistent_ssh_agent.cli.logger") as mock_logger:
+        list_keys(None)
+
+        # Verify logger was called with the correct message
+        mock_logger.info.assert_called_once_with("No SSH keys configured")
+
+
+@patch("persistent_ssh_agent.cli.ConfigManager")
+def test_remove_key_by_name(mock_config_manager):
+    """Test removing a specific SSH key."""
+    # Create mock config manager
+    mock_manager = MagicMock()
+    mock_manager.remove_key.return_value = True
+    mock_config_manager.return_value = mock_manager
+
+    # Create mock arguments
+    args = MagicMock()
+    args.name = "github"
+    args.all = False
+
+    # Call remove_key
+    with patch("persistent_ssh_agent.cli.logger") as mock_logger:
+        remove_key(args)
+
+        # Verify remove_key was called with the correct name
+        mock_manager.remove_key.assert_called_once_with("github")
+
+        # Verify logger was called with the correct message
+        mock_logger.info.assert_called_once_with("SSH key 'github' removed")
+
+
+@patch("persistent_ssh_agent.cli.ConfigManager")
+def test_remove_all_keys(mock_config_manager):
+    """Test removing all SSH keys."""
+    # Create mock config manager
+    mock_manager = MagicMock()
+    mock_manager.clear_config.return_value = True
+    mock_config_manager.return_value = mock_manager
+
+    # Create mock arguments
+    args = MagicMock()
+    args.name = None
+    args.all = True
+
+    # Call remove_key
+    with patch("persistent_ssh_agent.cli.logger") as mock_logger:
+        remove_key(args)
+
+        # Verify clear_config was called
+        mock_manager.clear_config.assert_called_once()
+
+        # Verify logger was called with the correct message
+        mock_logger.info.assert_called_once_with("All SSH keys removed")
+
+
+@patch("persistent_ssh_agent.cli.ConfigManager")
+def test_export_config_to_console(mock_config_manager):
+    """Test exporting configuration to console."""
+    # Create mock config manager
+    mock_manager = MagicMock()
+    mock_manager.export_config.return_value = {
+        "identity_file": "~/.ssh/id_rsa",
+        "keys": {
+            "github": "~/.ssh/github_key"
+        }
+    }
+    mock_config_manager.return_value = mock_manager
+
+    # Create mock arguments
+    args = MagicMock()
+    args.output = None
+    args.include_sensitive = False
+
+    # Call export_config
+    with patch("builtins.print") as mock_print:
+        export_config(args)
+
+        # Verify export_config was called with the correct parameters
+        mock_manager.export_config.assert_called_once_with(include_sensitive=False)
+
+        # Verify print was called with the correct JSON
+        mock_print.assert_called_once()
+
+
+@patch("persistent_ssh_agent.cli.ConfigManager")
+def test_import_config(mock_config_manager):
+    """Test importing configuration."""
+    # Create mock config manager
+    mock_manager = MagicMock()
+    mock_manager.import_config.return_value = True
+    mock_config_manager.return_value = mock_manager
+
+    # Create mock arguments
+    args = MagicMock()
+    args.input = "config.json"
+
+    # Create mock file
+    mock_file = MagicMock()
+    mock_file.__enter__.return_value = mock_file
+    mock_file.read.return_value = '{"identity_file": "~/.ssh/id_rsa"}'
+
+    # Call import_config
+    with patch("builtins.open", return_value=mock_file) as mock_open:
+        with patch("json.load", return_value={"identity_file": "~/.ssh/id_rsa"}) as mock_json_load:
+            with patch("persistent_ssh_agent.cli.logger") as mock_logger:
+                import_config(args)
+
+                # Verify open was called with the correct parameters
+                mock_open.assert_called_once_with("config.json", "r", encoding="utf-8")
+
+                # Verify import_config was called with the correct parameters
+                mock_manager.import_config.assert_called_once_with({"identity_file": "~/.ssh/id_rsa"})
+
+                # Verify logger was called with the correct message
+                mock_logger.info.assert_called_once_with("Configuration imported successfully")
