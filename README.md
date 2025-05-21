@@ -254,14 +254,14 @@ uvx persistent_ssh_agent remove --name github
 uvx persistent_ssh_agent export --output ~/.ssh/config.json
 
 # Import configuration from a file
-uvx persistent_ssh_agent import ~/.ssh/config.json
+uvx persistent_ssh_agent import config.json
 ```
 
 Available commands:
 
 - `config`: Configure SSH agent settings
   - `--identity-file`: Path to SSH identity file
-  - `--passphrase`: SSH key passphrase (not recommended, use --prompt instead)
+  - `--passphrase`: SSH key passphrase (not recommended, use --prompt-passphrase instead)
   - `--prompt-passphrase`: Prompt for SSH key passphrase
   - `--expiration`: Expiration time in hours
   - `--reuse-agent`: Whether to reuse existing SSH agent
@@ -284,7 +284,7 @@ Available commands:
   - `--include-sensitive`: Include sensitive information in export
 
 - `import`: Import configuration
-  - `input`: Input file path
+  - `input_file`: Input file path
 
 ### CI/CD Pipeline Integration
 

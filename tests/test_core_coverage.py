@@ -12,8 +12,8 @@ from unittest.mock import mock_open
 from unittest.mock import patch
 
 # Import third-party modules
-from persistent_ssh_agent.core import PersistentSSHAgent
 import pytest
+from persistent_ssh_agent.core import PersistentSSHAgent
 
 
 @pytest.fixture
@@ -689,7 +689,14 @@ def test_ssh_key_management_failures(ssh_manager):
     """Test SSH key management failure scenarios."""
     with patch.object(ssh_manager, "run_command") as mock_run, \
          patch("os.path.exists") as mock_exists, \
-         patch("builtins.open", mock_open(read_data="test key data")):
+         patch("builtins.open", mock_open(read_data="test key data")), \
+         patch("subprocess.Popen") as mock_popen:
+
+        # Mock Popen to avoid actual subprocess creation
+        mock_process = MagicMock()
+        mock_process.communicate.return_value = (b"", b"Error loading key")
+        mock_process.returncode = 1
+        mock_popen.return_value = mock_process
 
         # Test key loading failure
         mock_exists.return_value = True
