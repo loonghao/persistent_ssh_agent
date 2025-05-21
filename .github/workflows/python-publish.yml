@@ -11,9 +11,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
-      contents: write
+      # IMPORTANT: these permissions are mandatory for publishing and creating releases
+      id-token: write     # Required for PyPI trusted publishing
+      contents: write     # Required for creating releases
+      packages: write     # Required for publishing packages
+      actions: read       # Required for workflow access
+      issues: write       # Required for creating issues if needed
 
     steps:
     # This step is kept for backward compatibility
@@ -26,13 +29,11 @@ jobs:
           echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
         fi
 
-
-
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-        token: "${{ github.token }}"
-        fetch-depth: 0
-        # Don't set ref to main, let it checkout the tag that triggered the workflow
+        token: "${{ secrets.GITHUB_TOKEN }}"
+        fetch-depth: 0  # Fetch all history for tags and branches
     - uses: olegtarasov/get-tag@v2.1.4
       id: get_tag_name
       with:
@@ -54,6 +55,8 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: dist
+        skip-existing: true
+        verbose: true
 
 
     - name: Generate changelog
@@ -74,30 +77,11 @@ jobs:
           {{chore,style,ci||🔶 Nothing change}}
           ## Unknown
           {{__unknown__}}
-    # Set final tag for release using get-tag output
-    - name: Set final tag for release
-      id: set_final_tag
-      run: |
-        # Use get-tag output or fallback to github.ref_name
-        if [[ -n "${{ steps.get_tag_name.outputs.tag }}" ]]; then
-          FINAL_TAG="${{ steps.get_tag_name.outputs.tag }}"
-        elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          FINAL_TAG="${GITHUB_REF#refs/tags/}"
-        else
-          FINAL_TAG="${{ github.ref_name }}"
-        fi
-
-        # Set output and environment variable
-        echo "FINAL_TAG=$FINAL_TAG" >> $GITHUB_OUTPUT
-        echo "FINAL_TAG=$FINAL_TAG" >> $GITHUB_ENV
 
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "dist/*"
         token: ${{ github.token }}
-        tag: ${{ steps.get_tag_name.outputs.tag || steps.set_final_tag.outputs.FINAL_TAG }}
-        name: "Release ${{ steps.get_tag_name.outputs.tag || steps.set_final_tag.outputs.FINAL_TAG }}"
-        allowUpdates: true
         body: |
           Comparing Changes: ${{ steps.changelog.outputs.compareurl }}
 
