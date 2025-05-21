@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+  repository_dispatch:
+    types: [trigger-python-publish]
 
 jobs:
   deploy:
@@ -14,9 +16,20 @@ jobs:
       contents: write
 
     steps:
+    - name: Set tag variable
+      id: set_tag
+      run: |
+        if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+          echo "TAG=${{ github.event.client_payload.tag }}" >> $GITHUB_ENV
+          echo "Using tag from repository_dispatch: ${{ github.event.client_payload.tag }}"
+        else
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "Using tag from push event: ${GITHUB_REF#refs/tags/}"
+        fi
+
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       with:
-        token: "${{ secrets.GITHUB_TOKEN }}"
+        token: "${{ github.token }}"
         fetch-depth: 0
         ref: main
     - uses: olegtarasov/get-tag@v2.1.4

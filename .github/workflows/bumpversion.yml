@@ -12,13 +12,37 @@ jobs:
     name: "Bump version and create changelog with commitizen"
     permissions:
       contents: write
+      # Allow the job to create workflow runs
+      actions: write
     steps:
       - name: Check out
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
+          token: ${{ github.token }}
       - name: Create bump and changelog
+        id: cz
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ github.token }}
           branch: main
+      - name: Print version
+        run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
+      - name: Push tag explicitly
+        if: steps.cz.outputs.version != ''
+        run: |
+          echo "Creating and pushing tag v${{ steps.cz.outputs.version }}"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f v${{ steps.cz.outputs.version }}
+          git push origin v${{ steps.cz.outputs.version }} --force
+          echo "Tag pushed successfully"
+          git tag -l
+
+      - name: Trigger python-publish workflow
+        if: steps.cz.outputs.version != ''
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ github.token }}
+          event-type: trigger-python-publish
+          client-payload: '{"tag": "v${{ steps.cz.outputs.version }}"}'
