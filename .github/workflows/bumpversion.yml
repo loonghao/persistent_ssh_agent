@@ -26,18 +26,6 @@ jobs:
         with:
           github_token: ${{ github.token }}
           branch: main
-      - name: Print version
-        run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
-      - name: Push tag explicitly
-        if: steps.cz.outputs.version != ''
-        run: |
-          echo "Creating and pushing tag v${{ steps.cz.outputs.version }}"
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -f v${{ steps.cz.outputs.version }}
-          git push origin v${{ steps.cz.outputs.version }} --force
-          echo "Tag pushed successfully"
-          git tag -l
 
       - name: Trigger python-publish workflow
         if: steps.cz.outputs.version != ''
