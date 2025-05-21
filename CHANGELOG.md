@@ -1,3 +1,13 @@
+## v0.7.0 (2025-05-21)
+
+### Feat
+
+- add CLI command for adding SSH keys
+
+### Fix
+
+- update tests to use deobfuscate_passphrase instead of _deobfuscate_passphrase
+
 ## v0.6.0 (2025-05-21)
 
 ### Feat
