@@ -9,6 +9,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 
+[tool.poetry.scripts]
+persistent_ssh_agent = "persistent_ssh_agent.cli:main"
+
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=5.0"
 furo = "*"
