@@ -4,9 +4,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
-    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+    <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
         <title>persistent_ssh_agent.core - persistent_ssh_agent 0.5.1 文档</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=2707e25f" />
@@ -210,7 +210,26 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  
+  <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security-features.html">Security Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../persistent_ssh_agent.html">persistent_ssh_agent package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of persistent_ssh_agent package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+</ul>
+
 </div>
 </div>
       </div>
@@ -246,30 +265,39 @@
 <span></span><span class="sd">&quot;&quot;&quot;Core SSH management module.&quot;&quot;&quot;</span>
 
 <span class="c1"># Import built-in modules</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">socket</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">CompletedProcess</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletedProcess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">dedent</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
 <span class="c1"># Import third-party modules</span>
-<span class="kn">from</span> <span class="nn">persistent_ssh_agent.config</span> <span class="kn">import</span> <span class="n">SSHConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
+
+
+<span class="c1"># Import local modules (conditional to avoid circular imports)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Import third-party modules</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigManager</span>
+    <span class="n">_has_cli</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">_has_cli</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -287,15 +315,15 @@
 
 
 <div class="viewcode-block" id="SSHError">
-<a class="viewcode-back" href="../../modules/persistent_ssh_agent.core.html#persistent_ssh_agent.SSHError">[文档]</a>
-<span class="k">class</span> <span class="nc">SSHError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.SSHError">[文档]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SSHError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base exception for SSH-related errors.&quot;&quot;&quot;</span></div>
 
 
 
 <div class="viewcode-block" id="PersistentSSHAgent">
-<a class="viewcode-back" href="../../modules/persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent">[文档]</a>
-<span class="k">class</span> <span class="nc">PersistentSSHAgent</span><span class="p">:</span>
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent">[文档]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PersistentSSHAgent</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles persistent SSH agent operations and authentication.</span>
 
 <span class="sd">    This class manages SSH agent persistence across sessions by saving and</span>
@@ -320,7 +348,7 @@
 
     <span class="n">SSH_DEFAULT_KEY</span> <span class="o">=</span> <span class="s2">&quot;id_rsa&quot;</span>  <span class="c1"># Fallback default key</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">expiration_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">86400</span><span class="p">,</span>
                  <span class="n">reuse_agent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize SSH manager.</span>
@@ -342,7 +370,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_reuse_agent</span> <span class="o">=</span> <span class="n">reuse_agent</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_ensure_home_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ensure_home_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure HOME environment variable is set correctly.</span>
 
 <span class="sd">        This method ensures the HOME environment variable is set to the user&#39;s</span>
@@ -353,7 +381,7 @@
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Set HOME environment variable: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">_save_agent_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth_sock</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_pid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_agent_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth_sock</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_pid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save SSH agent information to file.</span>
 
 <span class="sd">        Args:</span>
@@ -375,7 +403,7 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to save agent info: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_load_agent_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_agent_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load and verify SSH agent information.</span>
 
 <span class="sd">        Returns:</span>
@@ -436,7 +464,7 @@
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_ssh_agent_output</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_ssh_agent_output</span><span class="p">(</span><span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse SSH agent output to extract environment variables.</span>
 
 <span class="sd">        Args:</span>
@@ -454,7 +482,7 @@
                 <span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">env_vars</span>
 
-    <span class="k">def</span> <span class="nf">_verify_loaded_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_loaded_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify if a specific key is loaded in the agent.</span>
 
 <span class="sd">        Args:</span>
@@ -466,7 +494,7 @@
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;ssh-add&quot;</span><span class="p">,</span> <span class="s2">&quot;-l&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">identity_file</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_start_ssh_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_start_ssh_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Start SSH agent and add identity.</span>
 
 <span class="sd">        This method first attempts to load an existing SSH agent if reuse_agent is True.</span>
@@ -533,7 +561,7 @@
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_create_ssh_add_process</span><span class="p">(</span><span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_ssh_add_process</span><span class="p">(</span><span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a subprocess for ssh-add command.</span>
 
 <span class="sd">        Args:</span>
@@ -550,7 +578,7 @@
             <span class="n">text</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_try_add_key_without_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_try_add_key_without_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to add SSH key without passphrase.</span>
 
 <span class="sd">        Args:</span>
@@ -579,7 +607,7 @@
             <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_add_key_with_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_key_with_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add SSH key with passphrase.</span>
 
 <span class="sd">        Args:</span>
@@ -607,7 +635,7 @@
             <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_add_ssh_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_ssh_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add SSH key to the agent.</span>
 
 <span class="sd">        Args:</span>
@@ -628,9 +656,24 @@
             <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
 
-            <span class="c1"># If passphrase is needed and we have it configured, try with passphrase</span>
-            <span class="k">if</span> <span class="n">needs_passphrase</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">identity_passphrase</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_key_with_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">identity_passphrase</span><span class="p">)</span>
+            <span class="c1"># If passphrase is needed, try with configured passphrase</span>
+            <span class="k">if</span> <span class="n">needs_passphrase</span><span class="p">:</span>
+                <span class="c1"># First check if we have a passphrase in the config</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">identity_passphrase</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using passphrase from SSHConfig&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_key_with_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">identity_passphrase</span><span class="p">)</span>
+
+                <span class="c1"># Then check if we have a passphrase from CLI</span>
+                <span class="k">if</span> <span class="n">_has_cli</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+                        <span class="n">cli_passphrase</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_passphrase</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">cli_passphrase</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using passphrase from CLI config&quot;</span><span class="p">)</span>
+                            <span class="n">deobfuscated</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">_deobfuscate_passphrase</span><span class="p">(</span><span class="n">cli_passphrase</span><span class="p">)</span>
+                            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_key_with_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">deobfuscated</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to get passphrase from CLI config: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -638,7 +681,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to add key: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_test_ssh_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_test_ssh_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test SSH connection to a host.</span>
 
 <span class="sd">        Args:</span>
@@ -664,8 +707,8 @@
         <span class="k">return</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="PersistentSSHAgent.setup_ssh">
-<a class="viewcode-back" href="../../modules/persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.setup_ssh">[文档]</a>
-    <span class="k">def</span> <span class="nf">setup_ssh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.setup_ssh">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_ssh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up SSH authentication for a host.</span>
 
 <span class="sd">        Args:</span>
@@ -705,7 +748,7 @@
             <span class="k">return</span> <span class="kc">False</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_build_ssh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_ssh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build SSH command options list.</span>
 
 <span class="sd">        Args:</span>
@@ -735,8 +778,8 @@
         <span class="k">return</span> <span class="n">options</span>
 
 <div class="viewcode-block" id="PersistentSSHAgent.get_git_ssh_command">
-<a class="viewcode-back" href="../../modules/persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.get_git_ssh_command">[文档]</a>
-    <span class="k">def</span> <span class="nf">get_git_ssh_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.get_git_ssh_command">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_git_ssh_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate Git SSH command with proper configuration.</span>
 
 <span class="sd">        Args:</span>
@@ -778,9 +821,9 @@
 
 
 <div class="viewcode-block" id="PersistentSSHAgent.run_command">
-<a class="viewcode-back" href="../../modules/persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.run_command">[文档]</a>
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.run_command">[文档]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">shell</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">shell</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="n">check_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletedProcess</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a command and return its output.</span>
@@ -815,7 +858,7 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_write_temp_key</span><span class="p">(</span><span class="n">key_content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_temp_key</span><span class="p">(</span><span class="n">key_content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write key content to a temporary file.</span>
 
 <span class="sd">        Args:</span>
@@ -850,7 +893,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to write temporary key file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_resolve_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve identity file path, handling both absolute and relative paths.</span>
 
 <span class="sd">        Args:</span>
@@ -880,7 +923,7 @@
         <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_get_available_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_available_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get list of available SSH keys in .ssh directory.</span>
 
 <span class="sd">        Returns:</span>
@@ -906,7 +949,7 @@
         <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">_get_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the identity file to use for a given hostname.</span>
 
 <span class="sd">        Args:</span>
@@ -915,7 +958,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Optional[str]: Path to the identity file, or None if not found.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Check environment variable first</span>
+        <span class="c1"># Check if we have a config from CLI</span>
+        <span class="k">if</span> <span class="n">_has_cli</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+                <span class="n">cli_identity_file</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_identity_file</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">cli_identity_file</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">cli_identity_file</span><span class="p">)):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using identity file from CLI config: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cli_identity_file</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">cli_identity_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to get identity file from CLI config: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="c1"># Check environment variable</span>
         <span class="k">if</span> <span class="s2">&quot;SSH_IDENTITY_FILE&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
             <span class="n">identity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SSH_IDENTITY_FILE&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
@@ -930,7 +984,7 @@
         <span class="c1"># Always return default key path, even if it doesn&#39;t exist</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">,</span> <span class="s2">&quot;id_rsa&quot;</span><span class="p">)))</span>
 
-    <span class="k">def</span> <span class="nf">_parse_ssh_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SSHConfig</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_ssh_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SSHConfig</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse SSH config file to get host-specific configurations.</span>
 
 <span class="sd">        Returns:</span>
@@ -1010,7 +1064,7 @@
             <span class="s2">&quot;canonicalizepermittedcnames&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any CNAME specification is valid</span>
         <span class="p">}</span>
 
-        <span class="k">def</span> <span class="nf">is_valid_host_pattern</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_host_pattern</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Check if a host pattern is valid.</span>
 
@@ -1063,7 +1117,7 @@
 
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">def</span> <span class="nf">get_validation_error</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_validation_error</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Get validation error message for a config key-value pair.</span>
 
 <span class="sd">            Args:</span>
@@ -1084,7 +1138,7 @@
 
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="k">def</span> <span class="nf">process_config_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">process_config_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Process a single line from SSH config file.</span>
 
 <span class="sd">            Args:</span>
@@ -1203,7 +1257,7 @@
 
         <span class="k">return</span> <span class="n">config</span>
 
-    <span class="k">def</span> <span class="nf">_extract_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract hostname from SSH URL.</span>
 
 <span class="sd">        Args:</span>
@@ -1254,8 +1308,8 @@
             <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="PersistentSSHAgent.is_valid_hostname">
-<a class="viewcode-back" href="../../modules/persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.is_valid_hostname">[文档]</a>
-    <span class="k">def</span> <span class="nf">is_valid_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.is_valid_hostname">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a hostname is valid according to RFC 1123 and supports IPv6.</span>
 
 <span class="sd">        Args:</span>
@@ -1316,7 +1370,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024, persistent_ssh_agent
+                Copyright &#169; 
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

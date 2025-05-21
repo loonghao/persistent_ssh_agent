@@ -1,0 +1,1240 @@
+<!doctype html>
+<html class="no-js" lang="en-US" data-content_root="../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
+        <title>persistent_ssh_agent.cli - persistent_ssh_agent 0.5.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=2707e25f" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=2707e25f" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #2980b9;
+  --color-brand-content: #2980b9;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #3498db;
+  --color-brand-content: #3498db;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #3498db;
+  --color-brand-content: #3498db;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.5.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.5.1 documentation</span>
+  
+</a>
+<div class="language-switcher">
+        <a href="/persistent_ssh_agent/zh_CN/_modules/persistent_ssh_agent/cli.html">中文</a>
+        <span class="current-lang">English</span>
+</div><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security-features.html">Security Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../persistent_ssh_agent.html">persistent_ssh_agent package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of persistent_ssh_agent package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for persistent_ssh_agent.cli</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Command-line interface for persistent-ssh-agent.&quot;&quot;&quot;</span>
+
+<span class="c1"># Import built-in modules</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">getpass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+
+<span class="c1"># Import third-party modules</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_backend</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">hashes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives.ciphers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cipher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives.ciphers.algorithms</span><span class="w"> </span><span class="kn">import</span> <span class="n">AES</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives.ciphers.modes</span><span class="w"> </span><span class="kn">import</span> <span class="n">CBC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cryptography.hazmat.primitives.kdf.pbkdf2</span><span class="w"> </span><span class="kn">import</span> <span class="n">PBKDF2HMAC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
+
+
+<span class="c1"># Configure logger</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>  <span class="c1"># Remove default handler</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss}&lt;/green&gt; | &lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt; | &lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span><span class="p">,</span>
+    <span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Constants for encryption</span>
+<span class="n">SALT_SIZE</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">IV_SIZE</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">KEY_SIZE</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># 256 bits</span>
+<span class="n">ITERATIONS</span> <span class="o">=</span> <span class="mi">100000</span>
+
+
+<div class="viewcode-block" id="Args">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.Args">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple class to mimic argparse namespace for compatibility with existing functions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize with keyword arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: Attributes to set on the instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ConfigManager">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages persistent configuration for SSH agent.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize configuration manager.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.persistent_ssh_agent&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_dir</span> <span class="o">/</span> <span class="s2">&quot;config.json&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_config_dir</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ensure_config_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure configuration directory exists.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Set proper permissions for config directory</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;nt&quot;</span><span class="p">:</span>  <span class="c1"># Skip on Windows</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_dir</span><span class="p">,</span> <span class="mo">0o700</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConfigManager.load_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.load_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load configuration from file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: Configuration dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load configuration: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.save_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.save_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save configuration to file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: Configuration dictionary</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># Set proper permissions for config file</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;nt&quot;</span><span class="p">:</span>  <span class="c1"># Skip on Windows</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="mo">0o600</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to save configuration: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.get_passphrase">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.get_passphrase">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stored passphrase.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[str]: Stored passphrase or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">encrypted_data</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;passphrase&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">encrypted_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">encrypted_data</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.set_passphrase">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.set_passphrase">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set and store passphrase.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            passphrase: SSH key passphrase</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="c1"># Use AES-256 encryption</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;passphrase&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encrypt_passphrase</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.get_identity_file">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.get_identity_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stored identity file path.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[str]: Stored identity file path or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.set_identity_file">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.set_identity_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set and store identity file path.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identity_file: Path to SSH identity file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.get_expiration_time">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.get_expiration_time">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_expiration_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stored expiration time.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[int]: Expiration time in seconds or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.set_expiration_time">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.set_expiration_time">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_expiration_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hours</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set and store expiration time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hours: Expiration time in hours</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hours</span> <span class="o">*</span> <span class="mi">3600</span>  <span class="c1"># Convert to seconds</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.get_reuse_agent">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.get_reuse_agent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_reuse_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get stored reuse agent setting.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[bool]: Reuse agent setting or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.set_reuse_agent">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.set_reuse_agent">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_reuse_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reuse</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set and store reuse agent setting.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            reuse: Whether to reuse existing SSH agent</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reuse</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.list_keys">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.list_keys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List all configured SSH keys.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: Dictionary of configured keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="s2">&quot;identity_file&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.add_key">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.add_key">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a named SSH key.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Name of the key</span>
+<span class="sd">            identity_file: Path to SSH identity file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.remove_key">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.remove_key">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a named SSH key.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Name of the key</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span> <span class="ow">and</span> <span class="s2">&quot;identity_file&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;identity_file&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]:</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.clear_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.clear_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all configuration.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">({})</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.export_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.export_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_sensitive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            include_sensitive: Whether to include sensitive information</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: Exported configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="n">export</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Always include non-sensitive information</span>
+        <span class="k">if</span> <span class="s2">&quot;identity_file&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identity_file&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;keys&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;expiration_time&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;expiration_time&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;reuse_agent&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;reuse_agent&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Include sensitive information if requested</span>
+        <span class="k">if</span> <span class="n">include_sensitive</span> <span class="ow">and</span> <span class="s2">&quot;passphrase&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">export</span><span class="p">[</span><span class="s2">&quot;passphrase&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;passphrase&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">export</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.import_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.import_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">import_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Import configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config_data: Configuration data to import</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+        <span class="c1"># Update current configuration with imported data</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">current_config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_config</span><span class="p">(</span><span class="n">current_config</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_derive_key_from_system</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Derive encryption key from system-specific information.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[bytes, bytes]: (key, salt)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get system-specific information</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Try multiple methods to get username, with fallbacks for CI environments</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">username</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getlogin</span><span class="p">()</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">username</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="c1"># Last resort fallback for CI environments</span>
+                    <span class="n">user</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">username</span> <span class="o">=</span> <span class="n">user</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;USERNAME&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown_user&quot;</span><span class="p">)</span>
+
+            <span class="n">system_info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span>
+                <span class="s2">&quot;machine_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_machine_id</span><span class="p">(),</span>
+                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+                <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># If all else fails, use a default set of values</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get system info: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, using fallback values&quot;</span><span class="p">)</span>
+            <span class="n">system_info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_host&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;machine_id&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_machine&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_user&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="s2">&quot;/unknown_home&quot;</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Create a deterministic salt from system info</span>
+        <span class="n">salt_base</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">system_info</span><span class="p">[</span><span class="s1">&#39;hostname&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">system_info</span><span class="p">[</span><span class="s1">&#39;machine_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">system_info</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">salt</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">salt_base</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">digest</span><span class="p">()[:</span><span class="n">SALT_SIZE</span><span class="p">]</span>
+
+        <span class="c1"># Derive key using PBKDF2</span>
+        <span class="n">kdf</span> <span class="o">=</span> <span class="n">PBKDF2HMAC</span><span class="p">(</span>
+            <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">(),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">KEY_SIZE</span><span class="p">,</span>
+            <span class="n">salt</span><span class="o">=</span><span class="n">salt</span><span class="p">,</span>
+            <span class="n">iterations</span><span class="o">=</span><span class="n">ITERATIONS</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Use a combination of system info as the password</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">system_info</span><span class="p">[</span><span class="s1">&#39;hostname&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">system_info</span><span class="p">[</span><span class="s1">&#39;machine_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">system_info</span><span class="p">[</span><span class="s1">&#39;home&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">kdf</span><span class="o">.</span><span class="n">derive</span><span class="p">(</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="n">salt</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_machine_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a unique machine identifier.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Machine ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Try to get machine ID from common locations</span>
+        <span class="n">machine_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Linux</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;/etc/machine-id&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/etc/machine-id&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">machine_id</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Windows</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;nt&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Import built-in modules</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">winreg</span>
+                <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span>
+                                    <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Cryptography&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
+                    <span class="n">machine_id</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;MachineGuid&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># macOS</span>
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;/Library/Preferences/SystemConfiguration/com.apple.computer.plist&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Import built-in modules</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">plistlib</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;/Library/Preferences/SystemConfiguration/com.apple.computer.plist&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">plist</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">machine_id</span> <span class="o">=</span> <span class="n">plist</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;LocalHostName&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Fallback to a hash of the hostname if we couldn&#39;t get a machine ID</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">machine_id</span><span class="p">:</span>
+            <span class="n">machine_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">machine_id</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_encrypt_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encrypt passphrase using AES-256.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            passphrase: Plain text passphrase</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Encrypted passphrase</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get key and salt</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">salt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derive_key_from_system</span><span class="p">()</span>
+
+            <span class="c1"># Generate a random IV</span>
+            <span class="n">iv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="n">IV_SIZE</span><span class="p">)</span>
+
+            <span class="c1"># Create an encryptor</span>
+            <span class="n">cipher</span> <span class="o">=</span> <span class="n">Cipher</span><span class="p">(</span><span class="n">AES</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">CBC</span><span class="p">(</span><span class="n">iv</span><span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">())</span>
+            <span class="n">encryptor</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="n">encryptor</span><span class="p">()</span>
+
+            <span class="c1"># Pad the plaintext to a multiple of 16 bytes (AES block size)</span>
+            <span class="n">plaintext</span> <span class="o">=</span> <span class="n">passphrase</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="n">padding_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plaintext</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span><span class="p">)</span>
+            <span class="n">plaintext</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">padding_length</span><span class="p">])</span> <span class="o">*</span> <span class="n">padding_length</span>
+
+            <span class="c1"># Encrypt the padded plaintext</span>
+            <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">encryptor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plaintext</span><span class="p">)</span> <span class="o">+</span> <span class="n">encryptor</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+            <span class="c1"># Combine salt, IV, and ciphertext</span>
+            <span class="n">encrypted_data</span> <span class="o">=</span> <span class="n">salt</span> <span class="o">+</span> <span class="n">iv</span> <span class="o">+</span> <span class="n">ciphertext</span>
+
+            <span class="c1"># Encode as base64 for storage</span>
+            <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">encrypted_data</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to encrypt passphrase: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_deobfuscate_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encrypted_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Decrypt passphrase.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            encrypted_data: Encrypted passphrase</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Plain text passphrase</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Check if this is a base64-encoded string (AES encryption)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">encrypted_data</span><span class="p">)</span>
+
+            <span class="c1"># Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)</span>
+            <span class="n">iv</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">SALT_SIZE</span><span class="p">:</span><span class="n">SALT_SIZE</span> <span class="o">+</span> <span class="n">IV_SIZE</span><span class="p">]</span>
+            <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">SALT_SIZE</span> <span class="o">+</span> <span class="n">IV_SIZE</span><span class="p">:]</span>
+
+            <span class="c1"># Get key using the same method as encryption</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derive_key_from_system</span><span class="p">()</span>
+
+            <span class="c1"># Create a decryptor</span>
+            <span class="n">cipher</span> <span class="o">=</span> <span class="n">Cipher</span><span class="p">(</span><span class="n">AES</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">CBC</span><span class="p">(</span><span class="n">iv</span><span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">())</span>
+            <span class="n">decryptor</span> <span class="o">=</span> <span class="n">cipher</span><span class="o">.</span><span class="n">decryptor</span><span class="p">()</span>
+
+            <span class="c1"># Decrypt the ciphertext</span>
+            <span class="n">padded_plaintext</span> <span class="o">=</span> <span class="n">decryptor</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ciphertext</span><span class="p">)</span> <span class="o">+</span> <span class="n">decryptor</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+            <span class="c1"># Remove padding</span>
+            <span class="n">padding_length</span> <span class="o">=</span> <span class="n">padded_plaintext</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">plaintext</span> <span class="o">=</span> <span class="n">padded_plaintext</span><span class="p">[:</span><span class="o">-</span><span class="n">padding_length</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">plaintext</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to decrypt passphrase: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+<div class="viewcode-block" id="ConfigManager.secure_delete_from_memory">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager.secure_delete_from_memory">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">secure_delete_from_memory</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Securely delete sensitive data from memory.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Data to delete</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># For strings, we can&#39;t modify the bytes directly</span>
+            <span class="c1"># This is a best-effort approach</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">):</span>
+            <span class="c1"># For bytearrays, we can modify in place</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span>
+
+        <span class="c1"># For bytes, we can&#39;t modify (immutable), but we can try to</span>
+        <span class="c1"># encourage garbage collection by removing references</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">data</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="setup_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.setup_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_config</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up configuration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+
+    <span class="c1"># Handle identity file</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">:</span>
+        <span class="n">identity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">identity_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file not found: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_identity_file</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file set to: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set identity file&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Handle passphrase</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">passphrase</span><span class="p">:</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">passphrase</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">prompt_passphrase</span><span class="p">:</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter SSH key passphrase: &quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_passphrase</span><span class="p">(</span><span class="n">passphrase</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Passphrase set successfully&quot;</span><span class="p">)</span>
+            <span class="c1"># Securely delete passphrase from memory</span>
+            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set passphrase&quot;</span><span class="p">)</span>
+            <span class="c1"># Securely delete passphrase from memory</span>
+            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Handle expiration time</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;expiration&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Expiration time must be a positive number&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_expiration_time</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expiration time set to: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set expiration time&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Handle reuse agent</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">set_reuse_agent</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reuse agent set to: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set reuse agent&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_ssh_connection_test">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.run_ssh_connection_test">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_ssh_connection_test</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test SSH connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+
+    <span class="c1"># Get stored configuration</span>
+    <span class="n">identity_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">identity_file</span> <span class="ow">or</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_identity_file</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">identity_file</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No identity file specified or found in configuration&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Expand user directory in path</span>
+    <span class="n">identity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+
+    <span class="c1"># Check if identity file exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identity file not found: </span><span class="si">{</span><span class="n">identity_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Get passphrase</span>
+    <span class="n">stored_passphrase</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_passphrase</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">stored_passphrase</span><span class="p">:</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">_deobfuscate_passphrase</span><span class="p">(</span><span class="n">stored_passphrase</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">passphrase</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Get expiration time and add to SSH config if available</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;expiration&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">expiration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Use command line argument</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using expiration time from command line: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">expiration</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
+        <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Check stored configuration</span>
+        <span class="n">stored_expiration</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_expiration_time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stored_expiration</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using expiration time from config: </span><span class="si">{</span><span class="n">stored_expiration</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3600</span><span class="si">}</span><span class="s2"> hours&quot;</span><span class="p">)</span>
+            <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
+
+    <span class="c1"># Get reuse agent setting and add to SSH config if available</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Use command line argument</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using reuse agent setting from command line: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Check stored configuration</span>
+        <span class="n">stored_reuse</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_reuse_agent</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stored_reuse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using reuse agent setting from config: </span><span class="si">{</span><span class="n">stored_reuse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># We don&#39;t need to set it in ssh_config as it&#39;s not used there</span>
+
+    <span class="c1"># Create SSH configuration</span>
+    <span class="n">ssh_config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
+        <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
+        <span class="n">identity_passphrase</span><span class="o">=</span><span class="n">passphrase</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Initialize SSH agent</span>
+    <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">ssh_config</span><span class="p">)</span>
+
+    <span class="c1"># Set verbosity level</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="p">(</span>
+                <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &quot;</span>
+                <span class="s2">&quot;&lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt; | &quot;</span>
+                <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
+                <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
+            <span class="p">),</span>
+            <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Test connection</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hostname</span>
+    <span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ SSH connection to </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2"> successful&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Clean up sensitive data</span>
+        <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
+            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ SSH connection to </span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Clean up sensitive data</span>
+        <span class="k">if</span> <span class="n">passphrase</span><span class="p">:</span>
+            <span class="n">config_manager</span><span class="o">.</span><span class="n">secure_delete_from_memory</span><span class="p">(</span><span class="n">passphrase</span><span class="p">)</span>
+
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="list_keys">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.list_keys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_keys</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all configured SSH keys.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        _: Command line arguments (unused)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">list_keys</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No SSH keys configured&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configured SSH keys:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="remove_key">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.remove_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_key</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a configured SSH key.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+        <span class="c1"># Remove all keys</span>
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">clear_config</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;All SSH keys removed&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to remove SSH keys&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="c1"># Remove specific key</span>
+        <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">remove_key</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SSH key &#39;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; removed&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to remove SSH key &#39;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; (not found)&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No key specified to remove&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="export_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.export_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_config</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Export configuration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+
+    <span class="c1"># Export configuration</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">export_config</span><span class="p">(</span><span class="n">include_sensitive</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">include_sensitive</span><span class="p">)</span>
+
+    <span class="c1"># Print configuration</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
+        <span class="c1"># Write to file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration exported to </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to export configuration: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Print to console</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="import_config">
+<a class="viewcode-back" href="../../persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.import_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">import_config</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Import configuration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line arguments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+
+    <span class="c1"># Read configuration</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to import configuration: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Import configuration</span>
+    <span class="k">if</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">import_config</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configuration imported successfully&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to import configuration&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Persistent SSH Agent CLI&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main entry point for CLI.&quot;&quot;&quot;</span>
+    <span class="c1"># This function serves as the entry point for the CLI</span>
+    <span class="c1"># The actual functionality is implemented in the command functions</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Configure SSH agent&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--identity-file&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to SSH identity file&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--passphrase&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;SSH key passphrase (not recommended, use --prompt-passphrase instead)&quot;</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--prompt-passphrase&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Prompt for SSH key passphrase&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--expiration&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Expiration time in hours&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--reuse-agent&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to reuse existing SSH agent&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">config_cmd</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">,</span> <span class="n">prompt_passphrase</span><span class="p">,</span> <span class="n">expiration</span><span class="p">,</span> <span class="n">reuse_agent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure SSH agent settings.&quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span>
+        <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
+        <span class="n">passphrase</span><span class="o">=</span><span class="n">passphrase</span><span class="p">,</span>
+        <span class="n">prompt_passphrase</span><span class="o">=</span><span class="n">prompt_passphrase</span><span class="p">,</span>
+        <span class="n">expiration</span><span class="o">=</span><span class="n">expiration</span><span class="p">,</span>
+        <span class="n">reuse_agent</span><span class="o">=</span><span class="n">reuse_agent</span>
+    <span class="p">)</span>
+
+    <span class="n">setup_config</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Test SSH connection&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;hostname&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--identity-file&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to SSH identity file (overrides config)&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--expiration&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Expiration time in hours (overrides config)&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--reuse-agent&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to reuse existing SSH agent (overrides config)&quot;</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Enable verbose output&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_cmd</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">,</span> <span class="n">expiration</span><span class="p">,</span> <span class="n">reuse_agent</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test SSH connection to a host.&quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span>
+        <span class="n">hostname</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span>
+        <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
+        <span class="n">expiration</span><span class="o">=</span><span class="n">expiration</span><span class="p">,</span>
+        <span class="n">reuse_agent</span><span class="o">=</span><span class="n">reuse_agent</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+    <span class="p">)</span>
+
+    <span class="n">run_ssh_connection_test</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List configured SSH keys&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_cmd</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all configured SSH keys.&quot;&quot;&quot;</span>
+    <span class="n">list_keys</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove configured SSH keys&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the key to remove&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--all&quot;</span><span class="p">,</span> <span class="s2">&quot;all_keys&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove all keys&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">all_keys</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove configured SSH keys.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">all_keys</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Error: Either --name or --all must be specified&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="nb">all</span><span class="o">=</span><span class="n">all_keys</span><span class="p">)</span>
+    <span class="n">remove_key</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;export&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Export configuration&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output file path&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--include-sensitive&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Include sensitive information in export&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_cmd</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">include_sensitive</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Export configuration.&quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="n">output</span><span class="p">,</span> <span class="n">include_sensitive</span><span class="o">=</span><span class="n">include_sensitive</span><span class="p">)</span>
+    <span class="n">export_config</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;import&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Import configuration&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;input_file&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">import_config_cmd</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Import configuration from a file.&quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">input_file</span><span class="p">)</span>
+    <span class="n">import_config</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/loonghao/persistent_ssh_agent" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=f5b06220"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>
