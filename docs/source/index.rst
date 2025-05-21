@@ -1,5 +1,5 @@
 Welcome to persistent_ssh_agent's documentation!
-==============================================
+================================================================
 
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_

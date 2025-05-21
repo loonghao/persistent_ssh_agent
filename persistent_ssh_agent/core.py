@@ -26,8 +26,10 @@ from typing import Union
 # Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
 
+
 # Import local modules (conditional to avoid circular imports)
 try:
+    # Import third-party modules
     from persistent_ssh_agent.cli import ConfigManager
     _has_cli = True
 except ImportError:
