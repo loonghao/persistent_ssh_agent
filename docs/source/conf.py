@@ -7,11 +7,14 @@ import sys
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath("../.."))
 
-from persistent_ssh_agent.__version__ import __version__  # noqa: E402
+# Get version directly from version file to avoid import issues
+with open(os.path.join(os.path.abspath("../.."), "persistent_ssh_agent", "__version__.py"), encoding="utf-8") as f:
+    version_line = f.read().strip()
+    __version__ = version_line.split("=")[1].strip().strip('"').strip("'")
 
 # -- Project information -----------------------------------------------------
 project = "persistent_ssh_agent"
-copyright = "2024, persistent_ssh_agent"
+copyright_str = "2024, persistent_ssh_agent"
 author = "persistent_ssh_agent"
 release = __version__
 

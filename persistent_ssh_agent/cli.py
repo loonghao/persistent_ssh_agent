@@ -2,19 +2,14 @@
 
 # Import built-in modules
 import base64
-import ctypes
 import getpass
 import hashlib
 import json
 import os
-import platform
-import secrets
+from pathlib import Path
 import socket
 import sys
-import uuid
-from pathlib import Path
 from typing import Dict
-from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -334,7 +329,8 @@ class ConfigManager:
                     username = getpass.getuser()
                 except Exception:
                     # Last resort fallback for CI environments
-                    username = os.environ.get("USER", os.environ.get("USERNAME", "unknown_user"))
+                    user = os.environ.get("USER", "")
+                    username = user or os.environ.get("USERNAME", "unknown_user")
 
             system_info = {
                 "hostname": socket.gethostname(),
@@ -391,6 +387,7 @@ class ConfigManager:
         # Windows
         elif os.name == "nt":
             try:
+                # Import built-in modules
                 import winreg
                 with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
                                     r"SOFTWARE\Microsoft\Cryptography") as key:
@@ -401,6 +398,7 @@ class ConfigManager:
         # macOS
         elif os.path.exists("/Library/Preferences/SystemConfiguration/com.apple.computer.plist"):
             try:
+                # Import built-in modules
                 import plistlib
                 with open("/Library/Preferences/SystemConfiguration/com.apple.computer.plist", "rb") as f:
                     plist = plistlib.load(f)
@@ -465,31 +463,12 @@ class ConfigManager:
             # Check if this is a base64-encoded string (AES encryption)
             data = base64.b64decode(encrypted_data)
 
-            # Extract salt, IV, and ciphertext
-            salt = data[:SALT_SIZE]
+            # Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)
             iv = data[SALT_SIZE:SALT_SIZE + IV_SIZE]
             ciphertext = data[SALT_SIZE + IV_SIZE:]
 
-            # Derive key using the extracted salt
-            kdf = PBKDF2HMAC(
-                algorithm=hashes.SHA256(),
-                length=KEY_SIZE,
-                salt=salt,
-                iterations=ITERATIONS,
-                backend=default_backend()
-            )
-
-            # Use system info as the password
-            system_info = {
-                "hostname": socket.gethostname(),
-                "machine_id": self._get_machine_id(),
-                "username": os.getlogin() if hasattr(os, "getlogin") else getpass.getuser(),
-                "home": str(Path.home())
-            }
-            password = (
-                f"{system_info['hostname']}:{system_info['machine_id']}:{system_info['home']}"
-            )
-            key = kdf.derive(password.encode())
+            # Get key using the same method as encryption
+            key, _ = self._derive_key_from_system()
 
             # Create a decryptor
             cipher = Cipher(AES(key), CBC(iv), backend=default_backend())

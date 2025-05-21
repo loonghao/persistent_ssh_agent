@@ -2,20 +2,15 @@
 
 # Import built-in modules
 import json
-import os
 from pathlib import Path
-import sys
-import tempfile
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
-import click
 from click.testing import CliRunner
 import pytest
 
 # Import local modules
-from persistent_ssh_agent.cli import Args
 from persistent_ssh_agent.cli import ConfigManager
 from persistent_ssh_agent.cli import export_config
 from persistent_ssh_agent.cli import import_config
@@ -67,23 +62,23 @@ def test_config_manager_save_config(config_manager):
 def test_config_manager_get_set_passphrase(config_manager):
     """Test getting and setting a passphrase."""
     # Mock _derive_key_from_system to avoid OS-specific issues in CI
-    with patch.object(config_manager, '_derive_key_from_system') as mock_derive:
+    with patch.object(config_manager, "_derive_key_from_system") as mock_derive:
         # Return a fixed key and salt for testing
-        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        mock_derive.return_value = (b"0" * 32, b"1" * 16)
 
         # Set a passphrase
         assert config_manager.set_passphrase("test") is True
 
         # Get the passphrase
         mock_derive.reset_mock()
-        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        mock_derive.return_value = (b"0" * 32, b"1" * 16)
         passphrase = config_manager.get_passphrase()
         assert passphrase is not None
         assert passphrase != "test"  # Should be encrypted
 
         # Verify the passphrase can be decrypted
         mock_derive.reset_mock()
-        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        mock_derive.return_value = (b"0" * 32, b"1" * 16)
         deobfuscated = config_manager._deobfuscate_passphrase(passphrase)
         assert deobfuscated == "test"
 
@@ -102,16 +97,16 @@ def test_config_manager_get_set_identity_file(config_manager):
 def test_config_manager_encrypt_decrypt(config_manager):
     """Test encryption and decryption of passphrase."""
     # Mock _derive_key_from_system to avoid OS-specific issues in CI
-    with patch.object(config_manager, '_derive_key_from_system') as mock_derive:
+    with patch.object(config_manager, "_derive_key_from_system") as mock_derive:
         # Return a fixed key and salt for testing
-        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        mock_derive.return_value = (b"0" * 32, b"1" * 16)
 
         passphrase = "test_passphrase"
         encrypted = config_manager._encrypt_passphrase(passphrase)
 
         # Reset the mock to ensure decryption uses the same key/salt
         mock_derive.reset_mock()
-        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        mock_derive.return_value = (b"0" * 32, b"1" * 16)
 
         decrypted = config_manager._deobfuscate_passphrase(encrypted)
         assert decrypted == passphrase
