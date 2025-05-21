@@ -233,6 +233,29 @@ asyncio.run(main())
 
 ## 🔧 Common Use Cases
 
+### Command Line Interface (CLI)
+
+The library provides a command-line interface for easy configuration and testing:
+
+```bash
+# Configure SSH agent with a specific identity file
+uvx persistent_ssh_agent config --identity-file ~/.ssh/id_ed25519 --prompt-passphrase
+
+# Test SSH connection to a host
+uvx persistent_ssh_agent test github.com
+```
+
+Available commands:
+
+- `config`: Configure SSH agent settings
+  - `--identity-file`: Path to SSH identity file
+  - `--passphrase`: SSH key passphrase (not recommended, use --prompt instead)
+  - `--prompt-passphrase`: Prompt for SSH key passphrase
+
+- `test`: Test SSH connection to a host
+  - `hostname`: Hostname to test connection with
+  - `--identity-file`: Path to SSH identity file (overrides config)
+
 ### CI/CD Pipeline Integration
 
 ```python

@@ -206,6 +206,29 @@ def setup_ssh(hostname: str, key_file: Optional[str] = None) -> bool:
 
 ## 🔧 常见使用场景
 
+### 命令行界面 (CLI)
+
+该库提供了一个命令行界面，用于轻松配置和测试：
+
+```bash
+# 使用特定身份文件配置 SSH agent
+uvx persistent_ssh_agent config --identity-file ~/.ssh/id_ed25519 --prompt-passphrase
+
+# 测试到主机的 SSH 连接
+uvx persistent_ssh_agent test github.com
+```
+
+可用命令：
+
+- `config`：配置 SSH agent 设置
+  - `--identity-file`：SSH 身份文件路径
+  - `--passphrase`：SSH 密钥密码短语（不推荐，请使用 --prompt 代替）
+  - `--prompt-passphrase`：提示输入 SSH 密钥密码短语
+
+- `test`：测试到主机的 SSH 连接
+  - `hostname`：要测试连接的主机名
+  - `--identity-file`：SSH 身份文件路径（覆盖配置）
+
 ### CI/CD 流水线集成
 
 ```python

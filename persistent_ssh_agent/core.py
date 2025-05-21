@@ -26,6 +26,13 @@ from typing import Union
 # Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
 
+# Import local modules (conditional to avoid circular imports)
+try:
+    from persistent_ssh_agent.cli import ConfigManager
+    _has_cli = True
+except ImportError:
+    _has_cli = False
+
 
 logger = logging.getLogger(__name__)
 
@@ -378,9 +385,24 @@ class PersistentSSHAgent:
             if success:
                 return True
 
-            # If passphrase is needed and we have it configured, try with passphrase
-            if needs_passphrase and self._config and self._config.identity_passphrase:
-                return self._add_key_with_passphrase(identity_file, self._config.identity_passphrase)
+            # If passphrase is needed, try with configured passphrase
+            if needs_passphrase:
+                # First check if we have a passphrase in the config
+                if self._config and self._config.identity_passphrase:
+                    logger.debug("Using passphrase from SSHConfig")
+                    return self._add_key_with_passphrase(identity_file, self._config.identity_passphrase)
+
+                # Then check if we have a passphrase from CLI
+                if _has_cli:
+                    try:
+                        config_manager = ConfigManager()
+                        cli_passphrase = config_manager.get_passphrase()
+                        if cli_passphrase:
+                            logger.debug("Using passphrase from CLI config")
+                            deobfuscated = config_manager._deobfuscate_passphrase(cli_passphrase)
+                            return self._add_key_with_passphrase(identity_file, deobfuscated)
+                    except Exception as e:
+                        logger.debug("Failed to get passphrase from CLI config: %s", e)
 
             return False
 
@@ -656,7 +678,18 @@ class PersistentSSHAgent:
         Returns:
             Optional[str]: Path to the identity file, or None if not found.
         """
-        # Check environment variable first
+        # Check if we have a config from CLI
+        if _has_cli:
+            try:
+                config_manager = ConfigManager()
+                cli_identity_file = config_manager.get_identity_file()
+                if cli_identity_file and os.path.exists(os.path.expanduser(cli_identity_file)):
+                    logger.debug("Using identity file from CLI config: %s", cli_identity_file)
+                    return os.path.expanduser(cli_identity_file)
+            except Exception as e:
+                logger.debug("Failed to get identity file from CLI config: %s", e)
+
+        # Check environment variable
         if "SSH_IDENTITY_FILE" in os.environ:
             identity_file = os.environ["SSH_IDENTITY_FILE"]
             if os.path.exists(identity_file):
