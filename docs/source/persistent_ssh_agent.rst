@@ -1,8 +1,8 @@
 persistent_ssh_agent package
-==========================
+============================
 
 Module contents
---------------
+---------------
 
 .. automodule:: persistent_ssh_agent
    :members:
