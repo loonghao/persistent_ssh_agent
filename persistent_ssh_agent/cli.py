@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import socket
 import sys
+from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Tuple
@@ -109,17 +110,39 @@ class ConfigManager:
             logger.error(f"Failed to save configuration: {e}")
             return False
 
+    def _get_config_value(self, key: str) -> Optional[Any]:
+        """Get a value from the configuration.
+
+        Args:
+            key: Configuration key
+
+        Returns:
+            Optional[Any]: Configuration value or None
+        """
+        config = self.load_config()
+        return config.get(key)
+
+    def _set_config_value(self, key: str, value: Any) -> bool:
+        """Set a value in the configuration.
+
+        Args:
+            key: Configuration key
+            value: Configuration value
+
+        Returns:
+            bool: True if successful
+        """
+        config = self.load_config()
+        config[key] = value
+        return self.save_config(config)
+
     def get_passphrase(self) -> Optional[str]:
         """Get stored passphrase.
 
         Returns:
             Optional[str]: Stored passphrase or None
         """
-        config = self.load_config()
-        encrypted_data = config.get("passphrase")
-        if not encrypted_data:
-            return None
-        return encrypted_data
+        return self._get_config_value("passphrase")
 
     def set_passphrase(self, passphrase: str) -> bool:
         """Set and store passphrase.
@@ -130,10 +153,9 @@ class ConfigManager:
         Returns:
             bool: True if successful
         """
-        config = self.load_config()
         # Use AES-256 encryption
-        config["passphrase"] = self._encrypt_passphrase(passphrase)
-        return self.save_config(config)
+        encrypted = self._encrypt_passphrase(passphrase)
+        return self._set_config_value("passphrase", encrypted)
 
     def get_identity_file(self) -> Optional[str]:
         """Get stored identity file path.
@@ -141,8 +163,7 @@ class ConfigManager:
         Returns:
             Optional[str]: Stored identity file path or None
         """
-        config = self.load_config()
-        return config.get("identity_file")
+        return self._get_config_value("identity_file")
 
     def set_identity_file(self, identity_file: str) -> bool:
         """Set and store identity file path.
@@ -153,9 +174,8 @@ class ConfigManager:
         Returns:
             bool: True if successful
         """
-        config = self.load_config()
-        config["identity_file"] = os.path.expanduser(identity_file)
-        return self.save_config(config)
+        expanded_path = os.path.expanduser(identity_file)
+        return self._set_config_value("identity_file", expanded_path)
 
     def get_expiration_time(self) -> Optional[int]:
         """Get stored expiration time.
@@ -163,8 +183,7 @@ class ConfigManager:
         Returns:
             Optional[int]: Expiration time in seconds or None
         """
-        config = self.load_config()
-        return config.get("expiration_time")
+        return self._get_config_value("expiration_time")
 
     def set_expiration_time(self, hours: int) -> bool:
         """Set and store expiration time.
@@ -175,9 +194,8 @@ class ConfigManager:
         Returns:
             bool: True if successful
         """
-        config = self.load_config()
-        config["expiration_time"] = hours * 3600  # Convert to seconds
-        return self.save_config(config)
+        seconds = hours * 3600  # Convert to seconds
+        return self._set_config_value("expiration_time", seconds)
 
     def get_reuse_agent(self) -> Optional[bool]:
         """Get stored reuse agent setting.
@@ -185,8 +203,7 @@ class ConfigManager:
         Returns:
             Optional[bool]: Reuse agent setting or None
         """
-        config = self.load_config()
-        return config.get("reuse_agent")
+        return self._get_config_value("reuse_agent")
 
     def set_reuse_agent(self, reuse: bool) -> bool:
         """Set and store reuse agent setting.
@@ -197,9 +214,7 @@ class ConfigManager:
         Returns:
             bool: True if successful
         """
-        config = self.load_config()
-        config["reuse_agent"] = reuse
-        return self.save_config(config)
+        return self._set_config_value("reuse_agent", reuse)
 
     def list_keys(self) -> Dict:
         """List all configured SSH keys.
@@ -210,11 +225,15 @@ class ConfigManager:
         config = self.load_config()
         result = {}
 
-        if "identity_file" in config:
-            result["default"] = config["identity_file"]
+        # Add default key if exists
+        identity_file = config.get("identity_file")
+        if identity_file:
+            result["default"] = identity_file
 
-        if "keys" in config and isinstance(config["keys"], dict):
-            result.update(config["keys"])
+        # Add named keys if exist
+        keys = config.get("keys", {})
+        if isinstance(keys, dict):
+            result.update(keys)
 
         return result
 
@@ -230,6 +249,11 @@ class ConfigManager:
         """
         config = self.load_config()
 
+        # Handle default key
+        if name == "default":
+            return self.set_identity_file(identity_file)
+
+        # Handle named keys
         if "keys" not in config:
             config["keys"] = {}
 
@@ -246,16 +270,23 @@ class ConfigManager:
             bool: True if successful
         """
         config = self.load_config()
+        updated = False
 
+        # Handle default key
         if name == "default" and "identity_file" in config:
             config.pop("identity_file")
-            return self.save_config(config)
+            updated = True
 
-        if "keys" in config and name in config["keys"]:
+        # Handle named keys
+        elif "keys" in config and name in config["keys"]:
             config["keys"].pop(name)
-            return self.save_config(config)
+            updated = True
 
-        return False
+            # Clean up empty keys dictionary
+            if not config["keys"]:
+                config.pop("keys")
+
+        return self.save_config(config) if updated else False
 
     def clear_config(self) -> bool:
         """Clear all configuration.
@@ -277,18 +308,13 @@ class ConfigManager:
         config = self.load_config()
         export = {}
 
-        # Always include non-sensitive information
-        if "identity_file" in config:
-            export["identity_file"] = config["identity_file"]
+        # Define non-sensitive keys
+        non_sensitive_keys = ["identity_file", "keys", "expiration_time", "reuse_agent"]
 
-        if "keys" in config:
-            export["keys"] = config["keys"]
-
-        if "expiration_time" in config:
-            export["expiration_time"] = config["expiration_time"]
-
-        if "reuse_agent" in config:
-            export["reuse_agent"] = config["reuse_agent"]
+        # Copy non-sensitive keys
+        for key in non_sensitive_keys:
+            if key in config:
+                export[key] = config[key]
 
         # Include sensitive information if requested
         if include_sensitive and "passphrase" in config:
@@ -305,11 +331,16 @@ class ConfigManager:
         Returns:
             bool: True if successful
         """
+        # Validate input data
+        if not isinstance(config_data, dict):
+            logger.error("Invalid configuration data: not a dictionary")
+            return False
+
+        # Get current configuration
         current_config = self.load_config()
 
         # Update current configuration with imported data
-        for key, value in config_data.items():
-            current_config[key] = value
+        current_config.update(config_data)
 
         return self.save_config(current_config)
 
@@ -321,17 +352,10 @@ class ConfigManager:
         """
         # Get system-specific information
         try:
-            # Try multiple methods to get username, with fallbacks for CI environments
-            try:
-                username = os.getlogin()
-            except (AttributeError, OSError):
-                try:
-                    username = getpass.getuser()
-                except Exception:
-                    # Last resort fallback for CI environments
-                    user = os.environ.get("USER", "")
-                    username = user or os.environ.get("USERNAME", "unknown_user")
+            # Get username with fallbacks for CI environments
+            username = self._get_username()
 
+            # Get system information
             system_info = {
                 "hostname": socket.gethostname(),
                 "machine_id": self._get_machine_id(),
@@ -367,6 +391,22 @@ class ConfigManager:
 
         return key, salt
 
+    def _get_username(self) -> str:
+        """Get current username with fallbacks for CI environments.
+
+        Returns:
+            str: Username
+        """
+        try:
+            return os.getlogin()
+        except (AttributeError, OSError):
+            try:
+                return getpass.getuser()
+            except Exception:
+                # Last resort fallback for CI environments
+                user = os.environ.get("USER", "")
+                return user or os.environ.get("USERNAME", "unknown_user")
+
     def _get_machine_id(self) -> str:
         """Get a unique machine identifier.
 
@@ -392,17 +432,6 @@ class ConfigManager:
                 with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
                                     r"SOFTWARE\Microsoft\Cryptography") as key:
                     machine_id = winreg.QueryValueEx(key, "MachineGuid")[0]
-            except (ImportError, OSError):
-                pass
-
-        # macOS
-        elif os.path.exists("/Library/Preferences/SystemConfiguration/com.apple.computer.plist"):
-            try:
-                # Import built-in modules
-                import plistlib
-                with open("/Library/Preferences/SystemConfiguration/com.apple.computer.plist", "rb") as f:
-                    plist = plistlib.load(f)
-                    machine_id = plist.get("LocalHostName", "")
             except (ImportError, OSError):
                 pass
 
@@ -433,9 +462,7 @@ class ConfigManager:
             encryptor = cipher.encryptor()
 
             # Pad the plaintext to a multiple of 16 bytes (AES block size)
-            plaintext = passphrase.encode()
-            padding_length = 16 - (len(plaintext) % 16)
-            plaintext += bytes([padding_length]) * padding_length
+            plaintext = self._pad_data(passphrase.encode())
 
             # Encrypt the padded plaintext
             ciphertext = encryptor.update(plaintext) + encryptor.finalize()
@@ -450,7 +477,31 @@ class ConfigManager:
             logger.error(f"Failed to encrypt passphrase: {e}")
             raise
 
-    def _deobfuscate_passphrase(self, encrypted_data: str) -> str:
+    def _pad_data(self, data: bytes) -> bytes:
+        """Pad data to a multiple of 16 bytes (AES block size) using PKCS7 padding.
+
+        Args:
+            data: Data to pad
+
+        Returns:
+            bytes: Padded data
+        """
+        padding_length = 16 - (len(data) % 16)
+        return data + bytes([padding_length]) * padding_length
+
+    def _unpad_data(self, padded_data: bytes) -> bytes:
+        """Remove PKCS7 padding from data.
+
+        Args:
+            padded_data: Padded data
+
+        Returns:
+            bytes: Unpadded data
+        """
+        padding_length = padded_data[-1]
+        return padded_data[:-padding_length]
+
+    def deobfuscate_passphrase(self, encrypted_data: str) -> str:
         """Decrypt passphrase.
 
         Args:
@@ -460,7 +511,7 @@ class ConfigManager:
             str: Plain text passphrase
         """
         try:
-            # Check if this is a base64-encoded string (AES encryption)
+            # Decode base64 data
             data = base64.b64decode(encrypted_data)
 
             # Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)
@@ -478,8 +529,7 @@ class ConfigManager:
             padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
 
             # Remove padding
-            padding_length = padded_plaintext[-1]
-            plaintext = padded_plaintext[:-padding_length]
+            plaintext = self._unpad_data(padded_plaintext)
 
             return plaintext.decode()
 
@@ -502,7 +552,7 @@ class ConfigManager:
 
         if isinstance(data, bytearray):
             # For bytearrays, we can modify in place
-            for i in range(len(data)):
+            for i, _ in enumerate(data):
                 data[i] = 0
             return
 
@@ -520,57 +570,108 @@ def setup_config(args):
     """
     config_manager = ConfigManager()
 
-    # Handle identity file
-    if args.identity_file:
-        identity_file = os.path.expanduser(args.identity_file)
-        if not os.path.exists(identity_file):
-            logger.error(f"Identity file not found: {identity_file}")
-            sys.exit(1)
+    # Process configuration options
+    try:
+        # Handle identity file
+        if args.identity_file:
+            _set_identity_file(config_manager, args.identity_file)
 
-        if config_manager.set_identity_file(identity_file):
-            logger.info(f"Identity file set to: {identity_file}")
-        else:
-            logger.error("Failed to set identity file")
-            sys.exit(1)
+        # Handle passphrase
+        _set_passphrase(config_manager, args)
 
-    # Handle passphrase
+        # Handle expiration time
+        if hasattr(args, "expiration") and args.expiration is not None:
+            _set_expiration_time(config_manager, args.expiration)
+
+        # Handle reuse agent
+        if hasattr(args, "reuse_agent") and args.reuse_agent is not None:
+            _set_reuse_agent(config_manager, args.reuse_agent)
+
+    except SystemExit:
+        # Re-raise any SystemExit exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Failed to set up configuration: {e}")
+        sys.exit(1)
+
+
+def _set_identity_file(config_manager, identity_file_path):
+    """Set identity file in configuration.
+
+    Args:
+        config_manager: ConfigManager instance
+        identity_file_path: Path to identity file
+    """
+    identity_file = os.path.expanduser(identity_file_path)
+    if not os.path.exists(identity_file):
+        logger.error(f"Identity file not found: {identity_file}")
+        sys.exit(1)
+
+    if config_manager.set_identity_file(identity_file):
+        logger.info(f"Identity file set to: {identity_file}")
+    else:
+        logger.error("Failed to set identity file")
+        sys.exit(1)
+
+
+def _set_passphrase(config_manager, args):
+    """Set passphrase in configuration.
+
+    Args:
+        config_manager: ConfigManager instance
+        args: Command line arguments
+    """
+    # Get passphrase from arguments or prompt
     if args.passphrase:
         passphrase = args.passphrase
     elif args.prompt_passphrase:
         passphrase = getpass.getpass("Enter SSH key passphrase: ")
     else:
-        passphrase = None
+        return  # No passphrase to set
 
-    if passphrase:
+    try:
+        # Set passphrase
         if config_manager.set_passphrase(passphrase):
             logger.info("Passphrase set successfully")
-            # Securely delete passphrase from memory
-            config_manager.secure_delete_from_memory(passphrase)
         else:
             logger.error("Failed to set passphrase")
-            # Securely delete passphrase from memory
+            sys.exit(1)
+    finally:
+        # Always securely delete passphrase from memory
+        if passphrase:
             config_manager.secure_delete_from_memory(passphrase)
-            sys.exit(1)
 
-    # Handle expiration time
-    if hasattr(args, "expiration") and args.expiration is not None:
-        if args.expiration < 0:
-            logger.error("Expiration time must be a positive number")
-            sys.exit(1)
 
-        if config_manager.set_expiration_time(args.expiration):
-            logger.info(f"Expiration time set to: {args.expiration} hours")
-        else:
-            logger.error("Failed to set expiration time")
-            sys.exit(1)
+def _set_expiration_time(config_manager, expiration_hours):
+    """Set expiration time in configuration.
 
-    # Handle reuse agent
-    if hasattr(args, "reuse_agent") and args.reuse_agent is not None:
-        if config_manager.set_reuse_agent(args.reuse_agent):
-            logger.info(f"Reuse agent set to: {args.reuse_agent}")
-        else:
-            logger.error("Failed to set reuse agent")
-            sys.exit(1)
+    Args:
+        config_manager: ConfigManager instance
+        expiration_hours: Expiration time in hours
+    """
+    if expiration_hours < 0:
+        logger.error("Expiration time must be a positive number")
+        sys.exit(1)
+
+    if config_manager.set_expiration_time(expiration_hours):
+        logger.info(f"Expiration time set to: {expiration_hours} hours")
+    else:
+        logger.error("Failed to set expiration time")
+        sys.exit(1)
+
+
+def _set_reuse_agent(config_manager, reuse_agent):
+    """Set reuse agent setting in configuration.
+
+    Args:
+        config_manager: ConfigManager instance
+        reuse_agent: Whether to reuse existing SSH agent
+    """
+    if config_manager.set_reuse_agent(reuse_agent):
+        logger.info(f"Reuse agent set to: {reuse_agent}")
+    else:
+        logger.error("Failed to set reuse agent")
+        sys.exit(1)
 
 
 def run_ssh_connection_test(args):
@@ -580,8 +681,57 @@ def run_ssh_connection_test(args):
         args: Command line arguments
     """
     config_manager = ConfigManager()
+    passphrase = None
 
-    # Get stored configuration
+    try:
+        # Get and validate identity file
+        identity_file = _get_and_validate_identity_file(args, config_manager)
+
+        # Get passphrase if available
+        passphrase = _get_passphrase_for_test(config_manager)
+
+        # Log configuration settings
+        _log_test_configuration(args, config_manager)
+
+        # Set up verbosity level if requested
+        if hasattr(args, "verbose") and args.verbose:
+            _configure_verbose_logging()
+
+        # Create SSH configuration and agent
+        ssh_config = SSHConfig(
+            identity_file=identity_file,
+            identity_passphrase=passphrase
+        )
+        ssh_agent = PersistentSSHAgent(config=ssh_config)
+
+        # Test connection
+        hostname = args.hostname
+        if ssh_agent.setup_ssh(hostname):
+            logger.info(f"✅ SSH connection to {hostname} successful")
+        else:
+            logger.error(f"❌ SSH connection to {hostname} failed")
+            sys.exit(1)
+
+    except Exception as e:
+        logger.error(f"SSH connection test failed: {e}")
+        sys.exit(1)
+    finally:
+        # Always clean up sensitive data
+        if passphrase:
+            config_manager.secure_delete_from_memory(passphrase)
+
+
+def _get_and_validate_identity_file(args, config_manager):
+    """Get and validate identity file from args or config.
+
+    Args:
+        args: Command line arguments
+        config_manager: ConfigManager instance
+
+    Returns:
+        str: Path to identity file
+    """
+    # Get identity file from args or config
     identity_file = args.identity_file or config_manager.get_identity_file()
     if not identity_file:
         logger.error("No identity file specified or found in configuration")
@@ -595,76 +745,62 @@ def run_ssh_connection_test(args):
         logger.error(f"Identity file not found: {identity_file}")
         sys.exit(1)
 
-    # Get passphrase
+    return identity_file
+
+
+def _get_passphrase_for_test(config_manager):
+    """Get passphrase from config if available.
+
+    Args:
+        config_manager: ConfigManager instance
+
+    Returns:
+        Optional[str]: Passphrase or None
+    """
     stored_passphrase = config_manager.get_passphrase()
     if stored_passphrase:
-        passphrase = config_manager._deobfuscate_passphrase(stored_passphrase)
-    else:
-        passphrase = None
+        # Use deobfuscate_passphrase method to get plain text passphrase
+        return config_manager.deobfuscate_passphrase(stored_passphrase)
+    return None
 
-    # Get expiration time and add to SSH config if available
+
+def _log_test_configuration(args, config_manager):
+    """Log test configuration settings.
+
+    Args:
+        args: Command line arguments
+        config_manager: ConfigManager instance
+    """
+    # Log expiration time
     if hasattr(args, "expiration") and args.expiration is not None:
-        # Use command line argument
         logger.debug(f"Using expiration time from command line: {args.expiration} hours")
-        # We don't need to set it in ssh_config as it's not used there
     else:
-        # Check stored configuration
         stored_expiration = config_manager.get_expiration_time()
         if stored_expiration:
             logger.debug(f"Using expiration time from config: {stored_expiration / 3600} hours")
-            # We don't need to set it in ssh_config as it's not used there
 
-    # Get reuse agent setting and add to SSH config if available
+    # Log reuse agent setting
     if hasattr(args, "reuse_agent") and args.reuse_agent is not None:
-        # Use command line argument
         logger.debug(f"Using reuse agent setting from command line: {args.reuse_agent}")
-        # We don't need to set it in ssh_config as it's not used there
     else:
-        # Check stored configuration
         stored_reuse = config_manager.get_reuse_agent()
         if stored_reuse is not None:
             logger.debug(f"Using reuse agent setting from config: {stored_reuse}")
-            # We don't need to set it in ssh_config as it's not used there
 
-    # Create SSH configuration
-    ssh_config = SSHConfig(
-        identity_file=identity_file,
-        identity_passphrase=passphrase
+
+def _configure_verbose_logging():
+    """Configure verbose logging with detailed format."""
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
+        level="DEBUG"
     )
-
-    # Initialize SSH agent
-    ssh_agent = PersistentSSHAgent(config=ssh_config)
-
-    # Set verbosity level
-    if hasattr(args, "verbose") and args.verbose:
-        logger.remove()
-        logger.add(
-            sys.stderr,
-            format=(
-                "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-                "<level>{level: <8}</level> | "
-                "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-                "<level>{message}</level>"
-            ),
-            level="DEBUG"
-        )
-
-    # Test connection
-    hostname = args.hostname
-    if ssh_agent.setup_ssh(hostname):
-        logger.info(f"✅ SSH connection to {hostname} successful")
-
-        # Clean up sensitive data
-        if passphrase:
-            config_manager.secure_delete_from_memory(passphrase)
-    else:
-        logger.error(f"❌ SSH connection to {hostname} failed")
-
-        # Clean up sensitive data
-        if passphrase:
-            config_manager.secure_delete_from_memory(passphrase)
-
-        sys.exit(1)
 
 
 def list_keys(_):
@@ -674,15 +810,52 @@ def list_keys(_):
         _: Command line arguments (unused)
     """
     config_manager = ConfigManager()
-    keys = config_manager.list_keys()
 
-    if not keys:
-        logger.info("No SSH keys configured")
-        return
+    try:
+        keys = config_manager.list_keys()
 
-    logger.info("Configured SSH keys:")
-    for name, path in keys.items():
-        logger.info(f"  {name}: {path}")
+        if not keys:
+            logger.info("No SSH keys configured")
+            return
+
+        logger.info("Configured SSH keys:")
+        for name, path in keys.items():
+            logger.info(f"  {name}: {path}")
+    except Exception as e:
+        logger.error(f"Failed to list SSH keys: {e}")
+        sys.exit(1)
+
+
+def add_key(args):
+    """Add a configured SSH key.
+
+    Args:
+        args: Command line arguments
+    """
+    config_manager = ConfigManager()
+
+    # Check required arguments
+    if not hasattr(args, "name") or not args.name:
+        logger.error("No key name specified")
+        sys.exit(1)
+
+    if not hasattr(args, "identity_file") or not args.identity_file:
+        logger.error("No identity file specified")
+        sys.exit(1)
+
+    name = args.name
+    identity_file = args.identity_file
+
+    try:
+        # Add key
+        if config_manager.add_key(name, identity_file):
+            logger.info(f"SSH key '{name}' added")
+        else:
+            logger.error(f"Failed to add SSH key '{name}'")
+            sys.exit(1)
+    except Exception as e:
+        logger.error(f"Failed to add SSH key '{name}': {e}")
+        sys.exit(1)
 
 
 def remove_key(args):
@@ -745,6 +918,7 @@ def import_config(args):
         args: Command line arguments
     """
     config_manager = ConfigManager()
+    config = {}  # Initialize config to avoid UnboundLocalError
 
     # Read configuration
     try:
@@ -818,6 +992,15 @@ def test_cmd(hostname, identity_file, expiration, reuse_agent, verbose):
 def list_cmd():
     """List all configured SSH keys."""
     list_keys(None)
+
+
+@main.command("add", help="Add a configured SSH key")
+@click.option("--name", required=True, help="Name of the key to add")
+@click.option("--identity-file", required=True, help="Path to SSH identity file")
+def add(name, identity_file):
+    """Add a configured SSH key."""
+    args = Args(name=name, identity_file=identity_file)
+    add_key(args)
 
 
 @main.command("remove", help="Remove configured SSH keys")
