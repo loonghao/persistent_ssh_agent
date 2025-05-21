@@ -66,17 +66,26 @@ def test_config_manager_save_config(config_manager):
 
 def test_config_manager_get_set_passphrase(config_manager):
     """Test getting and setting a passphrase."""
-    # Set a passphrase
-    assert config_manager.set_passphrase("test") is True
+    # Mock _derive_key_from_system to avoid OS-specific issues in CI
+    with patch.object(config_manager, '_derive_key_from_system') as mock_derive:
+        # Return a fixed key and salt for testing
+        mock_derive.return_value = (b'0' * 32, b'1' * 16)
 
-    # Get the passphrase
-    passphrase = config_manager.get_passphrase()
-    assert passphrase is not None
-    assert passphrase != "test"  # Should be obfuscated
+        # Set a passphrase
+        assert config_manager.set_passphrase("test") is True
 
-    # Verify the passphrase can be deobfuscated
-    deobfuscated = config_manager._deobfuscate_passphrase(passphrase)
-    assert deobfuscated == "test"
+        # Get the passphrase
+        mock_derive.reset_mock()
+        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        passphrase = config_manager.get_passphrase()
+        assert passphrase is not None
+        assert passphrase != "test"  # Should be encrypted
+
+        # Verify the passphrase can be decrypted
+        mock_derive.reset_mock()
+        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+        deobfuscated = config_manager._deobfuscate_passphrase(passphrase)
+        assert deobfuscated == "test"
 
 
 def test_config_manager_get_set_identity_file(config_manager):
@@ -92,10 +101,20 @@ def test_config_manager_get_set_identity_file(config_manager):
 
 def test_config_manager_encrypt_decrypt(config_manager):
     """Test encryption and decryption of passphrase."""
-    passphrase = "test_passphrase"
-    encrypted = config_manager._encrypt_passphrase(passphrase)
-    decrypted = config_manager._deobfuscate_passphrase(encrypted)
-    assert decrypted == passphrase
+    # Mock _derive_key_from_system to avoid OS-specific issues in CI
+    with patch.object(config_manager, '_derive_key_from_system') as mock_derive:
+        # Return a fixed key and salt for testing
+        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+
+        passphrase = "test_passphrase"
+        encrypted = config_manager._encrypt_passphrase(passphrase)
+
+        # Reset the mock to ensure decryption uses the same key/salt
+        mock_derive.reset_mock()
+        mock_derive.return_value = (b'0' * 32, b'1' * 16)
+
+        decrypted = config_manager._deobfuscate_passphrase(encrypted)
+        assert decrypted == passphrase
 
 
 @patch("persistent_ssh_agent.cli.ConfigManager")
