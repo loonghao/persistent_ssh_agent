@@ -28,7 +28,7 @@ Setting Up Development Environment
        pre-commit install
 
 Development Workflow
--------------------
+--------------------
 
 1. Create a new branch for your feature or bugfix:
 
@@ -69,7 +69,7 @@ Development Workflow
        git push origin feature/your-feature-name
 
 Pull Request Guidelines
-----------------------
+-----------------------
 
 * Include tests for any new features or bug fixes
 * Update documentation if necessary
