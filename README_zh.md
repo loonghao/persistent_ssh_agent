@@ -216,6 +216,18 @@ uvx persistent_ssh_agent config --identity-file ~/.ssh/id_ed25519 --prompt-passp
 
 # 测试到主机的 SSH 连接
 uvx persistent_ssh_agent test github.com
+
+# 列出已配置的 SSH 密钥
+uvx persistent_ssh_agent list
+
+# 删除特定的 SSH 密钥
+uvx persistent_ssh_agent remove --name github
+
+# 将配置导出到文件
+uvx persistent_ssh_agent export --output ~/.ssh/config.json
+
+# 从文件导入配置
+uvx persistent_ssh_agent import ~/.ssh/config.json
 ```
 
 可用命令：
@@ -224,10 +236,28 @@ uvx persistent_ssh_agent test github.com
   - `--identity-file`：SSH 身份文件路径
   - `--passphrase`：SSH 密钥密码短语（不推荐，请使用 --prompt 代替）
   - `--prompt-passphrase`：提示输入 SSH 密钥密码短语
+  - `--expiration`：过期时间（小时）
+  - `--reuse-agent`：是否复用现有的 SSH agent
 
 - `test`：测试到主机的 SSH 连接
   - `hostname`：要测试连接的主机名
   - `--identity-file`：SSH 身份文件路径（覆盖配置）
+  - `--expiration`：过期时间（小时）（覆盖配置）
+  - `--reuse-agent`：是否复用现有的 SSH agent（覆盖配置）
+  - `--verbose`：启用详细输出
+
+- `list`：列出已配置的 SSH 密钥
+
+- `remove`：删除已配置的 SSH 密钥
+  - `--name`：要删除的密钥名称
+  - `--all`：删除所有密钥
+
+- `export`：导出配置
+  - `--output`：输出文件路径
+  - `--include-sensitive`：在导出中包含敏感信息
+
+- `import`：导入配置
+  - `input`：输入文件路径
 
 ### CI/CD 流水线集成
 

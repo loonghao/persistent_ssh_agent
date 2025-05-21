@@ -8,18 +8,20 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+cryptography = ">=45.0.0"
+loguru = ">=0.7.0"
 
 [tool.poetry.scripts]
 persistent_ssh_agent = "persistent_ssh_agent.cli:main"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = ">=5.0"
+sphinx = ">=8.0"
 furo = "*"
 sphinx-autobuild = "*"
 sphinx-copybutton = "*"
 doc8 = ">=1.1.1"
 sphinx-intl = "*"
-myst-parser = ">=2.0.0"
+myst-parser = ">=4.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"

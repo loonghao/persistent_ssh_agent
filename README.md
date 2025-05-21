@@ -243,6 +243,18 @@ uvx persistent_ssh_agent config --identity-file ~/.ssh/id_ed25519 --prompt-passp
 
 # Test SSH connection to a host
 uvx persistent_ssh_agent test github.com
+
+# List configured SSH keys
+uvx persistent_ssh_agent list
+
+# Remove a specific SSH key
+uvx persistent_ssh_agent remove --name github
+
+# Export configuration to a file
+uvx persistent_ssh_agent export --output ~/.ssh/config.json
+
+# Import configuration from a file
+uvx persistent_ssh_agent import ~/.ssh/config.json
 ```
 
 Available commands:
@@ -251,10 +263,28 @@ Available commands:
   - `--identity-file`: Path to SSH identity file
   - `--passphrase`: SSH key passphrase (not recommended, use --prompt instead)
   - `--prompt-passphrase`: Prompt for SSH key passphrase
+  - `--expiration`: Expiration time in hours
+  - `--reuse-agent`: Whether to reuse existing SSH agent
 
 - `test`: Test SSH connection to a host
   - `hostname`: Hostname to test connection with
   - `--identity-file`: Path to SSH identity file (overrides config)
+  - `--expiration`: Expiration time in hours (overrides config)
+  - `--reuse-agent`: Whether to reuse existing SSH agent (overrides config)
+  - `--verbose`: Enable verbose output
+
+- `list`: List configured SSH keys
+
+- `remove`: Remove configured SSH keys
+  - `--name`: Name of the key to remove
+  - `--all`: Remove all keys
+
+- `export`: Export configuration
+  - `--output`: Output file path
+  - `--include-sensitive`: Include sensitive information in export
+
+- `import`: Import configuration
+  - `input`: Input file path
 
 ### CI/CD Pipeline Integration
 
