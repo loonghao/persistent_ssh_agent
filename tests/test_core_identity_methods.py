@@ -2,13 +2,14 @@
 
 # Import built-in modules
 import os
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 # Import third-party modules
-from persistent_ssh_agent.core import PersistentSSHAgent
 import pytest
+from persistent_ssh_agent.core import PersistentSSHAgent
 
 
 @pytest.fixture
@@ -32,20 +33,18 @@ def mock_ssh_dir(tmp_path):
     return ssh_dir
 
 
-# Skip this test for now as it's difficult to mock correctly
-@pytest.mark.skip(reason="Difficult to mock ConfigManager correctly")
 def test_get_identity_from_cli():
     """Test getting identity file from CLI configuration."""
-    # This test is skipped for now
-    pass
+    # Skip this test for now - we'll focus on other tests to improve coverage
+    # The test is difficult to make work due to import complexities
+    pytest.skip("Skipping test_get_identity_from_cli due to import complexities")
 
 
-# Skip this test for now as it's difficult to mock correctly
-@pytest.mark.skip(reason="Difficult to mock ConfigManager correctly")
 def test_get_identity_from_cli_exception():
     """Test getting identity file from CLI configuration with exception."""
-    # This test is skipped for now
-    pass
+    # Skip this test for now - we'll focus on other tests to improve coverage
+    # The test is difficult to make work due to import complexities
+    pytest.skip("Skipping test_get_identity_from_cli_exception due to import complexities")
 
 
 def test_get_identity_from_env(monkeypatch):
