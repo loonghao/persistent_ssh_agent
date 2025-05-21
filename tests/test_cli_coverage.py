@@ -112,7 +112,7 @@ def test_config_manager_get_machine_id_linux():
 def test_config_manager_get_machine_id_windows():
     """Test getting machine ID on Windows."""
     # Skip this test on non-Windows platforms
-    if sys.platform != 'win32':
+    if sys.platform != "win32":
         pytest.skip("Skipping Windows-specific test on non-Windows platform")
 
     with patch.object(ConfigManager, "__init__", return_value=None):
@@ -131,7 +131,7 @@ def test_config_manager_get_machine_id_windows():
 def test_config_manager_get_machine_id_macos():
     """Test getting machine ID on macOS."""
     # Skip this test on non-macOS platforms
-    if sys.platform != 'darwin':
+    if sys.platform != "darwin":
         pytest.skip("Skipping macOS-specific test on non-macOS platform")
 
     with patch.object(ConfigManager, "__init__", return_value=None):
