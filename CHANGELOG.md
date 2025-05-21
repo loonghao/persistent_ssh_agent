@@ -1,3 +1,9 @@
+## v0.7.3 (2025-05-21)
+
+### Fix
+
+- resolve CLI executable name and release action tag issues
+
 ## v0.7.2 (2025-05-21)
 
 ### Fix
