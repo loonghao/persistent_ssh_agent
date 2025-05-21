@@ -1,3 +1,9 @@
+## v0.7.2 (2025-05-21)
+
+### Fix
+
+- ensure release-action has valid tag input
+
 ## v0.7.1 (2025-05-21)
 
 ### Fix
