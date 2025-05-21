@@ -48,11 +48,17 @@ jobs:
       with:
         token: "${{ github.token }}"
         fetch-depth: 0
-        ref: main
+        # Don't set ref to main, let it checkout the tag that triggered the workflow
     - uses: olegtarasov/get-tag@v2.1.4
       id: get_tag_name
       with:
         tagRegex: "v(?<version>.*)"
+
+    - name: Debug get-tag output
+      run: |
+        echo "GIT_TAG_NAME: ${{ env.GIT_TAG_NAME }}"
+        echo "get_tag_name.outputs.tag: ${{ steps.get_tag_name.outputs.tag }}"
+        echo "get_tag_name.outputs.version: ${{ steps.get_tag_name.outputs.version }}"
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -93,12 +99,18 @@ jobs:
           {{chore,style,ci||🔶 Nothing change}}
           ## Unknown
           {{__unknown__}}
-    # Extract tag from ref as a fallback and set final tag
+    # Set final tag for release using get-tag output as primary source
     - name: Set final tag for release
       id: set_final_tag
       run: |
-        # Try to get tag from environment variables first
-        if [[ -n "${{ env.RELEASE_TAG }}" ]]; then
+        # Try to get tag from get-tag output first
+        if [[ -n "${{ steps.get_tag_name.outputs.tag }}" ]]; then
+          FINAL_TAG="${{ steps.get_tag_name.outputs.tag }}"
+          echo "Using get_tag_name.outputs.tag: $FINAL_TAG"
+        elif [[ -n "${{ env.GIT_TAG_NAME }}" ]]; then
+          FINAL_TAG="${{ env.GIT_TAG_NAME }}"
+          echo "Using GIT_TAG_NAME: $FINAL_TAG"
+        elif [[ -n "${{ env.RELEASE_TAG }}" ]]; then
           FINAL_TAG="${{ env.RELEASE_TAG }}"
           echo "Using RELEASE_TAG: $FINAL_TAG"
         elif [[ -n "${{ env.TAG }}" ]]; then
@@ -121,8 +133,8 @@ jobs:
       with:
         artifacts: "dist/*"
         token: ${{ github.token }}
-        tag: ${{ steps.set_final_tag.outputs.FINAL_TAG }}
-        name: "Release ${{ steps.set_final_tag.outputs.FINAL_TAG }}"
+        tag: ${{ steps.get_tag_name.outputs.tag || steps.set_final_tag.outputs.FINAL_TAG }}
+        name: "Release ${{ steps.get_tag_name.outputs.tag || steps.set_final_tag.outputs.FINAL_TAG }}"
         allowUpdates: true
         body: |
           Comparing Changes: ${{ steps.changelog.outputs.compareurl }}
