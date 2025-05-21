@@ -14,6 +14,7 @@ click = ">=8.1.0"
 
 [tool.poetry.scripts]
 persistent_ssh_agent = "persistent_ssh_agent.cli:main"
+persistent-ssh-agent = "persistent_ssh_agent.cli:main"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=8.0"
