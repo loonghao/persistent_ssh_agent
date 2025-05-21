@@ -21,9 +21,11 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
           echo "TAG=${{ github.event.client_payload.tag }}" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.client_payload.version }}" >> $GITHUB_ENV
           echo "Using tag from repository_dispatch: ${{ github.event.client_payload.tag }}"
         else
           echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
           echo "Using tag from push event: ${GITHUB_REF#refs/tags/}"
         fi
 
