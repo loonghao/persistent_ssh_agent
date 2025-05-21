@@ -45,4 +45,4 @@ jobs:
         with:
           token: ${{ github.token }}
           event-type: trigger-python-publish
-          client-payload: '{"tag": "v${{ steps.cz.outputs.version }}"}'
+          client-payload: '{"tag": "v${{ steps.cz.outputs.version }}", "version": "${{ steps.cz.outputs.version }}"}'
