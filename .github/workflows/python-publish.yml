@@ -1,5 +1,13 @@
 name: Upload Python Package
 
+permissions:
+  # IMPORTANT: these permissions are mandatory for publishing and creating releases
+  id-token: write     # Required for PyPI trusted publishing
+  contents: write     # Required for creating releases
+  packages: write     # Required for publishing packages
+  actions: read       # Required for workflow access
+  issues: write       # Required for creating issues if needed
+
 on:
   push:
     tags:
@@ -58,7 +66,6 @@ jobs:
         skip-existing: true
         verbose: true
 
-
     - name: Generate changelog
       id: changelog
       uses: jaywcjlove/changelog-generator@main
@@ -81,7 +88,6 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "dist/*"
-        token: ${{ github.token }}
         body: |
           Comparing Changes: ${{ steps.changelog.outputs.compareurl }}
 
