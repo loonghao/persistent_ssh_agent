@@ -199,6 +199,8 @@ class GitIntegration:
 
         This simplified method handles all credential helper setup internally,
         eliminating the need for manual script creation and configuration.
+        It automatically detects the operating system and uses the appropriate
+        shell syntax for Windows (cmd/PowerShell) or Unix/Linux (bash).
 
         Args:
             username: Git username (optional, uses GIT_USERNAME env var if not provided)
@@ -226,11 +228,10 @@ class GitIntegration:
                 logger.error("Git credentials not provided via parameters or environment variables")
                 return False
 
-            # Use Git's built-in credential helper with inline function
-            # This eliminates the need for external scripts
-            credential_helper = (
-                f"!f() {{ echo username={git_username}; echo password={git_password}; }}; f"
-            )
+            # Create platform-specific credential helper command
+            credential_helper = self._create_platform_credential_helper(git_username, git_password)
+
+            logger.debug("Using credential helper command: %s", credential_helper)
 
             result = run_command([
                 "git", "config", "--global", "credential.helper", credential_helper
@@ -238,6 +239,8 @@ class GitIntegration:
 
             if not result or result.returncode != 0:
                 logger.error("Failed to configure Git credential helper")
+                if result and result.stderr:
+                    logger.error("Git config error: %s", result.stderr.decode().strip())
                 return False
 
             logger.debug("Git credentials configured successfully")
@@ -246,6 +249,54 @@ class GitIntegration:
         except Exception as e:
             logger.error("Failed to set up Git credentials: %s", str(e))
             return False
+
+    def _create_platform_credential_helper(self, username: str, password: str) -> str:
+        """Create platform-specific credential helper command.
+
+        Args:
+            username: Git username
+            password: Git password/token
+
+        Returns:
+            str: Platform-specific credential helper command
+        """
+        # Escape special characters in credentials
+        escaped_username = self._escape_credential_value(username)
+        escaped_password = self._escape_credential_value(password)
+
+        if os.name == "nt":
+            # Windows: Use cmd.exe compatible syntax
+            # Use && to chain commands and echo for output
+            credential_helper = (
+                f"!echo username={escaped_username} && echo password={escaped_password}"
+            )
+        else:
+            # Unix/Linux: Use bash compatible syntax
+            credential_helper = (
+                f"!f() {{ echo username={escaped_username}; echo password={escaped_password}; }}; f"
+            )
+
+        return credential_helper
+
+    def _escape_credential_value(self, value: str) -> str:
+        """Escape special characters in credential values.
+
+        Args:
+            value: Credential value to escape
+
+        Returns:
+            str: Escaped credential value
+        """
+        # Escape characters that could cause issues in shell commands
+        # For both Windows and Unix, we need to handle quotes and special chars
+        if os.name == "nt":
+            # Windows cmd.exe escaping
+            # Escape double quotes and percent signs
+            return value.replace('"', '""').replace("%", "%%")
+
+        # Unix/Linux bash escaping
+        # Escape single quotes, double quotes, and backslashes
+        return value.replace("'", "'\"'\"'").replace('"', '\\"').replace("\\", "\\\\")
 
     def _test_ssh_connection(self, hostname: str) -> bool:
         """Test SSH connection to a host.

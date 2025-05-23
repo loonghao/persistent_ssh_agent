@@ -28,13 +28,7 @@ from persistent_ssh_agent import PersistentSSHAgent
 from persistent_ssh_agent.config import SSHConfig
 
 
-# Configure logger
-logger.remove()  # Remove default handler
-logger.add(
-    sys.stderr,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-    level="INFO"
-)
+# Logger will be configured dynamically in main() based on --debug flag
 
 # Constants for encryption
 SALT_SIZE = 16
@@ -937,10 +931,49 @@ def import_config(args):
 
 
 @click.group(help="Persistent SSH Agent CLI")
-def main():
+@click.option("--debug", is_flag=True, help="Enable debug logging")
+@click.pass_context
+def main(ctx, debug):
     """Main entry point for CLI."""
-    # This function serves as the entry point for the CLI
-    # The actual functionality is implemented in the command functions
+    # Ensure that ctx.obj exists and is a dict (for subcommands)
+    ctx.ensure_object(dict)
+    ctx.obj["debug"] = debug
+
+    # Configure logging based on debug flag
+    if debug:
+        _configure_debug_logging()
+    else:
+        _configure_default_logging()
+
+
+def _configure_debug_logging():
+    """Configure debug logging with detailed format."""
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
+        level="DEBUG"
+    )
+
+
+def _configure_default_logging():
+    """Configure default logging."""
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
+        level="INFO"
+    )
 
 
 @main.command("config", help="Configure SSH agent")
@@ -1037,12 +1070,22 @@ def import_config_cmd(input_file):
 @click.option("--username", help="Git username")
 @click.option("--password", help="Git password/token")
 @click.option("--prompt", is_flag=True, help="Prompt for credentials")
-def git_setup_cmd(username, password, prompt):
+@click.pass_context
+def git_setup_cmd(ctx, username, password, prompt):
     """Set up Git credential helper."""
     try:
         if prompt:
             username = click.prompt("Git username")
             password = click.prompt("Git password/token", hide_input=True)
+
+        # Get debug flag from context
+        debug_mode = ctx.obj.get("debug", False)
+
+        if debug_mode:
+            logger.debug("Debug mode enabled for git-setup command")
+            logger.debug("Username provided: %s", bool(username))
+            logger.debug("Password provided: %s", bool(password))
+            logger.debug("Prompt mode: %s", prompt)
 
         ssh_agent = PersistentSSHAgent()
         if ssh_agent.git.setup_git_credentials(username, password):
@@ -1053,8 +1096,10 @@ def git_setup_cmd(username, password, prompt):
 
     except Exception as e:
         logger.error("Failed to set up Git credentials: %s", str(e))
+        if ctx.obj.get("debug", False):
+            logger.exception("Full traceback:")
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    main(obj={})
