@@ -265,10 +265,10 @@ class GitIntegration:
         escaped_password = self._escape_credential_value(password)
 
         if os.name == "nt":
-            # Windows: Use cmd.exe compatible syntax
-            # Use && to chain commands and echo for output
+            # Windows: Use PowerShell compatible syntax
+            # Use semicolon to separate commands (works in both cmd and PowerShell)
             credential_helper = (
-                f"!echo username={escaped_username} && echo password={escaped_password}"
+                f"!echo username={escaped_username}; echo password={escaped_password}"
             )
         else:
             # Unix/Linux: Use bash compatible syntax
@@ -295,8 +295,8 @@ class GitIntegration:
             return value.replace('"', '""').replace("%", "%%")
 
         # Unix/Linux bash escaping
-        # Escape single quotes, double quotes, and backslashes
-        return value.replace("'", "'\"'\"'").replace('"', '\\"').replace("\\", "\\\\")
+        # Escape backslashes first, then double quotes, then single quotes
+        return value.replace("\\", "\\\\").replace('"', '\\"').replace("'", "'\"'\"'")
 
     def _test_ssh_connection(self, hostname: str) -> bool:
         """Test SSH connection to a host.
