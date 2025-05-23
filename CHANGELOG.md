@@ -1,3 +1,9 @@
+## v0.8.0 (2025-05-23)
+
+### Feat
+
+- add comprehensive SSH configuration and Git credential helper support
+
 ## v0.7.7 (2025-05-21)
 
 ### Fix
