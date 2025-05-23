@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" /><link rel="prev" title="Welcome to persistent_ssh_agent’s documentation!" href="index.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>Features - persistent_ssh_agent 0.7.2 documentation</title>
+        <title>Features - persistent_ssh_agent 0.7.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">persistent_ssh_agent 0.7.2 documentation</div></a>
+      <a href="index.html"><div class="brand">persistent_ssh_agent 0.7.7 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.2 documentation</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.7 documentation</span>
   
 </a>
 <div class="language-switcher">
@@ -229,6 +229,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
 </ul>
 
 </div>
@@ -286,9 +287,11 @@
 <section id="secure-key-management">
 <h2>Secure Key Management<a class="headerlink" href="#secure-key-management" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>Securely stores SSH key passphrases using AES-256 encryption</p></li>
+<li><p>Securely stores SSH key passphrases using AES-256 encryption (upgraded from XOR)</p></li>
 <li><p>Derives encryption keys from system-specific information</p></li>
 <li><p>Supports multiple SSH keys for different hosts or services</p></li>
+<li><p>Automatic key detection and loading (Ed25519, ECDSA, RSA)</p></li>
+<li><p>Secure temporary file handling with proper permissions</p></li>
 </ul>
 </section>
 <section id="command-line-interface">
@@ -297,6 +300,8 @@
 <li><p>Simple CLI for configuring and managing SSH keys</p></li>
 <li><p>Commands for testing SSH connections</p></li>
 <li><p>Export and import configuration for backup or sharing</p></li>
+<li><p>Git credential helper setup and management</p></li>
+<li><p>Interactive configuration with secure prompts</p></li>
 </ul>
 </section>
 <section id="cross-platform-support">
@@ -305,6 +310,17 @@
 <li><p>Works on Linux, macOS, and Windows</p></li>
 <li><p>Consistent behavior across different operating systems</p></li>
 <li><p>Handles platform-specific SSH agent implementations</p></li>
+<li><p>Windows-optimized implementation with proper registry handling</p></li>
+</ul>
+</section>
+<section id="git-integration">
+<h2>Git Integration<a class="headerlink" href="#git-integration" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Seamless Git credential helper integration</p></li>
+<li><p>Automatic Git SSH command generation</p></li>
+<li><p>Support for environment variable-based credential setup</p></li>
+<li><p>Context manager support for temporary credential configuration</p></li>
+<li><p>CI/CD pipeline integration with secure credential handling</p></li>
 </ul>
 </section>
 </section>
@@ -376,6 +392,7 @@
 <li><a class="reference internal" href="#secure-key-management">Secure Key Management</a></li>
 <li><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
 <li><a class="reference internal" href="#cross-platform-support">Cross-Platform Support</a></li>
+<li><a class="reference internal" href="#git-integration">Git Integration</a></li>
 </ul>
 </li>
 </ul>
@@ -387,7 +404,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=465ec406"></script>
+</div><script src="_static/documentation_options.js?v=2bafa17a"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Security Features" href="security-features.html" /><link rel="prev" title="Installation" href="installation.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>Usage - persistent_ssh_agent 0.7.2 documentation</title>
+        <title>Usage - persistent_ssh_agent 0.7.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">persistent_ssh_agent 0.7.2 documentation</div></a>
+      <a href="index.html"><div class="brand">persistent_ssh_agent 0.7.7 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.2 documentation</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.7 documentation</span>
   
 </a>
 <div class="language-switcher">
@@ -229,6 +229,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
 </ul>
 
 </div>
@@ -308,46 +309,61 @@
 <section id="configure-ssh-agent">
 <h3>Configure SSH Agent<a class="headerlink" href="#configure-ssh-agent" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set identity file</span>
-persistent_ssh_agent<span class="w"> </span>config<span class="w"> </span>--identity-file<span class="w"> </span>~/.ssh/id_rsa
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>config<span class="w"> </span>--identity-file<span class="w"> </span>~/.ssh/id_rsa
 
 <span class="c1"># Set passphrase (not recommended for security reasons)</span>
-persistent_ssh_agent<span class="w"> </span>config<span class="w"> </span>--passphrase<span class="w"> </span><span class="s2">&quot;your_passphrase&quot;</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>config<span class="w"> </span>--passphrase<span class="w"> </span><span class="s2">&quot;your_passphrase&quot;</span>
 
 <span class="c1"># Prompt for passphrase (more secure)</span>
-persistent_ssh_agent<span class="w"> </span>config<span class="w"> </span>--prompt-passphrase
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>config<span class="w"> </span>--prompt-passphrase
 </pre></div>
 </div>
 </section>
 <section id="test-ssh-connection">
 <h3>Test SSH Connection<a class="headerlink" href="#test-ssh-connection" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test connection to a host</span>
-persistent_ssh_agent<span class="w"> </span><span class="nb">test</span><span class="w"> </span>github.com
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span><span class="nb">test</span><span class="w"> </span>github.com
 
 <span class="c1"># Test with a specific identity file</span>
-persistent_ssh_agent<span class="w"> </span><span class="nb">test</span><span class="w"> </span>github.com<span class="w"> </span>--identity-file<span class="w"> </span>~/.ssh/github_key
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span><span class="nb">test</span><span class="w"> </span>github.com<span class="w"> </span>--identity-file<span class="w"> </span>~/.ssh/github_key
 </pre></div>
 </div>
 </section>
 <section id="manage-ssh-keys">
 <h3>Manage SSH Keys<a class="headerlink" href="#manage-ssh-keys" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List configured SSH keys</span>
-persistent_ssh_agent<span class="w"> </span>list
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>list
 
 <span class="c1"># Remove a specific key</span>
-persistent_ssh_agent<span class="w"> </span>remove<span class="w"> </span>--name<span class="w"> </span>github
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>remove<span class="w"> </span>--name<span class="w"> </span>github
 
 <span class="c1"># Remove all keys</span>
-persistent_ssh_agent<span class="w"> </span>remove<span class="w"> </span>--all
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>remove<span class="w"> </span>--all
 </pre></div>
 </div>
 </section>
 <section id="export-and-import-configuration">
 <h3>Export and Import Configuration<a class="headerlink" href="#export-and-import-configuration" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Export configuration</span>
-persistent_ssh_agent<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--output<span class="w"> </span>config.json
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--output<span class="w"> </span>config.json
 
 <span class="c1"># Import configuration</span>
-persistent_ssh_agent<span class="w"> </span>import<span class="w"> </span>config.json
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<span class="w"> </span>config.json
+</pre></div>
+</div>
+</section>
+<section id="git-credential-setup">
+<h3>Git Credential Setup<a class="headerlink" href="#git-credential-setup" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up Git credentials interactively</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup<span class="w"> </span>--prompt
+
+<span class="c1"># Set up Git credentials with username</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup<span class="w"> </span>--username<span class="w"> </span>your-username<span class="w"> </span>--prompt
+
+<span class="c1"># Set up Git credentials using environment variables</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GIT_USERNAME</span><span class="o">=</span>your-username
+<span class="nb">export</span><span class="w"> </span><span class="nv">GIT_PASSWORD</span><span class="o">=</span>your-password
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
 </pre></div>
 </div>
 </section>
@@ -424,6 +440,7 @@ persistent_ssh_agent<span class="w"> </span>import<span class="w"> </span>config
 <li><a class="reference internal" href="#test-ssh-connection">Test SSH Connection</a></li>
 <li><a class="reference internal" href="#manage-ssh-keys">Manage SSH Keys</a></li>
 <li><a class="reference internal" href="#export-and-import-configuration">Export and Import Configuration</a></li>
+<li><a class="reference internal" href="#git-credential-setup">Git Credential Setup</a></li>
 </ul>
 </li>
 </ul>
@@ -437,7 +454,7 @@ persistent_ssh_agent<span class="w"> </span>import<span class="w"> </span>config
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=465ec406"></script>
+</div><script src="_static/documentation_options.js?v=2bafa17a"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

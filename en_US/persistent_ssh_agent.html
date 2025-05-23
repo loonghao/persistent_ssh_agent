@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="persistent_ssh_agent.core module" href="persistent_ssh_agent.core.html" /><link rel="prev" title="Contributing" href="contributing.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent package - persistent_ssh_agent 0.7.2 documentation</title>
+        <title>persistent_ssh_agent package - persistent_ssh_agent 0.7.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">persistent_ssh_agent 0.7.2 documentation</div></a>
+      <a href="index.html"><div class="brand">persistent_ssh_agent 0.7.7 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.2 documentation</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.7 documentation</span>
   
 </a>
 <div class="language-switcher">
@@ -229,6 +229,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
 </ul>
 
 </div>
@@ -285,80 +286,20 @@
 <p>This class manages SSH agent persistence across sessions by saving and
 restoring agent information. It also handles SSH key management and
 authentication for various operations including Git.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.SSH_DEFAULT_KEY">
-<span class="sig-name descname"><span class="pre">SSH_DEFAULT_KEY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'id_rsa'</span></em><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.SSH_DEFAULT_KEY" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.SSH_DEFAULT_OPTIONS">
-<span class="sig-name descname"><span class="pre">SSH_DEFAULT_OPTIONS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'StrictHostKeyChecking':</span> <span class="pre">'no'}</span></em><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.SSH_DEFAULT_OPTIONS" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.SSH_KEY_TYPES">
-<span class="sig-name descname"><span class="pre">SSH_KEY_TYPES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['id_ed25519',</span> <span class="pre">'id_ecdsa',</span> <span class="pre">'id_ecdsa_sk',</span> <span class="pre">'id_ed25519_sk',</span> <span class="pre">'id_rsa',</span> <span class="pre">'id_dsa']</span></em><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.SSH_KEY_TYPES" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
-<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.get_git_ssh_command">
-<span class="sig-name descname"><span class="pre">get_git_ssh_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hostname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/persistent_ssh_agent/core.html#PersistentSSHAgent.get_git_ssh_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.get_git_ssh_command" title="Link to this definition">¶</a></dt>
-<dd><p>Generate Git SSH command with proper configuration.</p>
+<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.extract_hostname">
+<span class="sig-name descname"><span class="pre">extract_hostname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/persistent_ssh_agent/core.html#PersistentSSHAgent.extract_hostname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.extract_hostname" title="Link to this definition">¶</a></dt>
+<dd><p>Extract hostname from SSH URL (public method).</p>
+<p>This is a public wrapper around the extract_hostname function in utils.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hostname</strong> – Target Git host</p>
+<dd class="field-odd"><p><strong>url</strong> – SSH URL to extract hostname from (e.g., <a class="reference external" href="mailto:git&#37;&#52;&#48;github&#46;com">git<span>&#64;</span>github<span>&#46;</span>com</a>:user/repo.git)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>SSH command string if successful, None on error</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.is_valid_hostname">
-<span class="sig-name descname"><span class="pre">is_valid_hostname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hostname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/persistent_ssh_agent/core.html#PersistentSSHAgent.is_valid_hostname"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.is_valid_hostname" title="Link to this definition">¶</a></dt>
-<dd><p>Check if a hostname is valid according to RFC 1123 and supports IPv6.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>hostname</strong> – The hostname to validate</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the hostname is valid, False otherwise</p>
+<dd class="field-even"><p>Hostname if valid URL, None otherwise</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Maximum length of 255 characters</p></li>
-<li><p>Can contain letters (a-z), numbers (0-9), dots (.) and hyphens (-)</p></li>
-<li><p>Cannot start or end with a dot or hyphen</p></li>
-<li><p>Labels (parts between dots) cannot start or end with a hyphen</p></li>
-<li><p>Labels cannot be longer than 63 characters</p></li>
-<li><p>IPv6 addresses are supported (with or without brackets)</p></li>
-</ul>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.run_command">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CompletedProcess</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/persistent_ssh_agent/core.html#PersistentSSHAgent.run_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.run_command" title="Link to this definition">¶</a></dt>
-<dd><p>Run a command and return its output.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>command</strong> – Command and arguments to run</p></li>
-<li><p><strong>shell</strong> – Whether to run command through shell</p></li>
-<li><p><strong>check_output</strong> – Whether to capture command output</p></li>
-<li><p><strong>timeout</strong> – Command timeout in seconds</p></li>
-<li><p><strong>env</strong> – Environment variables for command</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>CompletedProcess object if successful, None on error</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>CompletedProcess</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -379,6 +320,58 @@ authentication for various operations including Git.</p>
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">persistent_ssh_agent.</span></span><span class="sig-name descname"><span class="pre">SSHAgentConstants</span></span><a class="reference internal" href="_modules/persistent_ssh_agent/constants.html#SSHAgentConstants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Constants for SSH agent operations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.AGENT_INFO_FILE">
+<span class="sig-name descname"><span class="pre">AGENT_INFO_FILE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'agent_info.json'</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.AGENT_INFO_FILE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.DEFAULT_EXPIRATION_TIME">
+<span class="sig-name descname"><span class="pre">DEFAULT_EXPIRATION_TIME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">86400</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.DEFAULT_EXPIRATION_TIME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_AGENT_PID_VAR">
+<span class="sig-name descname"><span class="pre">SSH_AGENT_PID_VAR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SSH_AGENT_PID'</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_AGENT_PID_VAR" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_AUTH_SOCK_VAR">
+<span class="sig-name descname"><span class="pre">SSH_AUTH_SOCK_VAR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SSH_AUTH_SOCK'</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_AUTH_SOCK_VAR" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_CONFIG_FILE">
+<span class="sig-name descname"><span class="pre">SSH_CONFIG_FILE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'config'</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_CONFIG_FILE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_DEFAULT_KEY">
+<span class="sig-name descname"><span class="pre">SSH_DEFAULT_KEY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'id_rsa'</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_DEFAULT_KEY" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_DEFAULT_OPTIONS">
+<span class="sig-name descname"><span class="pre">SSH_DEFAULT_OPTIONS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['-o',</span> <span class="pre">'StrictHostKeyChecking=no',</span> <span class="pre">'-o',</span> <span class="pre">'UserKnownHostsFile=/dev/null',</span> <span class="pre">'-o',</span> <span class="pre">'LogLevel=ERROR']</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_DEFAULT_OPTIONS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_DIR_NAME">
+<span class="sig-name descname"><span class="pre">SSH_DIR_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.ssh'</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_DIR_NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="persistent_ssh_agent.SSHAgentConstants.SSH_KEY_TYPES">
+<span class="sig-name descname"><span class="pre">SSH_KEY_TYPES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['id_ed25519',</span> <span class="pre">'id_ecdsa',</span> <span class="pre">'id_ecdsa_sk',</span> <span class="pre">'id_ed25519_sk',</span> <span class="pre">'id_rsa',</span> <span class="pre">'id_dsa']</span></em><a class="headerlink" href="#persistent_ssh_agent.SSHAgentConstants.SSH_KEY_TYPES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -487,13 +480,20 @@ authentication for various operations including Git.</p>
 <li><a class="reference internal" href="#">persistent_ssh_agent package</a><ul>
 <li><a class="reference internal" href="#module-persistent_ssh_agent">Module contents</a><ul>
 <li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent</span></code></a><ul>
-<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.SSH_DEFAULT_KEY"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.SSH_DEFAULT_KEY</span></code></a></li>
-<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.SSH_DEFAULT_OPTIONS"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.SSH_DEFAULT_OPTIONS</span></code></a></li>
-<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.SSH_KEY_TYPES"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.SSH_KEY_TYPES</span></code></a></li>
-<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.get_git_ssh_command"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.get_git_ssh_command()</span></code></a></li>
-<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.is_valid_hostname"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.is_valid_hostname()</span></code></a></li>
-<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.run_command"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.run_command()</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.extract_hostname"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.extract_hostname()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.setup_ssh"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.setup_ssh()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants</span></code></a><ul>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.AGENT_INFO_FILE"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.AGENT_INFO_FILE</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.DEFAULT_EXPIRATION_TIME"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.DEFAULT_EXPIRATION_TIME</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_AGENT_PID_VAR"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_AGENT_PID_VAR</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_AUTH_SOCK_VAR"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_AUTH_SOCK_VAR</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_CONFIG_FILE"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_CONFIG_FILE</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_DEFAULT_KEY"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_DEFAULT_KEY</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_DEFAULT_OPTIONS"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_DEFAULT_OPTIONS</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_DIR_NAME"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_DIR_NAME</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.SSHAgentConstants.SSH_KEY_TYPES"><code class="docutils literal notranslate"><span class="pre">SSHAgentConstants.SSH_KEY_TYPES</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#persistent_ssh_agent.SSHConfig"><code class="docutils literal notranslate"><span class="pre">SSHConfig</span></code></a><ul>
@@ -517,7 +517,7 @@ authentication for various operations including Git.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=465ec406"></script>
+</div><script src="_static/documentation_options.js?v=2bafa17a"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.core - persistent_ssh_agent 0.7.2 文档</title>
+        <title>persistent_ssh_agent.core - persistent_ssh_agent 0.7.7 文档</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -174,7 +174,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.7.2 文档</div></a>
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.7.7 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -198,7 +198,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.2 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.7 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -228,6 +228,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
 </ul>
 
 </div>
@@ -266,29 +267,29 @@
 
 <span class="c1"># Import built-in modules</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">suppress</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompletedProcess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="kn">import</span> <span class="n">dedent</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
 <span class="c1"># Import third-party modules</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHAgentConstants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.git</span><span class="w"> </span><span class="kn">import</span> <span class="n">GitIntegration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.ssh_config_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfigParser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.ssh_key_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHKeyManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_home_env</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_hostname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_command</span>
 
 
 <span class="c1"># Import local modules (conditional to avoid circular imports)</span>
@@ -331,23 +332,6 @@
 <span class="sd">    authentication for various operations including Git.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># SSH command constants</span>
-    <span class="n">SSH_DEFAULT_OPTIONS</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># noqa: RUF012</span>
-        <span class="s2">&quot;StrictHostKeyChecking&quot;</span><span class="p">:</span> <span class="s2">&quot;no&quot;</span>
-    <span class="p">}</span>
-
-    <span class="c1"># Supported SSH key types in order of preference</span>
-    <span class="n">SSH_KEY_TYPES</span> <span class="o">=</span> <span class="p">[</span>  <span class="c1"># noqa: RUF012</span>
-        <span class="s2">&quot;id_ed25519&quot;</span><span class="p">,</span>  <span class="c1"># Ed25519 (recommended, most secure)</span>
-        <span class="s2">&quot;id_ecdsa&quot;</span><span class="p">,</span>  <span class="c1"># ECDSA</span>
-        <span class="s2">&quot;id_ecdsa_sk&quot;</span><span class="p">,</span>  <span class="c1"># ECDSA with security key</span>
-        <span class="s2">&quot;id_ed25519_sk&quot;</span><span class="p">,</span>  <span class="c1"># Ed25519 with security key</span>
-        <span class="s2">&quot;id_rsa&quot;</span><span class="p">,</span>  <span class="c1"># RSA</span>
-        <span class="s2">&quot;id_dsa&quot;</span>  <span class="c1"># DSA (legacy, not recommended)</span>
-    <span class="p">]</span>
-
-    <span class="n">SSH_DEFAULT_KEY</span> <span class="o">=</span> <span class="s2">&quot;id_rsa&quot;</span>  <span class="c1"># Fallback default key</span>
-
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">expiration_time</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">86400</span><span class="p">,</span>
                  <span class="n">reuse_agent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
@@ -358,7 +342,7 @@
 <span class="sd">            config: Optional SSH configuration</span>
 <span class="sd">            reuse_agent: Whether to attempt reusing existing SSH agent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_home_env</span><span class="p">()</span>
+        <span class="n">ensure_home_env</span><span class="p">()</span>
 
         <span class="c1"># Initialize paths and state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.ssh&quot;</span>
@@ -369,17 +353,35 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reuse_agent</span> <span class="o">=</span> <span class="n">reuse_agent</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_ensure_home_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure HOME environment variable is set correctly.</span>
+        <span class="c1"># Initialize managers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssh_config_parser</span> <span class="o">=</span> <span class="n">SSHConfigParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span> <span class="o">=</span> <span class="n">SSHKeyManager</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">,</span> <span class="n">SSHAgentConstants</span><span class="o">.</span><span class="n">SSH_KEY_TYPES</span><span class="p">)</span>
 
-<span class="sd">        This method ensures the HOME environment variable is set to the user&#39;s</span>
-<span class="sd">        home directory, which is required for SSH operations.</span>
+        <span class="c1"># Initialize Git integration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">git</span> <span class="o">=</span> <span class="n">GitIntegration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context manager entry point.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PersistentSSHAgent: Self for use in with statement</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;HOME&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;HOME&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Set HOME environment variable: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context manager exit point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exc_type: Exception type if an exception occurred</span>
+<span class="sd">            exc_val: Exception value if an exception occurred</span>
+<span class="sd">            exc_tb: Exception traceback if an exception occurred</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None: Don&#39;t suppress exceptions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Currently no cleanup needed as SSH agent persists</span>
+        <span class="c1"># Future: Could add cleanup logic here if needed</span>
+        <span class="k">del</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span>  <span class="c1"># Suppress unused variable warnings</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_save_agent_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth_sock</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_pid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save SSH agent information to file.</span>
@@ -397,10 +399,10 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">agent_info</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved agent info to: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to save agent info: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_agent_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -414,7 +416,7 @@
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">agent_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
             <span class="c1"># Quick validation of required fields</span>
@@ -442,7 +444,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SSH_AGENT_PID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">agent_info</span><span class="p">[</span><span class="s2">&quot;SSH_AGENT_PID&quot;</span><span class="p">]</span>
 
             <span class="c1"># Verify agent is running</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;ssh-add&quot;</span><span class="p">,</span> <span class="s2">&quot;-l&quot;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;ssh-add&quot;</span><span class="p">,</span> <span class="s2">&quot;-l&quot;</span><span class="p">])</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to run ssh-add -l&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">False</span>
@@ -491,8 +493,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if key is loaded</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;ssh-add&quot;</span><span class="p">,</span> <span class="s2">&quot;-l&quot;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">identity_file</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">verify_loaded_key</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_start_ssh_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Start SSH agent and add identity.</span>
@@ -529,7 +530,7 @@
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;nt&quot;</span><span class="p">:</span>
                 <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-s&quot;</span><span class="p">)</span>
 
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to start SSH agent&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">False</span>
@@ -550,7 +551,7 @@
 
             <span class="c1"># Add the key</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Adding key to agent: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_ssh_key</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">add_ssh_key</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to add key to agent&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">False</span>
 
@@ -558,127 +559,6 @@
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to start SSH agent: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_ssh_add_process</span><span class="p">(</span><span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a subprocess for ssh-add command.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            identity_file: Path to SSH key to add</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            subprocess.Popen: Process object for ssh-add command</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;ssh-add&quot;</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">],</span>
-            <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-            <span class="n">text</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_try_add_key_without_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to add SSH key without passphrase.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            identity_file: Path to SSH key</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple[bool, bool]: (success, needs_passphrase)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_ssh_add_process</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Key added without passphrase&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span>
-            <span class="n">stderr_str</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">stderr</span>
-            <span class="k">if</span> <span class="s2">&quot;Enter passphrase&quot;</span> <span class="ow">in</span> <span class="n">stderr_str</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to add key: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stderr_str</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error adding key: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_add_key_with_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add SSH key with passphrase.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            identity_file: Path to SSH key</span>
-<span class="sd">            passphrase: Key passphrase</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True if successful</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_ssh_add_process</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">passphrase</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Key added with passphrase&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">True</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to add key with passphrase: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Timeout while adding key with passphrase&quot;</span><span class="p">)</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error adding key with passphrase: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="n">process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_add_ssh_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add SSH key to the agent.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            identity_file: Path to the SSH key to add</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True if successful, False otherwise</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Validate identity file</span>
-            <span class="n">identity_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Identity file not found: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-            <span class="c1"># Try adding without passphrase first</span>
-            <span class="n">success</span><span class="p">,</span> <span class="n">needs_passphrase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_add_key_without_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
-
-            <span class="c1"># If passphrase is needed, try with configured passphrase</span>
-            <span class="k">if</span> <span class="n">needs_passphrase</span><span class="p">:</span>
-                <span class="c1"># First check if we have a passphrase in the config</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">identity_passphrase</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using passphrase from SSHConfig&quot;</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_key_with_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">identity_passphrase</span><span class="p">)</span>
-
-                <span class="c1"># Then check if we have a passphrase from CLI</span>
-                <span class="k">if</span> <span class="n">_has_cli</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
-                        <span class="n">cli_passphrase</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">get_passphrase</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="n">cli_passphrase</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using passphrase from CLI config&quot;</span><span class="p">)</span>
-                            <span class="n">deobfuscated</span> <span class="o">=</span> <span class="n">config_manager</span><span class="o">.</span><span class="n">deobfuscate_passphrase</span><span class="p">(</span><span class="n">cli_passphrase</span><span class="p">)</span>
-                            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_key_with_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">deobfuscated</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to get passphrase from CLI config: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to add key: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_test_ssh_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -690,7 +570,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if connection successful</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">test_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span>
+        <span class="n">test_result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">&quot;ssh&quot;</span><span class="p">,</span> <span class="s2">&quot;-T&quot;</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;StrictHostKeyChecking=no&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;git@</span><span class="si">{</span><span class="n">hostname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
         <span class="p">)</span>
 
@@ -719,7 +599,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Validate hostname</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_hostname</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
+            <span class="c1"># Import third-party modules</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_valid_hostname</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_hostname</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid hostname: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">False</span>
 
@@ -760,8 +642,7 @@
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ssh&quot;</span><span class="p">]</span>
 
         <span class="c1"># Add default options</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SSH_DEFAULT_OPTIONS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">SSHAgentConstants</span><span class="o">.</span><span class="n">SSH_DEFAULT_OPTIONS</span><span class="p">)</span>
 
         <span class="c1"># Add identity file</span>
         <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">])</span>
@@ -776,86 +657,6 @@
                 <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">options</span>
-
-<div class="viewcode-block" id="PersistentSSHAgent.get_git_ssh_command">
-<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.get_git_ssh_command">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_git_ssh_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate Git SSH command with proper configuration.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            hostname: Target Git host</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            SSH command string if successful, None on error</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Validate hostname</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_hostname</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid hostname: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
-
-            <span class="c1"># Get and validate identity file</span>
-            <span class="n">identity_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_identity_file</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">identity_file</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No identity file found for: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Identity file does not exist: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
-
-            <span class="c1"># Set up SSH connection</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;SSH setup failed for: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
-
-            <span class="c1"># Build command with options</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_ssh_options</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
-            <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Generated SSH command: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">command</span>
-
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to generate Git SSH command: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
-
-
-<div class="viewcode-block" id="PersistentSSHAgent.run_command">
-<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.run_command">[文档]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">shell</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="n">check_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompletedProcess</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a command and return its output.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            command: Command and arguments to run</span>
-<span class="sd">            shell: Whether to run command through shell</span>
-<span class="sd">            check_output: Whether to capture command output</span>
-<span class="sd">            timeout: Command timeout in seconds</span>
-<span class="sd">            env: Environment variables for command</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            CompletedProcess: CompletedProcess object if successful, None on error</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-                <span class="n">command</span><span class="p">,</span>
-                <span class="n">shell</span><span class="o">=</span><span class="n">shell</span><span class="p">,</span>
-                <span class="n">capture_output</span><span class="o">=</span><span class="n">check_output</span><span class="p">,</span>
-                <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-                <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
-                <span class="n">check</span><span class="o">=</span><span class="kc">False</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">result</span>
-        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Command timed out: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Command failed: </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
-
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_write_temp_key</span><span class="p">(</span><span class="n">key_content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -929,35 +730,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            List[str]: List of available key paths with normalized format (forward slashes).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">available_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Use set to avoid duplicates</span>
-            <span class="k">for</span> <span class="n">key_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SSH_KEY_TYPES</span><span class="p">:</span>
-                <span class="c1"># Check for base key type (e.g., id_rsa)</span>
-                <span class="n">key_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">),</span> <span class="n">key_type</span><span class="p">)</span>
-                <span class="n">pub_key_path</span> <span class="o">=</span> <span class="n">key_path</span> <span class="o">+</span> <span class="s2">&quot;.pub&quot;</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">key_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pub_key_path</span><span class="p">):</span>
-                    <span class="n">available_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">key_path</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">))</span>
-
-                <span class="c1"># Check for keys with numeric suffixes (e.g., id_rsa2)</span>
-                <span class="n">pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_type</span><span class="si">}</span><span class="s2">[0-9]*&quot;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">numbered_key_path</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pattern</span><span class="p">):</span>
-                    <span class="n">pub_key_path</span> <span class="o">=</span> <span class="n">numbered_key_path</span> <span class="o">+</span> <span class="s2">&quot;.pub&quot;</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">numbered_key_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pub_key_path</span><span class="p">):</span>
-                        <span class="n">available_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">numbered_key_path</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">))</span>
-
-            <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">available_keys</span><span class="p">)</span>  <span class="c1"># Convert back to sorted list</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">get_available_keys</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_identity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the identity file to use for a given hostname.</span>
 
 <span class="sd">        This method tries multiple sources to find an appropriate SSH identity file,</span>
 <span class="sd">        checking them in the following order of priority:</span>
-<span class="sd">        1. CLI configuration (if available)</span>
-<span class="sd">        2. SSH_IDENTITY_FILE environment variable</span>
-<span class="sd">        3. Available SSH keys in the user&#39;s .ssh directory</span>
-<span class="sd">        4. Default key path (~/.ssh/id_rsa) as a fallback</span>
+<span class="sd">        1. SSH config file for the specific hostname</span>
+<span class="sd">        2. CLI configuration (if available)</span>
+<span class="sd">        3. SSH_IDENTITY_FILE environment variable</span>
+<span class="sd">        4. Available SSH keys in the user&#39;s .ssh directory</span>
+<span class="sd">        5. Default key path (~/.ssh/id_rsa) as a fallback</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            hostname: The hostname to get the identity file for.</span>
@@ -970,20 +754,111 @@
 <span class="sd">            will still return a default path to ~/.ssh/id_rsa, which may not exist.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Try to get identity file from different sources in order of priority</span>
+
+        <span class="c1"># 1. Check SSH config for host-specific identity file</span>
+        <span class="n">identity_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_identity_from_ssh_config</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identity_file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">identity_file</span>
+
+        <span class="c1"># 2. Check CLI configuration</span>
         <span class="n">identity_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_identity_from_cli</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">identity_file</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">identity_file</span>
 
+        <span class="c1"># 3. Check environment variable</span>
         <span class="n">identity_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_identity_from_env</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">identity_file</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">identity_file</span>
 
+        <span class="c1"># 4. Check available keys in .ssh directory</span>
         <span class="n">identity_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_identity_from_available_keys</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">identity_file</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">identity_file</span>
 
-        <span class="c1"># Always return default key path, even if it doesn&#39;t exist</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">,</span> <span class="s2">&quot;id_rsa&quot;</span><span class="p">)))</span>
+        <span class="c1"># 5. Always return default key path, even if it doesn&#39;t exist</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">,</span> <span class="n">SSHAgentConstants</span><span class="o">.</span><span class="n">SSH_DEFAULT_KEY</span><span class="p">)))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_identity_from_ssh_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get identity file from SSH config for a specific hostname.</span>
+
+<span class="sd">        This method checks the SSH configuration file (~/.ssh/config) for host-specific</span>
+<span class="sd">        IdentityFile settings. It uses the SSH config parser to find the appropriate</span>
+<span class="sd">        identity file for the given hostname.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hostname: The hostname to look up in SSH config</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[str]: Path to identity file from SSH config or None if not found</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; agent = PersistentSSHAgent()</span>
+<span class="sd">            &gt;&gt;&gt; identity_file = agent._get_identity_from_ssh_config(&quot;github.com&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; if identity_file:</span>
+<span class="sd">            ...     print(f&quot;Using SSH config identity file: {identity_file}&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Parse SSH config and find matching host configuration</span>
+            <span class="n">ssh_configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_config_parser</span><span class="o">.</span><span class="n">parse_ssh_config</span><span class="p">()</span>
+
+            <span class="c1"># Look for exact hostname match first</span>
+            <span class="k">if</span> <span class="n">hostname</span> <span class="ow">in</span> <span class="n">ssh_configs</span> <span class="ow">and</span> <span class="s2">&quot;identityfile&quot;</span> <span class="ow">in</span> <span class="n">ssh_configs</span><span class="p">[</span><span class="n">hostname</span><span class="p">]:</span>
+                <span class="n">identity_files</span> <span class="o">=</span> <span class="n">ssh_configs</span><span class="p">[</span><span class="n">hostname</span><span class="p">][</span><span class="s2">&quot;identityfile&quot;</span><span class="p">]</span>
+                <span class="c1"># Handle both single string and list of strings</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identity_files</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">identity_file</span> <span class="o">=</span> <span class="n">identity_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Use first identity file</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">identity_file</span> <span class="o">=</span> <span class="n">identity_files</span>
+
+                <span class="c1"># Expand user directory and resolve path</span>
+                <span class="n">expanded_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">expanded_path</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using identity file from SSH config: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">expanded_path</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">expanded_path</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;SSH config identity file does not exist: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">expanded_path</span><span class="p">)</span>
+
+            <span class="c1"># Look for wildcard matches if no exact match found</span>
+            <span class="k">for</span> <span class="n">host_pattern</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">ssh_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_hostname</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">host_pattern</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;identityfile&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                    <span class="n">identity_files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;identityfile&quot;</span><span class="p">]</span>
+                    <span class="c1"># Handle both single string and list of strings</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identity_files</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="n">identity_file</span> <span class="o">=</span> <span class="n">identity_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Use first identity file</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">identity_file</span> <span class="o">=</span> <span class="n">identity_files</span>
+
+                    <span class="c1"># Expand user directory and resolve path</span>
+                    <span class="n">expanded_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">expanded_path</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using identity file from SSH config pattern </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host_pattern</span><span class="p">,</span> <span class="n">expanded_path</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">expanded_path</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to get identity file from SSH config: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_match_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if hostname matches SSH config pattern.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hostname: The hostname to match</span>
+<span class="sd">            pattern: The SSH config host pattern (may contain wildcards)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if hostname matches the pattern</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; agent = PersistentSSHAgent()</span>
+<span class="sd">            &gt;&gt;&gt; agent._match_hostname(&quot;github.com&quot;, &quot;*.github.com&quot;)</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; agent._match_hostname(&quot;api.github.com&quot;, &quot;*.github.com&quot;)</span>
+<span class="sd">            True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Import built-in modules</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span>
+        <span class="k">return</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_identity_from_cli</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get identity file from CLI configuration.</span>
@@ -1045,7 +920,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get identity file from available keys in .ssh directory.</span>
 
 <span class="sd">        This method searches for available SSH keys in the user&#39;s .ssh directory</span>
-<span class="sd">        using the _get_available_keys method. It returns the first available key</span>
+<span class="sd">        using the ssh_key_manager. It returns the first available key</span>
 <span class="sd">        based on the priority order defined in SSH_KEY_TYPES (e.g., Ed25519 keys</span>
 <span class="sd">        have higher priority than RSA keys).</span>
 
@@ -1060,13 +935,54 @@
 <span class="sd">            ... else:</span>
 <span class="sd">            ...     print(&quot;No SSH keys found&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">available_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_available_keys</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">available_keys</span><span class="p">:</span>
-            <span class="c1"># Use the first available key (highest priority)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using first available key: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">available_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="k">return</span> <span class="n">available_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Already a full path</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">get_identity_from_available_keys</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1"># Delegation methods for backward compatibility with tests</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_ssh_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add SSH key to agent (delegation method).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identity_file: Path to SSH key</span>
+<span class="sd">            config: Optional SSH configuration</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">add_ssh_key</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_ssh_add_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create SSH add process (delegation method).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identity_file: Path to SSH key</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            subprocess.Popen: Process object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">create_ssh_add_process</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_try_add_key_without_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to add key without passphrase (delegation method).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identity_file: Path to SSH key</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[bool, bool]: (success, needs_passphrase)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">try_add_key_without_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_key_with_passphrase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add key with passphrase (delegation method).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identity_file: Path to SSH key</span>
+<span class="sd">            passphrase: SSH key passphrase</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if successful</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_key_manager</span><span class="o">.</span><span class="n">add_key_with_passphrase</span><span class="p">(</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">passphrase</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_parse_ssh_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SSHOptionValue</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse SSH config file to get host-specific configurations.</span>
@@ -1077,369 +993,25 @@
 <span class="sd">            while the inner dictionary maps configuration keys to their values.</span>
 <span class="sd">            Values can be either strings or lists of strings for multi-value options.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SSHOptionValue</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">current_host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">current_match</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">ssh_config_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span> <span class="o">/</span> <span class="s2">&quot;config&quot;</span>
+        <span class="c1"># Create a new parser instance with the current SSH directory</span>
+        <span class="c1"># This ensures tests can override the SSH directory properly</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">SSHConfigParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_ssh_config</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ssh_config_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;SSH config file does not exist: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ssh_config_path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">config</span>
+<div class="viewcode-block" id="PersistentSSHAgent.extract_hostname">
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.extract_hostname">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract hostname from SSH URL (public method).</span>
 
-        <span class="c1"># Define valid keys and their validation functions</span>
-        <span class="n">valid_keys</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="c1"># Connection settings</span>
-            <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any hostname is valid</span>
-            <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">,</span>
-            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any username is valid</span>
-            <span class="s2">&quot;identityfile&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any path is valid</span>
-            <span class="s2">&quot;identitiesonly&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;batchmode&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;bindaddress&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any address is valid</span>
-            <span class="s2">&quot;connecttimeout&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;connectionattempts&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span>
-
-            <span class="c1"># Security settings</span>
-            <span class="s2">&quot;stricthostkeychecking&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;accept-new&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;userknownhostsfile&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any path is valid</span>
-            <span class="s2">&quot;passwordauthentication&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;pubkeyauthentication&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;kbdinteractiveauthentication&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;hostbasedauthentication&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;gssapiauthentication&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;preferredauthentications&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">all</span><span class="p">(</span>
-                <span class="n">auth</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gssapi-with-mic&quot;</span><span class="p">,</span> <span class="s2">&quot;hostbased&quot;</span><span class="p">,</span> <span class="s2">&quot;publickey&quot;</span><span class="p">,</span> <span class="s2">&quot;keyboard-interactive&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">auth</span> <span class="ow">in</span>
-                <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)),</span>
-
-            <span class="c1"># Connection optimization</span>
-            <span class="s2">&quot;compression&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;tcpkeepalive&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;serveralivecountmax&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;serveraliveinterval&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
-
-            <span class="c1"># Proxy and forwarding</span>
-            <span class="s2">&quot;proxycommand&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any command is valid</span>
-            <span class="s2">&quot;proxyhost&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any host is valid</span>
-            <span class="s2">&quot;proxyport&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">,</span>
-            <span class="s2">&quot;proxyjump&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any jump specification is valid</span>
-            <span class="s2">&quot;dynamicforward&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">all</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65535</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()),</span>
-            <span class="s2">&quot;localforward&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Port forwarding specification</span>
-            <span class="s2">&quot;remoteforward&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Port forwarding specification</span>
-            <span class="s2">&quot;forwardagent&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-
-            <span class="c1"># Environment</span>
-            <span class="s2">&quot;sendenv&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any environment variable pattern is valid</span>
-            <span class="s2">&quot;setenv&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any environment variable setting is valid</span>
-            <span class="s2">&quot;requesttty&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;force&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;permittylocalcommand&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;typylocalcommand&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any command is valid</span>
-
-            <span class="c1"># Multiplexing</span>
-            <span class="s2">&quot;controlmaster&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;autoask&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;controlpath&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any path is valid</span>
-            <span class="s2">&quot;controlpersist&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any time specification is valid</span>
-
-            <span class="c1"># Misc</span>
-            <span class="s2">&quot;addkeystoagent&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">,</span> <span class="s2">&quot;confirm&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;canonicaldomains&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any domain list is valid</span>
-            <span class="s2">&quot;canonicalizefallbacklocal&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;canonicalizehostname&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;always&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;canonicalizemaxdots&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;canonicalizepermittedcnames&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Any CNAME specification is valid</span>
-        <span class="p">}</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_host_pattern</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Check if a host pattern is valid.</span>
-
-<span class="sd">            A valid host pattern can contain:</span>
-<span class="sd">            - Wildcards (* and ?)</span>
-<span class="sd">            - Negation (! at the start)</span>
-<span class="sd">            - Multiple patterns separated by spaces</span>
-<span class="sd">            - Most printable characters except control characters</span>
-<span class="sd">            - IPv6 addresses in square brackets</span>
-
-<span class="sd">            Args:</span>
-<span class="sd">                pattern (str): The host pattern to validate.</span>
-
-<span class="sd">            Returns:</span>
-<span class="sd">                bool: True if the pattern is valid, False otherwise.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-            <span class="c1"># Special cases</span>
-            <span class="k">if</span> <span class="n">pattern</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
-
-            <span class="c1"># Split multiple patterns</span>
-            <span class="n">patterns</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
-                <span class="c1"># Skip empty patterns</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">:</span>
-                    <span class="k">continue</span>
-
-                <span class="c1"># Allow negation prefix</span>
-                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;!&quot;</span><span class="p">):</span>
-                    <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-                <span class="c1"># Skip empty patterns after removing prefix</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">:</span>
-                    <span class="k">continue</span>
-
-                <span class="c1"># Check for control characters</span>
-                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="n">p</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="s2">&quot;</span><span class="se">\0\n\r\t</span><span class="s2">&quot;</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="kc">False</span>
-
-                <span class="c1"># Allow IPv6 addresses in square brackets</span>
-                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">):</span>
-                    <span class="c1"># Basic IPv6 validation</span>
-                    <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="s2">&quot;0123456789abcdefABCDEF:&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">p</span><span class="p">):</span>
-                        <span class="k">return</span> <span class="kc">False</span>
-                    <span class="k">continue</span>
-
-            <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">get_validation_error</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Get validation error message for a config key-value pair.</span>
-
-<span class="sd">            Args:</span>
-<span class="sd">                key: Configuration key</span>
-<span class="sd">                value: Configuration value</span>
-
-<span class="sd">            Returns:</span>
-<span class="sd">                Optional[str]: Error message if validation fails, None if valid</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_keys</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid configuration key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Invalid configuration key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_keys</span><span class="p">[</span><span class="n">key</span><span class="p">](</span><span class="n">value</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Invalid value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
-
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">process_config_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Process a single line from SSH config file.</span>
-
-<span class="sd">            Args:</span>
-<span class="sd">                line: The line to process from the SSH config file</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">nonlocal</span> <span class="n">current_host</span><span class="p">,</span> <span class="n">current_match</span><span class="p">,</span> <span class="n">config</span>
-
-            <span class="c1"># Normalize line endings and remove BOM if present</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\ufeff</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
-                <span class="k">return</span>
-
-            <span class="c1"># Handle Include directives</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;include &quot;</span><span class="p">):</span>
-                <span class="n">include_path</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">include_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">include_path</span><span class="p">)</span>
-                <span class="n">include_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">include_path</span><span class="p">)</span>
-
-                <span class="c1"># Support both absolute and relative paths</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">include_path</span><span class="p">):</span>
-                    <span class="n">include_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ssh_config_path</span><span class="p">)),</span> <span class="n">include_path</span><span class="p">)</span>
-
-                <span class="c1"># Expand glob patterns</span>
-                <span class="n">include_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">include_path</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">include_file</span> <span class="ow">in</span> <span class="n">include_files</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">include_file</span><span class="p">):</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">include_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">inc_f</span><span class="p">:</span>
-                                <span class="k">for</span> <span class="n">inc_line</span> <span class="ow">in</span> <span class="n">inc_f</span><span class="p">:</span>
-                                    <span class="n">process_config_line</span><span class="p">(</span><span class="n">inc_line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read include file </span><span class="si">{</span><span class="n">include_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">return</span>
-
-            <span class="c1"># Handle Match blocks</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;match &quot;</span><span class="p">):</span>
-                <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;host&quot;</span><span class="p">:</span>
-                    <span class="n">current_match</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                    <span class="n">current_host</span> <span class="o">=</span> <span class="n">current_match</span>
-                    <span class="k">if</span> <span class="n">current_host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-                        <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: ignore</span>
-                <span class="k">return</span>
-
-            <span class="c1"># Handle Host blocks</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;host &quot;</span><span class="p">):</span>
-                <span class="n">current_host</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">is_valid_host_pattern</span><span class="p">(</span><span class="n">current_host</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">current_host</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-                        <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: ignore</span>
-                    <span class="n">current_match</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid host pattern in </span><span class="si">{</span><span class="n">ssh_config_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">current_host</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">return</span>
-
-            <span class="c1"># Parse key-value pairs</span>
-            <span class="k">if</span> <span class="n">current_host</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="c1"># Split line into key and value, supporting both space and = separators</span>
-                    <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-                        <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                            <span class="k">return</span>
-                        <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-                    <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>  <span class="c1"># Skip empty values</span>
-                        <span class="k">return</span>
-
-                    <span class="c1"># Validate key and value</span>
-                    <span class="n">error_msg</span> <span class="o">=</span> <span class="n">get_validation_error</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">error_msg</span><span class="p">:</span>
-                        <span class="k">return</span>
-
-                    <span class="c1"># Handle array values</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;identityfile&quot;</span><span class="p">,</span> <span class="s2">&quot;localforward&quot;</span><span class="p">,</span> <span class="s2">&quot;remoteforward&quot;</span><span class="p">,</span> <span class="s2">&quot;dynamicforward&quot;</span><span class="p">,</span> <span class="s2">&quot;sendenv&quot;</span><span class="p">,</span> <span class="s2">&quot;setenv&quot;</span><span class="p">]:</span>
-                        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">]:</span>
-                            <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-                        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
-                            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">]:</span>  <span class="c1"># Avoid duplicates</span>
-                                <span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># Convert single value to list with new value</span>
-                            <span class="n">single_value</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
-                            <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">single_value</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">config</span><span class="p">[</span><span class="n">current_host</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing line in </span><span class="si">{</span><span class="n">ssh_config_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">, Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ssh_config_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8-sig&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="c1"># Reset config for each parse attempt</span>
-                <span class="n">config</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
-                <span class="n">current_host</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">current_match</span> <span class="o">=</span> <span class="kc">None</span>
-
-                <span class="c1"># Read and normalize the entire file content</span>
-                <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                <span class="n">lines</span> <span class="o">=</span> <span class="n">dedent</span><span class="p">(</span><span class="n">content</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Process each line</span>
-                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">process_config_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing line: </span><span class="si">{</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">, Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to parse SSH config: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">config</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># type: ignore  # Clear config on error</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No valid configuration found in SSH config file&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">config</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract hostname from SSH URL.</span>
-
-<span class="sd">        This method extracts the hostname from an SSH URL using a regular expression.</span>
-<span class="sd">        It validates both the URL format and the extracted hostname. The method</span>
-<span class="sd">        supports standard SSH URL formats used by Git and other services.</span>
+<span class="sd">        This is a public wrapper around the extract_hostname function in utils.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            url: SSH URL to extract hostname from (e.g., git@github.com:user/repo.git)</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Hostname if valid URL, None otherwise</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Valid formats:</span>
-<span class="sd">            - git@github.com:user/repo.git</span>
-<span class="sd">            - git@host.example.com:user/repo.git</span>
-
-<span class="sd">        Example:</span>
-<span class="sd">            &gt;&gt;&gt; agent = PersistentSSHAgent()</span>
-<span class="sd">            &gt;&gt;&gt; hostname = agent._extract_hostname(&quot;git@github.com:user/repo.git&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; print(hostname)  # &quot;github.com&quot;</span>
-<span class="sd">            &gt;&gt;&gt; hostname = agent._extract_hostname(&quot;invalid-url&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; print(hostname)  # None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="c1"># Use regex to extract hostname from SSH URL</span>
-        <span class="c1"># Pattern matches: username@hostname:path</span>
-        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^([^@]+)@([a-zA-Z0-9][-a-zA-Z0-9._]*[a-zA-Z0-9]):(.+)$&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="c1"># Extract hostname from match</span>
-        <span class="n">hostname</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-
-        <span class="c1"># Validate path and hostname</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="c1"># Validate hostname</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_hostname</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="k">return</span> <span class="n">hostname</span>
-
-<div class="viewcode-block" id="PersistentSSHAgent.is_valid_hostname">
-<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.is_valid_hostname">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_hostname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a hostname is valid according to RFC 1123 and supports IPv6.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            hostname: The hostname to validate</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True if the hostname is valid, False otherwise</span>
-
-<span class="sd">        Notes:</span>
-<span class="sd">            - Maximum length of 255 characters</span>
-<span class="sd">            - Can contain letters (a-z), numbers (0-9), dots (.) and hyphens (-)</span>
-<span class="sd">            - Cannot start or end with a dot or hyphen</span>
-<span class="sd">            - Labels (parts between dots) cannot start or end with a hyphen</span>
-<span class="sd">            - Labels cannot be longer than 63 characters</span>
-<span class="sd">            - IPv6 addresses are supported (with or without brackets)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">hostname</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="c1"># Handle IPv6 addresses</span>
-        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">hostname</span><span class="p">:</span>
-            <span class="c1"># Remove brackets if present</span>
-            <span class="k">if</span> <span class="n">hostname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">hostname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">):</span>
-                <span class="n">hostname</span> <span class="o">=</span> <span class="n">hostname</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Try to parse as IPv6 address</span>
-                <span class="n">socket</span><span class="o">.</span><span class="n">inet_pton</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET6</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">True</span>
-            <span class="k">except</span> <span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="c1"># Check length</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="c1"># Check for valid characters and label lengths</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">hostname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">label</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">63</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">label</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">label</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">label</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">return</span> <span class="kc">True</span></div>
+        <span class="k">return</span> <span class="n">extract_hostname</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -1481,7 +1053,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1af5e33d"></script>
+</div><script src="../../_static/documentation_options.js?v=77048641"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

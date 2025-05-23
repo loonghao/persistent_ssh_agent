@@ -6,7 +6,7 @@
 <link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" /><link rel="next" title="Features" href="features.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent 0.7.2 文档</title>
+        <title>persistent_ssh_agent 0.7.7 文档</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">persistent_ssh_agent 0.7.2 文档</div></a>
+      <a href="#"><div class="brand">persistent_ssh_agent 0.7.7 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.2 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.7.7 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -229,6 +229,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.core.html">persistent_ssh_agent.core module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a></li>
 </ul>
 
 </div>
@@ -307,7 +308,7 @@
 <li><p>🔗 Seamless Git integration</p></li>
 <li><p>🌐 Cross-platform compatibility (Windows, Linux, macOS)</p></li>
 <li><p>📦 No external dependencies beyond standard SSH tools</p></li>
-<li><p>🔒 Secure key management and session control</p></li>
+<li><p>🔒 Secure key management and session control with AES-256 encryption</p></li>
 <li><p>⚡ Asynchronous operation support</p></li>
 <li><p>🧪 Complete unit test coverage with performance benchmarks</p></li>
 <li><p>📝 Comprehensive type hints support</p></li>
@@ -316,6 +317,8 @@
 <li><p>📚 Multi-language documentation support</p></li>
 <li><p>🔍 Enhanced SSH configuration validation</p></li>
 <li><p>🛠️ Modern development toolchain (Poetry, Commitizen, Black)</p></li>
+<li><p>🔑 Git credential helper integration for seamless Git operations</p></li>
+<li><p>💻 Command-line interface with comprehensive configuration options</p></li>
 </ul>
 </section>
 <section id="installation">
@@ -545,6 +548,9 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span><span cla
 
 <span class="c1"># Import configuration from a file</span>
 uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<span class="w"> </span>config.json
+
+<span class="c1"># Set up Git credentials (new feature)</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup<span class="w"> </span>--username<span class="w"> </span>your-username<span class="w"> </span>--prompt
 </pre></div>
 </div>
 <p>Available commands:</p>
@@ -585,6 +591,13 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
 <li><p><code class="docutils literal notranslate"><span class="pre">input_file</span></code>: Input file path</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git-setup</span></code>: Configure Git credentials</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">--username</span></code>: Git username</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--password</span></code>: Git password (not recommended, use --prompt instead)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--prompt</span></code>: Prompt for Git credentials interactively</p></li>
+</ul>
+</li>
 </ul>
 </section>
 <section id="ci-cd-pipeline-integration">
@@ -621,7 +634,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
     <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
 
     <span class="c1"># Extract hostname and set up SSH</span>
-    <span class="n">hostname</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">_extract_hostname</span><span class="p">(</span><span class="n">repo_url</span><span class="p">)</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">extract_hostname</span><span class="p">(</span><span class="n">repo_url</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">hostname</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to set up SSH authentication&quot;</span><span class="p">)</span>
 
@@ -639,6 +652,49 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
         <span class="n">local_path</span><span class="p">,</span>
         <span class="n">env</span><span class="o">=</span><span class="n">env</span>
     <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="git-credential-helper-support-simplified">
+<h4>Git Credential Helper Support (Simplified)<a class="headerlink" href="#git-credential-helper-support-simplified" title="Link to this heading">¶</a></h4>
+<p>You can now set up Git credentials in a simplified way without manual script creation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="c1"># Method 1: Set credentials directly</span>
+<span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+<span class="n">ssh_agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">setup_git_credentials</span><span class="p">(</span><span class="s1">&#39;your-username&#39;</span><span class="p">,</span> <span class="s1">&#39;your-password&#39;</span><span class="p">)</span>
+
+<span class="c1"># Method 2: Use environment variables</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GIT_USERNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your-username&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GIT_PASSWORD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your-password&#39;</span>
+<span class="n">ssh_agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">setup_git_credentials</span><span class="p">()</span>  <span class="c1"># Automatically reads from env vars</span>
+
+<span class="c1"># Now Git commands will use these credentials</span>
+</pre></div>
+</div>
+<p><strong>CLI Setup:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set credentials directly</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup<span class="w"> </span>--username<span class="w"> </span>your-username<span class="w"> </span>--password<span class="w"> </span>your-password
+
+<span class="c1"># Interactive setup</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup<span class="w"> </span>--prompt
+
+<span class="c1"># Using environment variables</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GIT_USERNAME</span><span class="o">=</span>your-username
+<span class="nb">export</span><span class="w"> </span><span class="nv">GIT_PASSWORD</span><span class="o">=</span>your-password
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
+</pre></div>
+</div>
+<p><strong>CI Environment Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In build scripts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="c1"># Use context manager</span>
+<span class="k">with</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span> <span class="k">as</span> <span class="n">agent</span><span class="p">:</span>
+    <span class="c1"># SSH and Git credentials are configured, ready for Git operations</span>
+    <span class="n">agent</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">)</span>
+    <span class="c1"># Execute any Git commands...</span>
 </pre></div>
 </div>
 </section>
@@ -823,6 +879,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
 <li class="toctree-l2"><a class="reference internal" href="features.html#secure-key-management">Secure Key Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="features.html#command-line-interface">Command-Line Interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="features.html#cross-platform-support">Cross-Platform Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#git-integration">Git Integration</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
@@ -872,6 +929,18 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
 </li>
 <li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.config.html">persistent_ssh_agent.config module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.config.html#persistent_ssh_agent.config.SSHConfig"><code class="docutils literal notranslate"><span class="pre">SSHConfig</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="persistent_ssh_agent.cli.html">persistent_ssh_agent.cli module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.Args"><code class="docutils literal notranslate"><span class="pre">Args</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.ConfigManager"><code class="docutils literal notranslate"><span class="pre">ConfigManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.add_key"><code class="docutils literal notranslate"><span class="pre">add_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.export_config"><code class="docutils literal notranslate"><span class="pre">export_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.import_config"><code class="docutils literal notranslate"><span class="pre">import_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.list_keys"><code class="docutils literal notranslate"><span class="pre">list_keys()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.remove_key"><code class="docutils literal notranslate"><span class="pre">remove_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.run_ssh_connection_test"><code class="docutils literal notranslate"><span class="pre">run_ssh_connection_test()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="persistent_ssh_agent.cli.html#persistent_ssh_agent.cli.setup_config"><code class="docutils literal notranslate"><span class="pre">setup_config()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -958,6 +1027,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
 <li><a class="reference internal" href="#command-line-interface-cli">Command Line Interface (CLI)</a></li>
 <li><a class="reference internal" href="#ci-cd-pipeline-integration">CI/CD Pipeline Integration</a></li>
 <li><a class="reference internal" href="#git-integration">Git Integration</a></li>
+<li><a class="reference internal" href="#git-credential-helper-support-simplified">Git Credential Helper Support (Simplified)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#advanced-features">🌟 Advanced Features</a><ul>
@@ -985,7 +1055,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<sp
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=1af5e33d"></script>
+</div><script src="_static/documentation_options.js?v=77048641"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

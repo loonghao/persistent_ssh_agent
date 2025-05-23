@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.config - persistent_ssh_agent 0.7.7 文档</title>
+        <title>persistent_ssh_agent.constants - persistent_ssh_agent 0.7.7 文档</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -203,7 +203,7 @@
 </a>
 <div class="language-switcher">
         <span class="current-lang">中文</span>
-        <a href="/persistent_ssh_agent/en/_modules/persistent_ssh_agent/config.html">English</a>
+        <a href="/persistent_ssh_agent/en/_modules/persistent_ssh_agent/constants.html">English</a>
 </div><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="搜索" name="q" aria-label="搜索">
   <input type="hidden" name="check_keywords" value="yes">
@@ -262,33 +262,100 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>persistent_ssh_agent.config 源代码</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Configuration management for SSH agent.&quot;&quot;&quot;</span>
+          <h1>persistent_ssh_agent.constants 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Constants for SSH agent operations.&quot;&quot;&quot;</span>
+
 <span class="c1"># Import built-in modules</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 
-<div class="viewcode-block" id="SSHConfig">
-<a class="viewcode-back" href="../../persistent_ssh_agent.config.html#persistent_ssh_agent.SSHConfig">[文档]</a>
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SSHConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;SSH configuration class.&quot;&quot;&quot;</span>
-    <span class="c1"># Path to identity file</span>
-    <span class="n">identity_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># Identity file content (for CI environments)</span>
-    <span class="n">identity_content</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># Identity file passphrase</span>
-    <span class="n">identity_passphrase</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># Additional SSH options</span>
-    <span class="n">ssh_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<div class="viewcode-block" id="SSHAgentConstants">
+<a class="viewcode-back" href="../../persistent_ssh_agent.html#persistent_ssh_agent.SSHAgentConstants">[文档]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SSHAgentConstants</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constants for SSH agent operations.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize default values.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ssh_options</span> <span class="o">=</span> <span class="p">{}</span></div>
+    <span class="c1"># SSH key types in order of preference (most secure first)</span>
+    <span class="n">SSH_KEY_TYPES</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;id_ed25519&quot;</span><span class="p">,</span>     <span class="c1"># Ed25519 (recommended, most secure)</span>
+        <span class="s2">&quot;id_ecdsa&quot;</span><span class="p">,</span>       <span class="c1"># ECDSA</span>
+        <span class="s2">&quot;id_ecdsa_sk&quot;</span><span class="p">,</span>    <span class="c1"># ECDSA with security key</span>
+        <span class="s2">&quot;id_ed25519_sk&quot;</span><span class="p">,</span>  <span class="c1"># Ed25519 with security key</span>
+        <span class="s2">&quot;id_rsa&quot;</span><span class="p">,</span>         <span class="c1"># RSA</span>
+        <span class="s2">&quot;id_dsa&quot;</span>          <span class="c1"># DSA (legacy, not recommended)</span>
+    <span class="p">]</span>
 
+    <span class="c1"># Default SSH key type for fallback</span>
+    <span class="n">SSH_DEFAULT_KEY</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;id_rsa&quot;</span>  <span class="c1"># Fallback default key</span>
+
+    <span class="c1"># SSH command constants</span>
+    <span class="n">SSH_DEFAULT_OPTIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;StrictHostKeyChecking=no&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;UserKnownHostsFile=/dev/null&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;LogLevel=ERROR&quot;</span>
+    <span class="p">]</span>
+
+    <span class="c1"># SSH agent environment variables</span>
+    <span class="n">SSH_AUTH_SOCK_VAR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SSH_AUTH_SOCK&quot;</span>
+    <span class="n">SSH_AGENT_PID_VAR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SSH_AGENT_PID&quot;</span>
+
+    <span class="c1"># Default expiration time (24 hours in seconds)</span>
+    <span class="n">DEFAULT_EXPIRATION_TIME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">86400</span>
+
+    <span class="c1"># SSH agent info file name</span>
+    <span class="n">AGENT_INFO_FILE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;agent_info.json&quot;</span>
+
+    <span class="c1"># SSH config file name</span>
+    <span class="n">SSH_CONFIG_FILE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+
+    <span class="c1"># Default SSH directory name</span>
+    <span class="n">SSH_DIR_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;.ssh&quot;</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GitConstants</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constants for Git integration.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Git environment variables</span>
+    <span class="n">GIT_USERNAME_VAR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;GIT_USERNAME&quot;</span>
+    <span class="n">GIT_PASSWORD_VAR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;GIT_PASSWORD&quot;</span>
+    <span class="n">GIT_SSH_COMMAND_VAR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;GIT_SSH_COMMAND&quot;</span>
+
+    <span class="c1"># Common Git hosts</span>
+    <span class="n">COMMON_GIT_HOSTS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;github.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gitlab.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bitbucket.org&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;git.sr.ht&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;codeberg.org&quot;</span>
+    <span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CLIConstants</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constants for CLI operations.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Configuration file names</span>
+    <span class="n">CONFIG_FILE_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;persistent_ssh_agent_config.json&quot;</span>
+
+    <span class="c1"># Encryption constants</span>
+    <span class="n">ENCRYPTION_ALGORITHM</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AES-256-GCM&quot;</span>
+    <span class="n">KEY_DERIVATION_ITERATIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100000</span>
+
+    <span class="c1"># CLI command names</span>
+    <span class="n">SETUP_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;setup&quot;</span>
+    <span class="n">LIST_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;list&quot;</span>
+    <span class="n">REMOVE_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;remove&quot;</span>
+    <span class="n">EXPORT_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;export&quot;</span>
+    <span class="n">IMPORT_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;import&quot;</span>
+    <span class="n">TEST_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+
+
+<span class="c1"># Export all constants for easy access</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;CLIConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GitConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SSHAgentConstants&quot;</span>
+<span class="p">]</span>
 </pre></div>
         </article>
       </div>

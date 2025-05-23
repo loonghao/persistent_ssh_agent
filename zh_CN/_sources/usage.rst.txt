@@ -43,13 +43,13 @@ Configure SSH Agent
 .. code-block:: bash
 
     # Set identity file
-    persistent_ssh_agent config --identity-file ~/.ssh/id_rsa
+    uvx persistent_ssh_agent config --identity-file ~/.ssh/id_rsa
 
     # Set passphrase (not recommended for security reasons)
-    persistent_ssh_agent config --passphrase "your_passphrase"
+    uvx persistent_ssh_agent config --passphrase "your_passphrase"
 
     # Prompt for passphrase (more secure)
-    persistent_ssh_agent config --prompt-passphrase
+    uvx persistent_ssh_agent config --prompt-passphrase
 
 Test SSH Connection
 ~~~~~~~~~~~~~~~~~~
@@ -57,10 +57,10 @@ Test SSH Connection
 .. code-block:: bash
 
     # Test connection to a host
-    persistent_ssh_agent test github.com
+    uvx persistent_ssh_agent test github.com
 
     # Test with a specific identity file
-    persistent_ssh_agent test github.com --identity-file ~/.ssh/github_key
+    uvx persistent_ssh_agent test github.com --identity-file ~/.ssh/github_key
 
 Manage SSH Keys
 ~~~~~~~~~~~~~~
@@ -68,13 +68,13 @@ Manage SSH Keys
 .. code-block:: bash
 
     # List configured SSH keys
-    persistent_ssh_agent list
+    uvx persistent_ssh_agent list
 
     # Remove a specific key
-    persistent_ssh_agent remove --name github
+    uvx persistent_ssh_agent remove --name github
 
     # Remove all keys
-    persistent_ssh_agent remove --all
+    uvx persistent_ssh_agent remove --all
 
 Export and Import Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +82,23 @@ Export and Import Configuration
 .. code-block:: bash
 
     # Export configuration
-    persistent_ssh_agent export --output config.json
+    uvx persistent_ssh_agent export --output config.json
 
     # Import configuration
-    persistent_ssh_agent import config.json
+    uvx persistent_ssh_agent import config.json
+
+Git Credential Setup
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    # Set up Git credentials interactively
+    uvx persistent_ssh_agent git-setup --prompt
+
+    # Set up Git credentials with username
+    uvx persistent_ssh_agent git-setup --username your-username --prompt
+
+    # Set up Git credentials using environment variables
+    export GIT_USERNAME=your-username
+    export GIT_PASSWORD=your-password
+    uvx persistent_ssh_agent git-setup
