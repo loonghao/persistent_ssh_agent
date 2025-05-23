@@ -30,10 +30,17 @@
 - 🔗 无缝 Git 集成
 - 🌐 跨平台兼容性 (Windows, Linux, macOS)
 - 📦 除标准 SSH 工具外无外部依赖
-- 🔒 安全的密钥管理和会话控制
+- 🔒 安全的密钥管理和会话控制，支持 AES-256 加密
 - ⚡ 异步操作支持
 - 🧪 完整的单元测试覆盖
 - 📝 类型提示支持
+- 🔐 支持多种 SSH 密钥类型（Ed25519、ECDSA、RSA）
+- 🌍 IPv6 支持
+- 📚 多语言文档支持
+- 🔍 增强的 SSH 配置验证
+- 🛠️ 现代开发工具链（Poetry、Commitizen、Black）
+- 🔑 Git 凭证助手集成，实现无缝 Git 操作
+- 💻 命令行界面，提供全面的配置选项
 
 ## 🚀 安装
 
@@ -150,7 +157,7 @@ def clone_repo(repo_url: str, local_path: str) -> Repo:
     ssh_agent = PersistentSSHAgent()
 
     # 提取主机名并设置 SSH
-    hostname = ssh_agent._extract_hostname(repo_url)
+    hostname = ssh_agent.extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("SSH 认证设置失败")
 
@@ -168,6 +175,54 @@ def clone_repo(repo_url: str, local_path: str) -> Repo:
         local_path,
         env=env
     )
+```
+
+### Git 凭证助手支持（简化版本）
+
+现在你可以通过简化的方式设置 Git 凭证，无需手动创建脚本：
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+
+# 方式1：直接设置凭证
+ssh_agent = PersistentSSHAgent()
+ssh_agent.git.setup_git_credentials('你的用户名', '你的密码')
+
+# 方式2：使用环境变量
+import os
+os.environ['GIT_USERNAME'] = '你的用户名'
+os.environ['GIT_PASSWORD'] = '你的密码'
+ssh_agent.git.setup_git_credentials()  # 自动从环境变量读取
+
+# 现在 Git 命令将使用这些凭证
+```
+
+**CLI 方式设置：**
+
+```bash
+# 直接设置凭证
+uvx persistent_ssh_agent git-setup --username 你的用户名 --password 你的密码
+
+# 交互式设置
+uvx persistent_ssh_agent git-setup --prompt
+
+# 使用环境变量
+export GIT_USERNAME=你的用户名
+export GIT_PASSWORD=你的密码
+uvx persistent_ssh_agent git-setup
+```
+
+**在 CI 环境中使用：**
+
+```python
+# 在构建脚本中
+from persistent_ssh_agent import PersistentSSHAgent
+
+# 使用上下文管理器
+with PersistentSSHAgent() as agent:
+    # SSH 和 Git 凭证都已配置好，可以直接执行 Git 操作
+    agent.setup_ssh('github.com')
+    # 执行任何 Git 命令...
 ```
 
 ### 安全特性
@@ -228,6 +283,9 @@ uvx persistent_ssh_agent export --output ~/.ssh/config.json
 
 # 从文件导入配置
 uvx persistent_ssh_agent import config.json
+
+# 设置 Git 凭证（新功能）
+uvx persistent_ssh_agent git-setup --username 你的用户名 --prompt
 ```
 
 可用命令：
@@ -258,6 +316,11 @@ uvx persistent_ssh_agent import config.json
 
 - `import`：导入配置
   - `input_file`：输入文件路径
+
+- `git-setup`：配置 Git 凭证
+  - `--username`：Git 用户名
+  - `--password`：Git 密码（不推荐，请使用 --prompt 代替）
+  - `--prompt`：交互式提示输入 Git 凭证
 
 ### CI/CD 流水线集成
 

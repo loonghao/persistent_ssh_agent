@@ -1033,5 +1033,28 @@ def import_config_cmd(input_file):
     import_config(args)
 
 
+@main.command("git-setup", help="Set up Git credentials")
+@click.option("--username", help="Git username")
+@click.option("--password", help="Git password/token")
+@click.option("--prompt", is_flag=True, help="Prompt for credentials")
+def git_setup_cmd(username, password, prompt):
+    """Set up Git credential helper."""
+    try:
+        if prompt:
+            username = click.prompt("Git username")
+            password = click.prompt("Git password/token", hide_input=True)
+
+        ssh_agent = PersistentSSHAgent()
+        if ssh_agent.git.setup_git_credentials(username, password):
+            logger.info("✅ Git credentials configured successfully")
+        else:
+            logger.error("❌ Failed to configure Git credentials")
+            sys.exit(1)
+
+    except Exception as e:
+        logger.error("Failed to set up Git credentials: %s", str(e))
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

@@ -21,6 +21,7 @@ Welcome to persistent_ssh_agent's documentation!
    persistent_ssh_agent package <persistent_ssh_agent>
    persistent_ssh_agent.core module <persistent_ssh_agent.core>
    persistent_ssh_agent.config module <persistent_ssh_agent.config>
+   persistent_ssh_agent.cli module <persistent_ssh_agent.cli>
 
 Indices and tables
 ==================
