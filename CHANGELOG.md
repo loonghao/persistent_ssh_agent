@@ -1,3 +1,10 @@
+## v0.8.1 (2025-05-23)
+
+### Fix
+
+- correct Unix credential escaping order to prevent double escaping
+- Windows compatibility for Git credential helper and add CLI debug support
+
 ## v0.8.0 (2025-05-23)
 
 ### Feat
