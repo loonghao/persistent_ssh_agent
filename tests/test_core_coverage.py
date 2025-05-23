@@ -841,30 +841,31 @@ def test_setup_git_credentials(ssh_manager):
 def test_platform_specific_credential_helper(ssh_manager):
     """Test platform-specific credential helper generation."""
     # Test Windows credential helper
-    with patch('os.name', 'nt'):
-        helper = ssh_manager.git._create_platform_credential_helper('testuser', 'testpass')
-        assert '&&' in helper  # Windows uses && to chain commands
-        assert 'echo username=testuser' in helper
-        assert 'echo password=testpass' in helper
-        assert helper.startswith('!')
+    with patch("os.name", "nt"):
+        helper = ssh_manager.git._create_platform_credential_helper("testuser", "testpass")
+        assert ";" in helper  # Windows uses semicolon to separate commands (PowerShell compatible)
+        assert "echo username=testuser" in helper
+        assert "echo password=testpass" in helper
+        assert helper.startswith("!")
+        assert "&&" not in helper  # Should not use cmd.exe specific syntax
 
     # Test Unix credential helper
-    with patch('os.name', 'posix'):
-        helper = ssh_manager.git._create_platform_credential_helper('testuser', 'testpass')
-        assert '{ echo username=testuser; echo password=testpass; }' in helper
-        assert helper.startswith('!')
+    with patch("os.name", "posix"):
+        helper = ssh_manager.git._create_platform_credential_helper("testuser", "testpass")
+        assert "{ echo username=testuser; echo password=testpass; }" in helper
+        assert helper.startswith("!")
 
 
 def test_credential_escaping(ssh_manager):
     """Test credential value escaping for different platforms."""
     # Test Windows escaping
-    with patch('os.name', 'nt'):
+    with patch("os.name", "nt"):
         escaped = ssh_manager.git._escape_credential_value('test"value%special')
         assert '""' in escaped  # Double quotes should be escaped
-        assert '%%' in escaped  # Percent signs should be escaped
+        assert "%%" in escaped  # Percent signs should be escaped
 
     # Test Unix escaping
-    with patch('os.name', 'posix'):
+    with patch("os.name", "posix"):
         escaped = ssh_manager.git._escape_credential_value('test"value\'special')
         assert '\\"' in escaped  # Double quotes should be escaped
         # Test that single quotes are properly escaped
