@@ -103,7 +103,7 @@ def test_load_agent_info_ssh_add_failure():
                 # Mock os.name to be "nt" (Windows)
                 with patch("os.name", "nt"):
                     # Mock run_command to return None (failure)
-                    with patch.object(agent, "run_command", return_value=None):
+                    with patch("persistent_ssh_agent.utils.run_command", return_value=None):
                         # Call _load_agent_info
                         result = agent._load_agent_info()
 
@@ -141,7 +141,7 @@ def test_load_agent_info_ssh_add_not_running():
                     # Mock run_command to return returncode 2 (agent not running)
                     mock_result = MagicMock()
                     mock_result.returncode = 2
-                    with patch.object(agent, "run_command", return_value=mock_result):
+                    with patch("persistent_ssh_agent.utils.run_command", return_value=mock_result):
                         # Call _load_agent_info
                         result = agent._load_agent_info()
 
@@ -172,21 +172,23 @@ def test_start_ssh_agent_reuse_without_key():
     with patch.object(agent, "_load_agent_info", return_value=True):
         # Mock _verify_loaded_key to return False
         with patch.object(agent, "_verify_loaded_key", return_value=False):
-            # Mock run_command for ssh-agent
+            # Mock subprocess.run for ssh-agent
             mock_result = MagicMock()
             mock_result.returncode = 0
             mock_result.stdout = (
                 "SSH_AUTH_SOCK=/tmp/ssh-agent.sock; export SSH_AUTH_SOCK;\n"
                 "SSH_AGENT_PID=123; export SSH_AGENT_PID;"
             )
-            with patch.object(agent, "run_command", return_value=mock_result):
+            with patch("subprocess.run", return_value=mock_result):
                 # Mock _add_ssh_key to return True
                 with patch.object(agent, "_add_ssh_key", return_value=True):
-                    # Call _start_ssh_agent
-                    result = agent._start_ssh_agent("~/.ssh/id_rsa")
+                    # Mock SSH key manager to avoid subprocess calls
+                    with patch.object(agent.ssh_key_manager, "add_ssh_key", return_value=True):
+                        # Call _start_ssh_agent
+                        result = agent._start_ssh_agent("~/.ssh/id_rsa")
 
-                    # Verify the result
-                    assert result is True
+                        # Verify the result
+                        assert result is True
 
 
 def test_start_ssh_agent_already_started():
@@ -208,7 +210,7 @@ def test_start_ssh_agent_failure():
     agent = PersistentSSHAgent(reuse_agent=False)
 
     # Mock run_command to return None (failure)
-    with patch.object(agent, "run_command", return_value=None):
+    with patch("persistent_ssh_agent.utils.run_command", return_value=None):
         # Call _start_ssh_agent
         result = agent._start_ssh_agent("~/.ssh/id_rsa")
 
@@ -224,7 +226,7 @@ def test_start_ssh_agent_no_env_vars():
     mock_result = MagicMock()
     mock_result.returncode = 0
     mock_result.stdout = "Some output without environment variables"
-    with patch.object(agent, "run_command", return_value=mock_result):
+    with patch("persistent_ssh_agent.utils.run_command", return_value=mock_result):
         # Call _start_ssh_agent
         result = agent._start_ssh_agent("~/.ssh/id_rsa")
 
@@ -236,11 +238,12 @@ def test_try_add_key_without_passphrase_success():
     """Test adding key without passphrase successfully."""
     agent = PersistentSSHAgent()
 
-    # Mock _create_ssh_add_process
+    # Mock subprocess.Popen directly
     mock_process = MagicMock()
     mock_process.returncode = 0
     mock_process.communicate.return_value = ("stdout", "stderr")
-    with patch.object(agent, "_create_ssh_add_process", return_value=mock_process):
+
+    with patch("subprocess.Popen", return_value=mock_process):
         # Call _try_add_key_without_passphrase
         success, needs_passphrase = agent._try_add_key_without_passphrase("~/.ssh/id_rsa")
 
@@ -253,14 +256,14 @@ def test_try_add_key_without_passphrase_needs_passphrase():
     """Test adding key without passphrase when it needs a passphrase."""
     agent = PersistentSSHAgent()
 
-    # Mock _create_ssh_add_process
+    # Mock subprocess.Popen directly
     mock_process = MagicMock()
     mock_process.returncode = 1
     mock_process.communicate.return_value = (
         "stdout",
         "Enter passphrase for /home/user/.ssh/id_rsa:"
     )
-    with patch.object(agent, "_create_ssh_add_process", return_value=mock_process):
+    with patch("subprocess.Popen", return_value=mock_process):
         # Call _try_add_key_without_passphrase
         success, needs_passphrase = agent._try_add_key_without_passphrase("~/.ssh/id_rsa")
 
@@ -273,10 +276,10 @@ def test_try_add_key_without_passphrase_timeout():
     """Test adding key without passphrase with timeout."""
     agent = PersistentSSHAgent()
 
-    # Mock _create_ssh_add_process
+    # Mock subprocess.Popen directly
     mock_process = MagicMock()
     mock_process.communicate.side_effect = subprocess.TimeoutExpired("ssh-add", 1)
-    with patch.object(agent, "_create_ssh_add_process", return_value=mock_process):
+    with patch("subprocess.Popen", return_value=mock_process):
         # Call _try_add_key_without_passphrase
         success, needs_passphrase = agent._try_add_key_without_passphrase("~/.ssh/id_rsa")
 
@@ -289,11 +292,11 @@ def test_add_key_with_passphrase_success():
     """Test adding key with passphrase successfully."""
     agent = PersistentSSHAgent()
 
-    # Mock _create_ssh_add_process
+    # Mock subprocess.Popen directly
     mock_process = MagicMock()
     mock_process.returncode = 0
     mock_process.communicate.return_value = ("stdout", "stderr")
-    with patch.object(agent, "_create_ssh_add_process", return_value=mock_process):
+    with patch("subprocess.Popen", return_value=mock_process):
         # Call _add_key_with_passphrase
         result = agent._add_key_with_passphrase("~/.ssh/id_rsa", "passphrase")
 
@@ -305,11 +308,11 @@ def test_add_key_with_passphrase_failure():
     """Test adding key with passphrase with failure."""
     agent = PersistentSSHAgent()
 
-    # Mock _create_ssh_add_process
+    # Mock subprocess.Popen directly
     mock_process = MagicMock()
     mock_process.returncode = 1
     mock_process.communicate.return_value = ("stdout", "Bad passphrase")
-    with patch.object(agent, "_create_ssh_add_process", return_value=mock_process):
+    with patch("subprocess.Popen", return_value=mock_process):
         # Call _add_key_with_passphrase
         result = agent._add_key_with_passphrase("~/.ssh/id_rsa", "passphrase")
 

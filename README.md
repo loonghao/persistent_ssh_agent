@@ -31,7 +31,7 @@
 - 🔗 Seamless Git integration
 - 🌐 Cross-platform compatibility (Windows, Linux, macOS)
 - 📦 No external dependencies beyond standard SSH tools
-- 🔒 Secure key management and session control
+- 🔒 Secure key management and session control with AES-256 encryption
 - ⚡ Asynchronous operation support
 - 🧪 Complete unit test coverage with performance benchmarks
 - 📝 Comprehensive type hints support
@@ -40,6 +40,8 @@
 - 📚 Multi-language documentation support
 - 🔍 Enhanced SSH configuration validation
 - 🛠️ Modern development toolchain (Poetry, Commitizen, Black)
+- 🔑 Git credential helper integration for seamless Git operations
+- 💻 Command-line interface with comprehensive configuration options
 
 ## 🚀 Installation
 
@@ -255,6 +257,9 @@ uvx persistent_ssh_agent export --output ~/.ssh/config.json
 
 # Import configuration from a file
 uvx persistent_ssh_agent import config.json
+
+# Set up Git credentials (new feature)
+uvx persistent_ssh_agent git-setup --username your-username --prompt
 ```
 
 Available commands:
@@ -285,6 +290,11 @@ Available commands:
 
 - `import`: Import configuration
   - `input_file`: Input file path
+
+- `git-setup`: Configure Git credentials
+  - `--username`: Git username
+  - `--password`: Git password (not recommended, use --prompt instead)
+  - `--prompt`: Prompt for Git credentials interactively
 
 ### CI/CD Pipeline Integration
 
@@ -321,7 +331,7 @@ def clone_repo(repo_url: str, local_path: str) -> Repo:
     ssh_agent = PersistentSSHAgent()
 
     # Extract hostname and set up SSH
-    hostname = ssh_agent._extract_hostname(repo_url)
+    hostname = ssh_agent.extract_hostname(repo_url)
     if not hostname or not ssh_agent.setup_ssh(hostname):
         raise RuntimeError("Failed to set up SSH authentication")
 
@@ -339,6 +349,54 @@ def clone_repo(repo_url: str, local_path: str) -> Repo:
         local_path,
         env=env
     )
+```
+
+### Git Credential Helper Support (Simplified)
+
+You can now set up Git credentials in a simplified way without manual script creation:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+
+# Method 1: Set credentials directly
+ssh_agent = PersistentSSHAgent()
+ssh_agent.git.setup_git_credentials('your-username', 'your-password')
+
+# Method 2: Use environment variables
+import os
+os.environ['GIT_USERNAME'] = 'your-username'
+os.environ['GIT_PASSWORD'] = 'your-password'
+ssh_agent.git.setup_git_credentials()  # Automatically reads from env vars
+
+# Now Git commands will use these credentials
+```
+
+**CLI Setup:**
+
+```bash
+# Set credentials directly
+uvx persistent_ssh_agent git-setup --username your-username --password your-password
+
+# Interactive setup
+uvx persistent_ssh_agent git-setup --prompt
+
+# Using environment variables
+export GIT_USERNAME=your-username
+export GIT_PASSWORD=your-password
+uvx persistent_ssh_agent git-setup
+```
+
+**CI Environment Usage:**
+
+```python
+# In build scripts
+from persistent_ssh_agent import PersistentSSHAgent
+
+# Use context manager
+with PersistentSSHAgent() as agent:
+    # SSH and Git credentials are configured, ready for Git operations
+    agent.setup_ssh('github.com')
+    # Execute any Git commands...
 ```
 
 ## 🌟 Advanced Features

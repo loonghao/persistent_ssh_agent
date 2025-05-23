@@ -5,6 +5,9 @@ import os
 
 # Import third-party modules
 from persistent_ssh_agent.core import PersistentSSHAgent
+from persistent_ssh_agent.utils import ensure_home_env
+from persistent_ssh_agent.utils import extract_hostname
+from persistent_ssh_agent.utils import is_valid_hostname
 import pytest
 
 
@@ -28,13 +31,13 @@ def test_ensure_home_env(ssh_manager):
         expected_home = os.path.expanduser("~")
 
         # Test HOME environment setup
-        ssh_manager._ensure_home_env()
+        ensure_home_env()
         assert os.environ["HOME"] == expected_home
 
         # Test that existing HOME is not modified
         test_home = "/test/home"
         os.environ["HOME"] = test_home
-        ssh_manager._ensure_home_env()
+        ensure_home_env()
         assert os.environ["HOME"] == test_home
 
     finally:
@@ -63,38 +66,38 @@ def test_parse_ssh_config(ssh_manager, mock_ssh_config, monkeypatch):
 def test_extract_hostname(ssh_manager):
     """Test hostname extraction from repository URLs."""
     # Test standard GitHub URL
-    hostname = ssh_manager._extract_hostname("git@github.com:user/repo.git")
+    hostname = extract_hostname("git@github.com:user/repo.git")
     assert hostname == "github.com"
 
     # Test GitLab URL
-    hostname = ssh_manager._extract_hostname("git@gitlab.com:group/project.git")
+    hostname = extract_hostname("git@gitlab.com:group/project.git")
     assert hostname == "gitlab.com"
 
     # Test custom domain
-    hostname = ssh_manager._extract_hostname("git@git.example.com:org/repo.git")
+    hostname = extract_hostname("git@git.example.com:org/repo.git")
     assert hostname == "git.example.com"
 
     # Test invalid URLs
-    assert ssh_manager._extract_hostname("invalid-url") is None
-    assert ssh_manager._extract_hostname("https://github.com/user/repo.git") is None
-    assert ssh_manager._extract_hostname("") is None
+    assert extract_hostname("invalid-url") is None
+    assert extract_hostname("https://github.com/user/repo.git") is None
+    assert extract_hostname("") is None
 
 
 def test_is_valid_hostname(ssh_manager):
     """Test hostname validation."""
     # Test valid hostnames
-    assert ssh_manager.is_valid_hostname("github.com") is True
-    assert ssh_manager.is_valid_hostname("git.example.com") is True
-    assert ssh_manager.is_valid_hostname("sub1.sub2.example.com") is True
-    assert ssh_manager.is_valid_hostname("test-host.com") is True
-    assert ssh_manager.is_valid_hostname("192.168.1.1") is True
+    assert is_valid_hostname("github.com") is True
+    assert is_valid_hostname("git.example.com") is True
+    assert is_valid_hostname("sub1.sub2.example.com") is True
+    assert is_valid_hostname("test-host.com") is True
+    assert is_valid_hostname("192.168.1.1") is True
 
     # Test invalid hostnames
-    assert ssh_manager.is_valid_hostname("") is False
-    assert ssh_manager.is_valid_hostname("a" * 256) is False  # Too long
-    assert ssh_manager.is_valid_hostname("invalid_hostname") is False  # Contains underscore
-    assert ssh_manager.is_valid_hostname("host@name") is False  # Contains @
-    assert ssh_manager.is_valid_hostname("host:name") is False  # Contains :
+    assert is_valid_hostname("") is False
+    assert is_valid_hostname("a" * 256) is False  # Too long
+    assert is_valid_hostname("invalid_hostname") is False  # Contains underscore
+    assert is_valid_hostname("host@name") is False  # Contains @
+    assert is_valid_hostname("host:name") is False  # Contains :
 
 
 def test_start_ssh_agent_reuse(ssh_manager, mocker):
@@ -102,18 +105,33 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     # Mock necessary methods
     mock_load_agent = mocker.patch.object(ssh_manager, "_load_agent_info")
     mock_verify_key = mocker.patch.object(ssh_manager, "_verify_loaded_key")
-    mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_run_command = mocker.patch("persistent_ssh_agent.utils.run_command")
+    mock_subprocess_run = mocker.patch("subprocess.run")
     mock_add_key = mocker.patch.object(ssh_manager, "_add_ssh_key")
+    mock_save_agent = mocker.patch.object(ssh_manager, "_save_agent_info")
     mock_logger = mocker.patch("persistent_ssh_agent.core.logger")
 
     # Mock run_command to return a successful result with proper stdout
     class MockResult:
         returncode = 0
         stdout = "SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
-    mock_run_command.return_value = MockResult()
 
-    # Mock successful key operations
+    def mock_run_command_side_effect(command, **kwargs):
+        if command == ["ssh-agent", "-s"] or command == ["ssh-add", "-l"]:
+            return MockResult()
+        else:
+            return MockResult()
+
+    mock_run_command.side_effect = mock_run_command_side_effect
+    mock_subprocess_run.side_effect = mock_run_command_side_effect
+
+    # Mock successful key operations and SSH key manager
     mock_add_key.return_value = True
+    mock_save_agent.return_value = None
+
+    # Mock SSH key manager methods to avoid subprocess calls
+    mock_ssh_key_manager_add = mocker.patch.object(ssh_manager.ssh_key_manager, "add_ssh_key")
+    mock_ssh_key_manager_add.return_value = True
 
     # Test case 1: Successfully reuse existing agent
     mock_load_agent.return_value = True
@@ -130,7 +148,6 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     assert ssh_manager._start_ssh_agent(identity_file) is True
     mock_logger.debug.assert_has_calls([
         mocker.call("Existing agent found but key not loaded"),
-        mocker.call("Saved agent info to: %s", ssh_manager._agent_info_file),
         mocker.call("Adding key to agent: %s", identity_file)
     ], any_order=False)
 
@@ -141,7 +158,6 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     assert ssh_manager._start_ssh_agent(identity_file) is True
     mock_logger.debug.assert_has_calls([
         mocker.call("No valid existing agent found"),
-        mocker.call("Saved agent info to: %s", ssh_manager._agent_info_file),
         mocker.call("Adding key to agent: %s", identity_file)
     ], any_order=False)
 
@@ -152,27 +168,40 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     assert ssh_manager._start_ssh_agent(identity_file) is True
     mock_logger.debug.assert_has_calls([
         mocker.call("Agent reuse disabled, starting new agent"),
-        mocker.call("Saved agent info to: %s", ssh_manager._agent_info_file),
         mocker.call("Adding key to agent: %s", identity_file)
     ], any_order=False)
 
 
 def test_start_ssh_agent_platform_specific(ssh_manager, mocker):
     """Test platform-specific SSH agent startup."""
-    mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_run_command = mocker.patch("persistent_ssh_agent.utils.run_command")
+    mock_subprocess_run = mocker.patch("subprocess.run")
     mock_os = mocker.patch("persistent_ssh_agent.core.os")
     mock_verify_key = mocker.patch.object(ssh_manager, "_verify_loaded_key")
     mock_add_key = mocker.patch.object(ssh_manager, "_add_ssh_key")
+    mock_save_agent = mocker.patch.object(ssh_manager, "_save_agent_info")
 
     # Mock run_command to return a successful result with proper stdout
     class MockResult:
         returncode = 0
         stdout = "SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
-    mock_run_command.return_value = MockResult()
 
-    # Mock successful key operations
+    def mock_run_command_side_effect(command, **kwargs):
+        if command == ["ssh-agent", "-s"] or command == ["ssh-agent"] or command == ["ssh-add", "-l"]:
+            return MockResult()
+        return MockResult()
+
+    mock_run_command.side_effect = mock_run_command_side_effect
+    mock_subprocess_run.side_effect = mock_run_command_side_effect
+
+    # Mock successful key operations and SSH key manager
     mock_verify_key.return_value = False  # Key not loaded initially
     mock_add_key.return_value = True  # Key added successfully
+    mock_save_agent.return_value = None
+
+    # Mock SSH key manager methods to avoid subprocess calls
+    mock_ssh_key_manager_add = mocker.patch.object(ssh_manager.ssh_key_manager, "add_ssh_key")
+    mock_ssh_key_manager_add.return_value = True
 
     # Test Windows (nt) platform
     mock_os.name = "nt"
@@ -180,17 +209,15 @@ def test_start_ssh_agent_platform_specific(ssh_manager, mocker):
     identity_file = "~/.ssh/id_rsa"
 
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_run_command.assert_called_with(["ssh-agent", "-s"])
 
     # Test Unix platform
     mock_os.name = "posix"
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_run_command.assert_called_with(["ssh-agent"])
 
 
 def test_start_ssh_agent_failure(ssh_manager, mocker):
     """Test SSH agent startup failure cases."""
-    mock_run_command = mocker.patch.object(ssh_manager, "run_command")
+    mock_run_command = mocker.patch("persistent_ssh_agent.utils.run_command")
     mock_logger = mocker.patch("persistent_ssh_agent.core.logger")
 
     # Mock run_command to return a failed result

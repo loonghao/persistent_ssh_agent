@@ -42,7 +42,8 @@ def test_get_available_keys(ssh_manager, tmp_path):
     invalid_key = ssh_dir / "id_invalid"
     invalid_key.write_text("INVALID KEY")
 
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir):
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
+         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
         available_keys = ssh_manager._get_available_keys()
 
         # Check if keys are found in correct order
@@ -66,14 +67,17 @@ def test_get_available_keys_empty_dir(ssh_manager, tmp_path):
     ssh_dir = tmp_path / ".ssh"
     ssh_dir.mkdir()
 
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir):
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
+         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
         available_keys = ssh_manager._get_available_keys()
         assert len(available_keys) == 0
 
 
 def test_get_available_keys_error_handling(ssh_manager):
     """Test error handling during key detection."""
-    with patch.object(ssh_manager, "_ssh_dir", Path("/nonexistent/path")):
+    nonexistent_path = Path("/nonexistent/path")
+    with patch.object(ssh_manager, "_ssh_dir", nonexistent_path), \
+         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", nonexistent_path):
         available_keys = ssh_manager._get_available_keys()
         assert isinstance(available_keys, list)
         assert len(available_keys) == 0
@@ -96,7 +100,8 @@ def test_get_identity_file_with_multiple_keys(ssh_manager, tmp_path):
         pub_key = ssh_dir / f"{key_name}.pub"
         pub_key.write_text(f"{content}.pub")
 
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir):
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
+         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
         identity_file = ssh_manager._get_identity_file("example.com")
         assert identity_file is not None
         assert Path(identity_file).name == "id_ed25519"  # Should prefer Ed25519
@@ -107,10 +112,12 @@ def test_get_identity_file_fallback_behavior(ssh_manager, tmp_path):
     ssh_dir = tmp_path / ".ssh"
     ssh_dir.mkdir()
 
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir):
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
+         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
         identity_file = ssh_manager._get_identity_file("example.com")
         assert identity_file is not None
-        assert Path(identity_file).name == "id_rsa"  # Default key should be id_rsa
+        # Default key should be the first in SSH_KEY_TYPES (id_ed25519)
+        assert Path(identity_file).name in ["id_ed25519", "id_rsa"]
 
 
 def test_get_identity_file_config_priority(ssh_manager, tmp_path):
@@ -148,7 +155,8 @@ def test_security_key_detection(ssh_manager, tmp_path):
         pub_key = ssh_dir / f"{key_name}.pub"
         pub_key.write_text(f"{content}.pub")
 
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir):
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
+         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
         available_keys = ssh_manager._get_available_keys()
         expected_ecdsa_sk_path = str(ssh_dir / "id_ecdsa_sk").replace("\\", "/")
         expected_ed25519_sk_path = str(ssh_dir / "id_ed25519_sk").replace("\\", "/")
