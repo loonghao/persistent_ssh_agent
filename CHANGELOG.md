@@ -1,3 +1,14 @@
+## v0.10.0 (2025-05-26)
+
+### Feat
+
+- implement smart authentication strategies and enhanced Git integration
+
+### Fix
+
+- resolve Python 3.8 compatibility issue with type annotations
+- resolve linting issues and code formatting
+
 ## v0.9.0 (2025-05-26)
 
 ### Feat
