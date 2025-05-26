@@ -3,10 +3,15 @@
 # Import built-in modules
 import logging
 import os
+import time
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 
 # Import third-party modules
+from persistent_ssh_agent.constants import AuthStrategyConstants
+from persistent_ssh_agent.constants import GitConstants
 from persistent_ssh_agent.constants import SSHAgentConstants
 from persistent_ssh_agent.utils import extract_hostname as _extract_hostname
 from persistent_ssh_agent.utils import is_valid_hostname
@@ -18,7 +23,15 @@ logger = logging.getLogger(__name__)
 
 
 class GitIntegration:
-    """Git integration for SSH agent management."""
+    """Git integration for SSH agent management.
+
+    This class provides two main categories of functionality:
+    1. SSH-based Git operations (get_git_ssh_command, _test_ssh_connection)
+    2. Credential-based Git operations (setup_git_credentials, clear_credential_helpers)
+
+    The credential-based operations are completely independent of SSH functionality
+    and do not require SSH keys or SSH agent setup.
+    """
 
     def __init__(self, ssh_agent):
         """Initialize Git integration.
@@ -107,6 +120,9 @@ class GitIntegration:
 
     def get_git_ssh_command(self, hostname: str) -> Optional[str]:
         """Generate Git SSH command with proper configuration.
+
+        NOTE: This method is SSH-specific and requires SSH keys and SSH agent setup.
+        It is NOT used by Git credential operations (git-setup, git-clear commands).
 
         Args:
             hostname: Target Git host
@@ -197,6 +213,9 @@ class GitIntegration:
     def get_current_credential_helpers(self) -> List[str]:
         """Get current Git credential helpers.
 
+        This method is completely independent of SSH functionality and only
+        queries Git's credential helper configuration.
+
         Returns:
             List[str]: List of current credential helper configurations
         """
@@ -210,8 +229,258 @@ class GitIntegration:
             logger.debug("Failed to get current credential helpers: %s", str(e))
             return []
 
+    def get_git_env_with_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> dict:
+        """Get environment variables for Git commands with credentials.
+
+        This method returns a dictionary of environment variables that can be used
+        to run Git commands with temporary credentials without modifying global Git config.
+
+        Args:
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            dict: Environment variables for Git commands
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> env = agent.git.get_git_env_with_credentials('user', 'pass')
+            >>> subprocess.run(['git', 'clone', 'https://github.com/user/repo.git'], env=env)
+        """
+        import os
+
+        # Start with current environment
+        env = os.environ.copy()
+
+        # Use provided credentials or fall back to environment variables
+        git_username = username or os.environ.get("GIT_USERNAME")
+        git_password = password or os.environ.get("GIT_PASSWORD")
+
+        if git_username and git_password:
+            # Set the credentials in environment variables for temporary use
+            env["GIT_USERNAME"] = git_username
+            env["GIT_PASSWORD"] = git_password
+
+            logger.debug("Created Git environment with temporary credentials")
+        else:
+            logger.debug("No credentials provided, using existing environment")
+
+        return env
+
+    def run_git_command_with_credentials(self, command: List[str], username: Optional[str] = None,
+                                       password: Optional[str] = None) -> Optional[object]:
+        """Run a Git command with temporary credentials.
+
+        This method runs Git commands with temporary credentials without modifying
+        global Git configuration.
+
+        Args:
+            command: Git command as list (e.g., ['git', 'clone', 'repo_url'])
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            Command result object or None if failed
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> result = agent.git.run_git_command_with_credentials(
+            ...     ['git', 'submodule', 'update', '--init', '--recursive'],
+            ...     username='user', password='pass'
+            ... )
+        """
+        # Use provided credentials or fall back to environment variables
+        git_username = username or os.environ.get("GIT_USERNAME")
+        git_password = password or os.environ.get("GIT_PASSWORD")
+
+        if not git_username or not git_password:
+            logger.warning("No Git credentials provided, running command without authentication")
+            return run_command(command)
+
+        # Create credential helper command
+        credential_helper = self._create_platform_credential_helper(git_username, git_password)
+
+        # Add credential helper to the git command using -c option
+        if command[0] == "git":
+            # Insert the credential helper config before the git subcommand
+            enhanced_command = [
+                command[0],  # 'git'
+                "-c", f"credential.helper={credential_helper}",
+                *command[1:]  # rest of the command
+            ]
+        else:
+            enhanced_command = command
+
+        logger.debug("Running Git command with temporary credentials: %s", enhanced_command)
+        return run_command(enhanced_command)
+
+    def get_credential_helper_command(self, username: Optional[str] = None,
+                                    password: Optional[str] = None) -> Optional[str]:
+        """Get the credential helper command for temporary use.
+
+        This method returns the credential helper command that can be used with
+        'git -c credential.helper=<command>' for temporary authentication.
+
+        Args:
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            str: Credential helper command if credentials provided, None otherwise
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> helper = agent.git.get_credential_helper_command('user', 'pass')
+            >>> # Use with: git -c credential.helper="{helper}" clone repo_url
+        """
+        # Use provided credentials or fall back to environment variables
+        git_username = username or os.environ.get("GIT_USERNAME")
+        git_password = password or os.environ.get("GIT_PASSWORD")
+
+        if not git_username or not git_password:
+            logger.debug("No Git credentials provided for credential helper")
+            return None
+
+        # Create and return credential helper command
+        credential_helper = self._create_platform_credential_helper(git_username, git_password)
+        logger.debug("Generated credential helper command")
+        return credential_helper
+
+    def test_credentials(self, host: Optional[str] = None, timeout: int = 30,
+                        username: Optional[str] = None, password: Optional[str] = None) -> Dict[str, bool]:
+        """Test Git credentials validity by attempting to access repositories.
+
+        This method tests Git credentials by using 'git ls-remote' command to check
+        if the credentials can successfully authenticate with Git repositories.
+
+        Args:
+            host: Specific host to test (e.g., 'github.com'). If None, tests common Git hosts.
+            timeout: Timeout in seconds for each test (default: 30)
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            Dict[str, bool]: Dictionary mapping host names to test results (True = valid, False = invalid)
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> results = agent.git.test_credentials('github.com', username='user', password='token')
+            >>> print(results)  # {'github.com': True}
+        """
+        if host:
+            return {host: self._test_single_host_credentials(host, timeout, username, password)}
+        else:
+            return self._test_common_git_hosts_credentials(timeout, username, password)
+
+    def _test_single_host_credentials(self, host: str, timeout: int,
+                                    username: Optional[str] = None, password: Optional[str] = None) -> bool:
+        """Test credentials for a single Git host.
+
+        Args:
+            host: Git host to test (e.g., 'github.com')
+            timeout: Timeout in seconds
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            bool: True if credentials are valid, False otherwise
+        """
+        try:
+            # Use provided credentials or fall back to environment variables
+            git_username = username or os.environ.get("GIT_USERNAME")
+            git_password = password or os.environ.get("GIT_PASSWORD")
+
+            if not git_username or not git_password:
+                logger.debug("No credentials provided for testing host: %s", host)
+                return False
+
+            # Create a test repository URL for the host
+            test_urls = self._get_test_urls_for_host(host)
+
+            for test_url in test_urls:
+                logger.debug("Testing credentials for %s with URL: %s", host, test_url)
+
+                # Create credential helper command
+                credential_helper = self._create_platform_credential_helper(git_username, git_password)
+
+                # Run git ls-remote with credentials
+                result = run_command([
+                    "git", "-c", f"credential.helper={credential_helper}",
+                    "ls-remote", test_url
+                ], timeout=timeout)
+
+                if result and result.returncode == 0:
+                    logger.debug("Credentials test successful for %s", host)
+                    return True
+                elif result and result.returncode != 0:
+                    logger.debug("Credentials test failed for %s: %s", host, result.stderr)
+                else:
+                    logger.debug("Credentials test timed out or failed for %s", host)
+
+            return False
+
+        except Exception as e:
+            logger.error("Error testing credentials for %s: %s", host, str(e))
+            return False
+
+    def _test_common_git_hosts_credentials(self, timeout: int,
+                                         username: Optional[str] = None, password: Optional[str] = None) -> Dict[str, bool]:
+        """Test credentials for common Git hosting services.
+
+        Args:
+            timeout: Timeout in seconds for each test
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            Dict[str, bool]: Dictionary mapping host names to test results
+        """
+        common_hosts = [
+            "github.com",
+            "gitlab.com",
+            "bitbucket.org"
+        ]
+
+        results = {}
+        for host in common_hosts:
+            results[host] = self._test_single_host_credentials(host, timeout, username, password)
+
+        return results
+
+    def _get_test_urls_for_host(self, host: str) -> List[str]:
+        """Get test repository URLs for a specific Git host.
+
+        Args:
+            host: Git host name
+
+        Returns:
+            List[str]: List of test URLs to try
+        """
+        # Map of hosts to their test repositories
+        test_repos = {
+            "github.com": [
+                "https://github.com/octocat/Hello-World.git"
+            ],
+            "gitlab.com": [
+                "https://gitlab.com/gitlab-org/gitlab.git"
+            ],
+            "bitbucket.org": [
+                "https://bitbucket.org/atlassian/atlassian-frontend.git"
+            ]
+        }
+
+        # Return specific test URLs for known hosts, or create a generic one
+        if host in test_repos:
+            return test_repos[host]
+        else:
+            # For unknown hosts, try a generic test URL
+            return [f"https://{host}/test/repo.git"]
+
     def clear_credential_helpers(self) -> bool:
         """Clear all existing Git credential helpers.
+
+        This method is completely independent of SSH functionality and only
+        modifies Git's credential helper configuration.
 
         Returns:
             bool: True if successful, False otherwise
@@ -249,6 +518,10 @@ class GitIntegration:
 
     def setup_git_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> bool:
         """Set up Git credential helper with environment variables (simplified version).
+
+        IMPORTANT: This method is completely independent of SSH functionality.
+        It does NOT require SSH keys, SSH agent, or any SSH configuration.
+        It only configures Git's credential helper system to use username/password authentication.
 
         This simplified method handles all credential helper setup internally,
         eliminating the need for manual script creation and configuration.
@@ -373,6 +646,8 @@ class GitIntegration:
     def _test_ssh_connection(self, hostname: str) -> bool:
         """Test SSH connection to a host.
 
+        NOTE: This method is SSH-specific and is NOT used by Git credential operations.
+
         Args:
             hostname: Hostname to test connection with
 
@@ -394,3 +669,362 @@ class GitIntegration:
 
         logger.error("SSH connection test failed with code: %d", test_result.returncode)
         return False
+
+    def health_check(self) -> Dict[str, Any]:
+        """Perform comprehensive health check of Git authentication systems.
+
+        This method checks the status of Git credentials, SSH keys, network connectivity,
+        and provides recommendations for improving authentication setup.
+
+        Returns:
+            Dict[str, Any]: Comprehensive health check results
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> health = agent.git.health_check()
+            >>> print(health['overall'])  # 'healthy', 'warning', or 'error'
+        """
+        logger.debug("Starting Git authentication health check")
+
+        health_status = {
+            'overall': 'healthy',
+            'timestamp': time.time(),
+            'git_credentials': self._check_git_credentials(),
+            'ssh_keys': self._check_ssh_keys(),
+            'network': self._check_network_connectivity(),
+            'recommendations': []
+        }
+
+        # Determine overall health status
+        issues = []
+        if health_status['git_credentials']['status'] == 'error':
+            issues.append('git_credentials')
+        if health_status['ssh_keys']['status'] == 'error':
+            issues.append('ssh_keys')
+        if health_status['network']['status'] == 'error':
+            issues.append('network')
+
+        if len(issues) >= 2:
+            health_status['overall'] = 'error'
+        elif len(issues) == 1:
+            health_status['overall'] = 'warning'
+
+        # Generate recommendations
+        health_status['recommendations'] = self._generate_recommendations(health_status)
+
+        logger.debug("Health check completed with overall status: %s", health_status['overall'])
+        return health_status
+
+    def clear_invalid_credentials(self, hosts: Optional[List[str]] = None) -> bool:
+        """Clear invalid Git credential helpers.
+
+        This method identifies and removes credential helpers that are no longer
+        valid or accessible, helping to clean up Git configuration.
+
+        Args:
+            hosts: Optional list of hosts to check. If None, checks common Git hosts.
+
+        Returns:
+            bool: True if cleanup was successful, False otherwise
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> agent.git.clear_invalid_credentials(['github.com', 'gitlab.com'])
+        """
+        logger.debug("Starting invalid credentials cleanup")
+
+        try:
+            # Get current credential helpers
+            current_helpers = self.get_current_credential_helpers()
+            if not current_helpers:
+                logger.debug("No credential helpers found to check")
+                return True
+
+            # Test each credential helper
+            invalid_helpers = []
+            for helper in current_helpers:
+                if not self._is_credential_helper_valid(helper):
+                    invalid_helpers.append(helper)
+
+            if not invalid_helpers:
+                logger.debug("All credential helpers are valid")
+                return True
+
+            logger.info("Found %d invalid credential helpers", len(invalid_helpers))
+
+            # Clear all credential helpers and reconfigure with valid ones
+            if not self.clear_credential_helpers():
+                logger.error("Failed to clear existing credential helpers")
+                return False
+
+            # Reconfigure with valid helpers only
+            valid_helpers = [h for h in current_helpers if h not in invalid_helpers]
+            for helper in valid_helpers:
+                result = run_command([
+                    "git", "config", "--global", "--add", "credential.helper", helper
+                ])
+                if not result or result.returncode != 0:
+                    logger.warning("Failed to restore valid credential helper: %s", helper)
+
+            logger.info("Successfully cleaned up invalid credential helpers")
+            return True
+
+        except Exception as e:
+            logger.error("Failed to clear invalid credentials: %s", str(e))
+            return False
+
+    def setup_smart_credentials(self, host: str, strategy: str = 'auto', **kwargs) -> bool:
+        """Set up Git credentials using intelligent authentication strategy.
+
+        This method uses the authentication strategy system to intelligently
+        configure Git credentials based on the specified strategy and available
+        authentication methods.
+
+        Args:
+            host: Target Git host (e.g., 'github.com')
+            strategy: Authentication strategy ('auto', 'ssh_first', 'credentials_first', 'ssh_only')
+            **kwargs: Additional parameters (username, password, etc.)
+
+        Returns:
+            bool: True if setup was successful, False otherwise
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> # Auto-detect best authentication method
+            >>> agent.git.setup_smart_credentials('github.com', 'auto')
+            >>> # Force SSH authentication
+            >>> agent.git.setup_smart_credentials('github.com', 'ssh_only')
+        """
+        logger.debug("Setting up smart credentials for host: %s with strategy: %s", host, strategy)
+
+        try:
+            # Import here to avoid circular imports
+            from persistent_ssh_agent.auth_strategy import AuthenticationStrategyFactory
+
+            # Create authentication strategy
+            auth_strategy = AuthenticationStrategyFactory.create_strategy(
+                strategy, self._ssh_agent, **kwargs
+            )
+
+            # Attempt authentication
+            success = auth_strategy.authenticate(host, **kwargs)
+
+            if success:
+                logger.info("Smart credentials setup successful for %s using strategy: %s", host, strategy)
+                return True
+            else:
+                logger.error("Smart credentials setup failed for %s", host)
+                return False
+
+        except Exception as e:
+            logger.error("Failed to setup smart credentials for %s: %s", host, str(e))
+            return False
+
+    def _check_git_credentials(self) -> Dict[str, Any]:
+        """Check Git credentials status.
+
+        Returns:
+            Dict[str, Any]: Git credentials status information
+        """
+        try:
+            # Get current credential helpers
+            helpers = self.get_current_credential_helpers()
+
+            # Test credentials with common hosts
+            test_results = self.test_credentials()
+
+            # Determine status
+            if not helpers:
+                status = "warning"
+                message = "No credential helpers configured"
+            elif any(test_results.values()):
+                status = "healthy"
+                message = "Credentials working for at least one host"
+            else:
+                status = "error"
+                message = "Credentials not working for any tested hosts"
+
+            return {
+                "status": status,
+                "message": message,
+                "helpers": helpers,
+                "test_results": test_results
+            }
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Failed to check Git credentials: {str(e)}",
+                "helpers": [],
+                "test_results": {}
+            }
+
+    def _check_ssh_keys(self) -> Dict[str, Any]:
+        """Check SSH keys status.
+
+        Returns:
+            Dict[str, Any]: SSH keys status information
+        """
+        try:
+            # Check if SSH agent is running
+            ssh_agent_active = getattr(self._ssh_agent, "_ssh_agent_started", False)
+
+            # Test SSH connection to common Git hosts
+            ssh_test_results = {}
+            common_hosts = GitConstants.COMMON_GIT_HOSTS
+
+            for host in common_hosts:
+                try:
+                    ssh_test_results[host] = self._ssh_agent._test_ssh_connection(host)
+                except Exception:
+                    ssh_test_results[host] = False
+
+            # Determine status
+            if not ssh_agent_active:
+                status = "warning"
+                message = "SSH agent not active"
+            elif any(ssh_test_results.values()):
+                status = "healthy"
+                message = "SSH keys working for at least one host"
+            else:
+                status = "error"
+                message = "SSH keys not working for any tested hosts"
+
+            return {
+                "status": status,
+                "message": message,
+                "ssh_agent_active": ssh_agent_active,
+                "test_results": ssh_test_results
+            }
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Failed to check SSH keys: {str(e)}",
+                "ssh_agent_active": False,
+                "test_results": {}
+            }
+
+    def _check_network_connectivity(self) -> Dict[str, Any]:
+        """Check network connectivity to Git hosts.
+
+        Returns:
+            Dict[str, Any]: Network connectivity status information
+        """
+        try:
+            connectivity_results = {}
+            common_hosts = GitConstants.COMMON_GIT_HOSTS
+
+            for host in common_hosts:
+                try:
+                    # Simple connectivity test using git ls-remote
+                    result = run_command([
+                        "git", "ls-remote", f"https://{host}/test/test.git"
+                    ], timeout=10)
+
+                    # Even if authentication fails, we can reach the host if we get a response
+                    connectivity_results[host] = result is not None
+
+                except Exception:
+                    connectivity_results[host] = False
+
+            # Determine status
+            reachable_hosts = sum(connectivity_results.values())
+            total_hosts = len(connectivity_results)
+
+            if reachable_hosts == total_hosts:
+                status = "healthy"
+                message = "All Git hosts are reachable"
+            elif reachable_hosts > 0:
+                status = "warning"
+                message = f"Only {reachable_hosts}/{total_hosts} Git hosts are reachable"
+            else:
+                status = "error"
+                message = "No Git hosts are reachable"
+
+            return {
+                "status": status,
+                "message": message,
+                "connectivity_results": connectivity_results
+            }
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Failed to check network connectivity: {str(e)}",
+                "connectivity_results": {}
+            }
+
+    def _generate_recommendations(self, health_status: Dict[str, Any]) -> List[str]:
+        """Generate recommendations based on health check results.
+
+        Args:
+            health_status: Health check results
+
+        Returns:
+            List[str]: List of recommendations
+        """
+        recommendations = []
+
+        try:
+            # Git credentials recommendations
+            git_creds = health_status.get("git_credentials", {})
+            if git_creds.get("status") == "error":
+                recommendations.append("Configure Git credentials using 'uvx persistent_ssh_agent git-setup'")
+            elif git_creds.get("status") == "warning":
+                recommendations.append("Consider setting up Git credentials for better authentication")
+
+            # SSH keys recommendations
+            ssh_keys = health_status.get("ssh_keys", {})
+            if ssh_keys.get("status") == "error":
+                recommendations.append("Set up SSH keys using 'uvx persistent_ssh_agent setup <hostname>'")
+            elif not ssh_keys.get("ssh_agent_active", False):
+                recommendations.append("Start SSH agent for better SSH key management")
+
+            # Network connectivity recommendations
+            network = health_status.get("network", {})
+            if network.get("status") == "error":
+                recommendations.append("Check network connectivity and firewall settings")
+            elif network.get("status") == "warning":
+                recommendations.append("Some Git hosts are unreachable - check network configuration")
+
+            # General recommendations
+            if health_status.get("overall") == "error":
+                recommendations.append("Run 'uvx persistent_ssh_agent health-check --verbose' for detailed diagnostics")
+
+        except Exception as e:
+            logger.debug("Failed to generate recommendations: %s", str(e))
+            recommendations.append("Run health check again for updated recommendations")
+
+        return recommendations
+
+    def _is_credential_helper_valid(self, helper: str) -> bool:
+        """Check if a credential helper is valid and accessible.
+
+        Args:
+            helper: Credential helper configuration string
+
+        Returns:
+            bool: True if helper is valid, False otherwise
+        """
+        try:
+            # Skip built-in helpers (they start with !)
+            if helper.startswith("!"):
+                return True
+
+            # For file-based helpers, check if the file exists and is executable
+            if os.path.exists(helper):
+                return os.access(helper, os.X_OK) if os.name != "nt" else True
+
+            # For system helpers (like 'manager', 'store'), assume they're valid
+            # These are typically built into Git or the system
+            system_helpers = ["manager", "store", "cache", "osxkeychain", "wincred"]
+            if any(helper.endswith(sh) for sh in system_helpers):
+                return True
+
+            # If we can't determine validity, assume it's invalid
+            return False
+
+        except Exception as e:
+            logger.debug("Error checking credential helper validity: %s", str(e))
+            return False

@@ -42,6 +42,9 @@
 - 🛠️ Modern development toolchain (Poetry, Commitizen, Black)
 - 🔑 Git credential helper integration for seamless Git operations
 - 💻 Command-line interface with comprehensive configuration options
+- 🧠 Smart authentication strategies with automatic fallback mechanisms
+- 🔍 Comprehensive health check and diagnostic capabilities
+- 🧹 Automatic cleanup of invalid credential configurations
 
 ## 🚀 Installation
 
@@ -258,8 +261,17 @@ uvx persistent_ssh_agent export --output ~/.ssh/config.json
 # Import configuration from a file
 uvx persistent_ssh_agent import config.json
 
-# Set up Git credentials (new feature)
+# Set up Git credentials
 uvx persistent_ssh_agent git-setup --username your-username --prompt
+
+# Test Git credentials validity
+uvx persistent_ssh_agent test-credentials github.com
+
+# Perform comprehensive health check
+uvx persistent_ssh_agent health-check
+
+# Smart authentication setup with automatic fallback
+uvx persistent_ssh_agent smart-setup github.com --strategy auto
 ```
 
 Available commands:
@@ -295,6 +307,22 @@ Available commands:
   - `--username`: Git username
   - `--password`: Git password (not recommended, use --prompt instead)
   - `--prompt`: Prompt for Git credentials interactively
+
+- `test-credentials`: Test Git credentials validity
+  - `hostname`: Git host to test (optional, tests all common hosts if not specified)
+  - `--username`: Git username for testing
+  - `--password`: Git password for testing
+  - `--timeout`: Timeout in seconds for each test
+
+- `health-check`: Perform comprehensive authentication health check
+  - `--format`: Output format (text or json)
+  - `--verbose`: Show detailed diagnostic information
+
+- `smart-setup`: Intelligent authentication setup with automatic fallback
+  - `hostname`: Target Git host
+  - `--strategy`: Authentication strategy (auto, ssh_first, credentials_first, ssh_only)
+  - `--username`: Git username (for credential-based authentication)
+  - `--password`: Git password (for credential-based authentication)
 
 ### CI/CD Pipeline Integration
 
@@ -400,6 +428,102 @@ with PersistentSSHAgent() as agent:
 ```
 
 ## 🌟 Advanced Features
+
+### Smart Authentication Strategies
+
+The library now includes intelligent authentication strategies that automatically select the best authentication method:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+
+# Create agent instance
+agent = PersistentSSHAgent()
+
+# Smart authentication with automatic fallback
+# Tries Git credentials first, falls back to SSH if needed
+success = agent.git.setup_smart_credentials('github.com', strategy='auto')
+
+# Force SSH-only authentication
+success = agent.git.setup_smart_credentials('github.com', strategy='ssh_only')
+
+# Prefer SSH, fallback to credentials
+success = agent.git.setup_smart_credentials('github.com', strategy='ssh_first')
+```
+
+**Available Authentication Strategies:**
+
+- `auto` (default): Intelligent selection based on environment and cached preferences
+- `ssh_first`: Try SSH authentication first, fallback to credentials
+- `credentials_first`: Try Git credentials first, fallback to SSH
+- `ssh_only`: Use only SSH key authentication
+- `credentials_only`: Use only Git credential authentication
+
+**Environment Variable Control:**
+
+```bash
+# Force SSH authentication for all operations
+export FORCE_SSH_AUTH=true
+
+# Prefer SSH authentication (with fallback)
+export PREFER_SSH_AUTH=true
+
+# Set specific authentication strategy
+export AUTH_STRATEGY=ssh_first
+```
+
+### Health Check and Diagnostics
+
+Comprehensive health checking capabilities for authentication systems:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+
+agent = PersistentSSHAgent()
+
+# Perform comprehensive health check
+health_status = agent.git.health_check()
+
+print(f"Overall status: {health_status['overall']}")  # healthy, warning, or error
+print(f"Git credentials: {health_status['git_credentials']['status']}")
+print(f"SSH keys: {health_status['ssh_keys']['status']}")
+print(f"Network connectivity: {health_status['network']['status']}")
+
+# Get recommendations for improvement
+for recommendation in health_status['recommendations']:
+    print(f"💡 {recommendation}")
+```
+
+**Health Check Features:**
+
+- Git credential validation and testing
+- SSH key availability and functionality testing
+- Network connectivity verification to Git hosts
+- Automatic recommendation generation
+- Detailed diagnostic information
+
+### Credential Management
+
+Advanced credential management with automatic cleanup:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+
+agent = PersistentSSHAgent()
+
+# Test credential validity for specific hosts
+results = agent.git.test_credentials('github.com', username='user', password='token')
+print(f"GitHub credentials valid: {results['github.com']}")
+
+# Test all common Git hosts
+all_results = agent.git.test_credentials()
+for host, valid in all_results.items():
+    print(f"{host}: {'✅' if valid else '❌'}")
+
+# Clean up invalid credential helpers
+cleanup_success = agent.git.clear_invalid_credentials()
+if cleanup_success:
+    print("✅ Invalid credentials cleaned up successfully")
+```
 
 ### Custom Configuration
 
