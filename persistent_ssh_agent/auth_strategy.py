@@ -12,6 +12,7 @@ import os
 import time
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
 
 # Import third-party modules
@@ -38,7 +39,6 @@ class AuthenticationStrategy(ABC):
         Returns:
             bool: True if authentication successful, False otherwise
         """
-        pass
 
     @abstractmethod
     def test_connection(self, host: str) -> bool:
@@ -50,7 +50,6 @@ class AuthenticationStrategy(ABC):
         Returns:
             bool: True if connection test successful, False otherwise
         """
-        pass
 
     @abstractmethod
     def get_status(self) -> Dict[str, Any]:
@@ -59,7 +58,6 @@ class AuthenticationStrategy(ABC):
         Returns:
             Dict containing authentication status information
         """
-        pass
 
 
 class SmartAuthenticationStrategy(AuthenticationStrategy):
@@ -440,7 +438,7 @@ class AuthenticationStrategyFactory:
         raise ValueError(f"Unsupported authentication strategy: {strategy_type}")
 
     @staticmethod
-    def get_available_strategies() -> list[str]:
+    def get_available_strategies() -> List[str]:
         """Get list of available authentication strategies.
 
         Returns:

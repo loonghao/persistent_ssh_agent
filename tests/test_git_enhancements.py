@@ -1,12 +1,12 @@
 """Tests for Git integration enhancements."""
 
-import time
-from unittest.mock import MagicMock, patch
+# Import built-in modules
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
-import pytest
-
-from persistent_ssh_agent.constants import GitConstants
+# Import third-party modules
 from persistent_ssh_agent.git import GitIntegration
+import pytest
 
 
 class TestGitIntegrationEnhancements:
