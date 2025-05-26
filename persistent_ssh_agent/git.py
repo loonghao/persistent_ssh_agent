@@ -240,7 +240,11 @@ class GitIntegration:
             if not result or result.returncode != 0:
                 logger.error("Failed to configure Git credential helper")
                 if result and result.stderr:
-                    logger.error("Git config error: %s", result.stderr.decode().strip())
+                    # Handle both string and bytes stderr output
+                    stderr_msg = result.stderr
+                    if isinstance(stderr_msg, bytes):
+                        stderr_msg = stderr_msg.decode("utf-8", errors="replace")
+                    logger.error("Git config error: %s", stderr_msg.strip())
                 return False
 
             logger.debug("Git credentials configured successfully")
