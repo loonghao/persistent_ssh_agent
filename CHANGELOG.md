@@ -1,3 +1,9 @@
+## v0.8.2 (2025-05-26)
+
+### Fix
+
+- handle both string and bytes stderr in Git credential setup
+
 ## v0.8.1 (2025-05-23)
 
 ### Fix
