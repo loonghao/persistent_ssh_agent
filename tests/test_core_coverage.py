@@ -838,6 +838,45 @@ def test_setup_git_credentials(ssh_manager):
         assert ssh_manager.git.setup_git_credentials("testuser", "testpass") is False
 
 
+def test_setup_git_credentials_stderr_handling(ssh_manager):
+    """Test Git credentials setup with stderr handling (both string and bytes)."""
+    # Test with string stderr (current behavior after fix)
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=1, stderr="Git config error message"
+        )
+
+        result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
+        assert result is False
+
+    # Test with bytes stderr (edge case for compatibility)
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=1, stderr=b"Git config error message"
+        )
+
+        result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
+        assert result is False
+
+    # Test with empty stderr
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=1, stderr=""
+        )
+
+        result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
+        assert result is False
+
+    # Test with None stderr
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=1, stderr=None
+        )
+
+        result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
+        assert result is False
+
+
 def test_platform_specific_credential_helper(ssh_manager):
     """Test platform-specific credential helper generation."""
     # Test Windows credential helper
