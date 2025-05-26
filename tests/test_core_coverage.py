@@ -934,6 +934,65 @@ def test_setup_git_credentials_with_replace_all(ssh_manager):
         assert "credential.helper" in call_args
 
 
+def test_clear_credential_helpers(ssh_manager):
+    """Test clearing Git credential helpers."""
+    # Test clearing when helpers exist
+    with patch("subprocess.run") as mock_subprocess_run:
+        # Mock get_current_credential_helpers to return helpers
+        mock_subprocess_run.side_effect = [
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\nhelper2\n"),
+            subprocess.CompletedProcess(args=[], returncode=0)
+        ]
+
+        result = ssh_manager.git.clear_credential_helpers()
+        assert result is True
+        assert mock_subprocess_run.call_count == 2
+
+        # Verify --unset-all flag is used
+        clear_call_args = mock_subprocess_run.call_args_list[1][0][0]
+        assert "git" in clear_call_args
+        assert "config" in clear_call_args
+        assert "--global" in clear_call_args
+        assert "--unset-all" in clear_call_args
+        assert "credential.helper" in clear_call_args
+
+    # Test clearing when no helpers exist
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout="")
+
+        result = ssh_manager.git.clear_credential_helpers()
+        assert result is True
+        # Should only call get_current_credential_helpers, not the clear command
+        assert mock_subprocess_run.call_count == 1
+
+    # Test clearing with command failure
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.side_effect = [
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\n"),
+            subprocess.CompletedProcess(args=[], returncode=1, stderr="Error clearing helpers")
+        ]
+
+        result = ssh_manager.git.clear_credential_helpers()
+        assert result is False
+
+
+def test_setup_git_credentials_with_multiple_values_error(ssh_manager):
+    """Test Git credentials setup with multiple values error provides helpful suggestion."""
+    with patch("subprocess.run") as mock_subprocess_run:
+        # Mock get_current_credential_helpers call
+        mock_subprocess_run.side_effect = [
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\nhelper2\n"),
+            subprocess.CompletedProcess(
+                args=[], returncode=1,
+                stderr="warning: credential.helper has multiple values\nerror: cannot overwrite multiple values"
+            )
+        ]
+
+        result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
+        assert result is False
+        assert mock_subprocess_run.call_count == 2
+
+
 def test_platform_specific_credential_helper(ssh_manager):
     """Test platform-specific credential helper generation."""
     # Test Windows credential helper
