@@ -82,8 +82,38 @@ class CLIConstants:
     TEST_COMMAND: ClassVar[str] = "test"
 
 
+class AuthStrategyConstants:
+    """Constants for authentication strategy operations."""
+
+    # Authentication strategy types
+    STRATEGY_SMART: ClassVar[str] = "smart"
+    STRATEGY_SSH_FIRST: ClassVar[str] = "ssh_first"
+    STRATEGY_CREDENTIALS_FIRST: ClassVar[str] = "credentials_first"
+    STRATEGY_SSH_ONLY: ClassVar[str] = "ssh_only"
+    STRATEGY_CREDENTIALS_ONLY: ClassVar[str] = "credentials_only"
+
+    # Default strategy
+    DEFAULT_STRATEGY: ClassVar[str] = STRATEGY_SMART
+
+    # Environment variables for strategy control
+    ENV_FORCE_SSH_AUTH: ClassVar[str] = "FORCE_SSH_AUTH"
+    ENV_PREFER_SSH_AUTH: ClassVar[str] = "PREFER_SSH_AUTH"
+    ENV_AUTH_STRATEGY: ClassVar[str] = "AUTH_STRATEGY"
+
+    # Authentication method names
+    AUTH_METHOD_SSH: ClassVar[str] = "ssh"
+    AUTH_METHOD_CREDENTIALS: ClassVar[str] = "credentials"
+
+    # Connection test timeout (seconds)
+    CONNECTION_TEST_TIMEOUT: ClassVar[int] = 30
+
+    # Authentication cache duration (seconds)
+    AUTH_CACHE_DURATION: ClassVar[int] = 3600
+
+
 # Export all constants for easy access
 __all__ = [
+    "AuthStrategyConstants",
     "CLIConstants",
     "GitConstants",
     "SSHAgentConstants"

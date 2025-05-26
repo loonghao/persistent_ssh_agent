@@ -1073,7 +1073,11 @@ def import_config_cmd(input_file):
 @click.option("--prompt", is_flag=True, help="Prompt for credentials")
 @click.pass_context
 def git_setup_cmd(ctx, username, password, prompt):
-    """Set up Git credential helper."""
+    """Set up Git credential helper.
+
+    This command configures Git to use username/password authentication
+    and is completely independent of SSH keys or SSH agent configuration.
+    """
     try:
         if prompt:
             username = click.prompt("Git username")
@@ -1189,7 +1193,11 @@ def git_debug_cmd(ctx):
 @click.option("--confirm", is_flag=True, help="Skip confirmation prompt")
 @click.pass_context
 def git_clear_cmd(ctx, confirm):
-    """Clear all Git credential helpers."""
+    """Clear all Git credential helpers.
+
+    This command removes Git credential helper configurations
+    and is completely independent of SSH keys or SSH agent configuration.
+    """
     try:
         ssh_agent = PersistentSSHAgent()
 
