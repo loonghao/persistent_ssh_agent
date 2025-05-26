@@ -28,9 +28,7 @@ def test_config_with_passphrase(ssh_manager, tmp_path):
     identity_file = tmp_path / "test_key"
     identity_file.write_text("test key")
 
-    with patch("subprocess.run") as mock_run, \
-         patch("subprocess.Popen") as mock_popen:
-
+    with patch("subprocess.run") as mock_run, patch("subprocess.Popen") as mock_popen:
         # Mock SSH agent startup
         def mock_run_side_effect(*args, **kwargs):
             if args[0][0] == "ssh-agent":
@@ -38,8 +36,8 @@ def test_config_with_passphrase(ssh_manager, tmp_path):
                     args=["ssh-agent", "-s"],
                     returncode=0,
                     stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
-                          "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
-                    stderr=b""
+                    "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
+                    stderr=b"",
                 )
             elif args[0][0] == "ssh-add":
                 if len(args[0]) > 1 and args[0][1] == "-l":
@@ -49,7 +47,7 @@ def test_config_with_passphrase(ssh_manager, tmp_path):
                         args=["ssh-add", "-l"],
                         returncode=1 if not ssh_manager._ssh_agent_started else 0,
                         stdout=b"",
-                        stderr=b""
+                        stderr=b"",
                     )
             return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=b"", stderr=b"")
 
@@ -71,7 +69,7 @@ def test_config_with_passphrase(ssh_manager, tmp_path):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
 
 
@@ -80,9 +78,7 @@ def test_start_ssh_agent_unit(ssh_manager, tmp_path):
     identity_file = tmp_path / "test_key"
     identity_file.write_text("test key")
 
-    with patch("subprocess.run") as mock_run, \
-         patch("subprocess.Popen") as mock_popen:
-
+    with patch("subprocess.run") as mock_run, patch("subprocess.Popen") as mock_popen:
         # Mock SSH agent startup
         def mock_run_side_effect(*args, **kwargs):
             if args[0][0] == "ssh-agent":
@@ -90,8 +86,8 @@ def test_start_ssh_agent_unit(ssh_manager, tmp_path):
                     args=["ssh-agent", "-s"],
                     returncode=0,
                     stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
-                          "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
-                    stderr=""
+                    "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
+                    stderr="",
                 )
             elif args[0][0] == "ssh-add":
                 if len(args[0]) > 1 and args[0][1] == "-l":
@@ -101,7 +97,7 @@ def test_start_ssh_agent_unit(ssh_manager, tmp_path):
                         args=["ssh-add", "-l"],
                         returncode=1 if not ssh_manager._ssh_agent_started else 0,
                         stdout=b"",
-                        stderr=b""
+                        stderr=b"",
                     )
             return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=b"", stderr=b"")
 
@@ -122,9 +118,7 @@ def test_env_with_passphrase(ssh_manager, tmp_path):
     identity_file = tmp_path / "test_key"
     identity_file.write_text("test key")
 
-    with patch("subprocess.run") as mock_run, \
-         patch("subprocess.Popen") as mock_popen:
-
+    with patch("subprocess.run") as mock_run, patch("subprocess.Popen") as mock_popen:
         # Mock SSH agent startup
         def mock_run_side_effect(*args, **kwargs):
             if args[0][0] == "ssh-agent":
@@ -132,8 +126,8 @@ def test_env_with_passphrase(ssh_manager, tmp_path):
                     args=["ssh-agent", "-s"],
                     returncode=0,
                     stdout="SSH_AUTH_SOCK=/tmp/ssh-XXX; export SSH_AUTH_SOCK;\n"
-                          "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
-                    stderr=""
+                    "SSH_AGENT_PID=1234; export SSH_AGENT_PID;\n",
+                    stderr="",
                 )
             elif args[0][0] == "ssh-add":
                 if len(args[0]) > 1 and args[0][1] == "-l":
@@ -143,7 +137,7 @@ def test_env_with_passphrase(ssh_manager, tmp_path):
                         args=["ssh-add", "-l"],
                         returncode=1 if not ssh_manager._ssh_agent_started else 0,
                         stdout=b"",
-                        stderr=b""
+                        stderr=b"",
                     )
             return subprocess.CompletedProcess(args=args[0], returncode=0, stdout=b"", stderr=b"")
 

@@ -146,30 +146,33 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     mock_logger.debug.reset_mock()  # Reset mock to clear previous calls
 
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_logger.debug.assert_has_calls([
-        mocker.call("Existing agent found but key not loaded"),
-        mocker.call("Adding key to agent: %s", identity_file)
-    ], any_order=False)
+    mock_logger.debug.assert_has_calls(
+        [mocker.call("Existing agent found but key not loaded"), mocker.call("Adding key to agent: %s", identity_file)],
+        any_order=False,
+    )
 
     # Test case 3: No valid agent found
     mock_load_agent.return_value = False
     mock_logger.debug.reset_mock()
 
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_logger.debug.assert_has_calls([
-        mocker.call("No valid existing agent found"),
-        mocker.call("Adding key to agent: %s", identity_file)
-    ], any_order=False)
+    mock_logger.debug.assert_has_calls(
+        [mocker.call("No valid existing agent found"), mocker.call("Adding key to agent: %s", identity_file)],
+        any_order=False,
+    )
 
     # Test case 4: Agent reuse disabled
     ssh_manager._reuse_agent = False
     mock_logger.debug.reset_mock()
 
     assert ssh_manager._start_ssh_agent(identity_file) is True
-    mock_logger.debug.assert_has_calls([
-        mocker.call("Agent reuse disabled, starting new agent"),
-        mocker.call("Adding key to agent: %s", identity_file)
-    ], any_order=False)
+    mock_logger.debug.assert_has_calls(
+        [
+            mocker.call("Agent reuse disabled, starting new agent"),
+            mocker.call("Adding key to agent: %s", identity_file),
+        ],
+        any_order=False,
+    )
 
 
 def test_start_ssh_agent_platform_specific(ssh_manager, mocker):
@@ -223,6 +226,7 @@ def test_start_ssh_agent_failure(ssh_manager, mocker):
     # Mock run_command to return a failed result
     class MockResult:
         returncode = 1
+
     mock_run_command.return_value = MockResult()
 
     ssh_manager._reuse_agent = False  # Disable reuse to test agent startup

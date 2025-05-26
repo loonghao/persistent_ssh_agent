@@ -10,7 +10,6 @@ from typing import List
 from typing import Optional
 
 # Import third-party modules
-from persistent_ssh_agent.constants import AuthStrategyConstants
 from persistent_ssh_agent.constants import GitConstants
 from persistent_ssh_agent.constants import SSHAgentConstants
 from persistent_ssh_agent.utils import extract_hostname as _extract_hostname
@@ -195,9 +194,7 @@ class GitIntegration:
                 return False
 
             # Configure Git to use the credential helper
-            result = run_command([
-                "git", "config", "--global", "credential.helper", credential_helper
-            ])
+            result = run_command(["git", "config", "--global", "credential.helper", credential_helper])
 
             if not result or result.returncode != 0:
                 logger.error("Failed to configure Git credential helper")
@@ -247,6 +244,7 @@ class GitIntegration:
             >>> env = agent.git.get_git_env_with_credentials('user', 'pass')
             >>> subprocess.run(['git', 'clone', 'https://github.com/user/repo.git'], env=env)
         """
+        # Import built-in modules
         import os
 
         # Start with current environment
@@ -267,8 +265,9 @@ class GitIntegration:
 
         return env
 
-    def run_git_command_with_credentials(self, command: List[str], username: Optional[str] = None,
-                                       password: Optional[str] = None) -> Optional[object]:
+    def run_git_command_with_credentials(
+        self, command: List[str], username: Optional[str] = None, password: Optional[str] = None
+    ) -> Optional[object]:
         """Run a Git command with temporary credentials.
 
         This method runs Git commands with temporary credentials without modifying
@@ -305,8 +304,9 @@ class GitIntegration:
             # Insert the credential helper config before the git subcommand
             enhanced_command = [
                 command[0],  # 'git'
-                "-c", f"credential.helper={credential_helper}",
-                *command[1:]  # rest of the command
+                "-c",
+                f"credential.helper={credential_helper}",
+                *command[1:],  # rest of the command
             ]
         else:
             enhanced_command = command
@@ -314,8 +314,9 @@ class GitIntegration:
         logger.debug("Running Git command with temporary credentials: %s", enhanced_command)
         return run_command(enhanced_command)
 
-    def get_credential_helper_command(self, username: Optional[str] = None,
-                                    password: Optional[str] = None) -> Optional[str]:
+    def get_credential_helper_command(
+        self, username: Optional[str] = None, password: Optional[str] = None
+    ) -> Optional[str]:
         """Get the credential helper command for temporary use.
 
         This method returns the credential helper command that can be used with
@@ -346,8 +347,13 @@ class GitIntegration:
         logger.debug("Generated credential helper command")
         return credential_helper
 
-    def test_credentials(self, host: Optional[str] = None, timeout: int = 30,
-                        username: Optional[str] = None, password: Optional[str] = None) -> Dict[str, bool]:
+    def test_credentials(
+        self,
+        host: Optional[str] = None,
+        timeout: int = 30,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+    ) -> Dict[str, bool]:
         """Test Git credentials validity by attempting to access repositories.
 
         This method tests Git credentials by using 'git ls-remote' command to check
@@ -372,8 +378,9 @@ class GitIntegration:
         else:
             return self._test_common_git_hosts_credentials(timeout, username, password)
 
-    def _test_single_host_credentials(self, host: str, timeout: int,
-                                    username: Optional[str] = None, password: Optional[str] = None) -> bool:
+    def _test_single_host_credentials(
+        self, host: str, timeout: int, username: Optional[str] = None, password: Optional[str] = None
+    ) -> bool:
         """Test credentials for a single Git host.
 
         Args:
@@ -404,10 +411,9 @@ class GitIntegration:
                 credential_helper = self._create_platform_credential_helper(git_username, git_password)
 
                 # Run git ls-remote with credentials
-                result = run_command([
-                    "git", "-c", f"credential.helper={credential_helper}",
-                    "ls-remote", test_url
-                ], timeout=timeout)
+                result = run_command(
+                    ["git", "-c", f"credential.helper={credential_helper}", "ls-remote", test_url], timeout=timeout
+                )
 
                 if result and result.returncode == 0:
                     logger.debug("Credentials test successful for %s", host)
@@ -423,8 +429,9 @@ class GitIntegration:
             logger.error("Error testing credentials for %s: %s", host, str(e))
             return False
 
-    def _test_common_git_hosts_credentials(self, timeout: int,
-                                         username: Optional[str] = None, password: Optional[str] = None) -> Dict[str, bool]:
+    def _test_common_git_hosts_credentials(
+        self, timeout: int, username: Optional[str] = None, password: Optional[str] = None
+    ) -> Dict[str, bool]:
         """Test credentials for common Git hosting services.
 
         Args:
@@ -435,11 +442,7 @@ class GitIntegration:
         Returns:
             Dict[str, bool]: Dictionary mapping host names to test results
         """
-        common_hosts = [
-            "github.com",
-            "gitlab.com",
-            "bitbucket.org"
-        ]
+        common_hosts = ["github.com", "gitlab.com", "bitbucket.org"]
 
         results = {}
         for host in common_hosts:
@@ -458,15 +461,9 @@ class GitIntegration:
         """
         # Map of hosts to their test repositories
         test_repos = {
-            "github.com": [
-                "https://github.com/octocat/Hello-World.git"
-            ],
-            "gitlab.com": [
-                "https://gitlab.com/gitlab-org/gitlab.git"
-            ],
-            "bitbucket.org": [
-                "https://bitbucket.org/atlassian/atlassian-frontend.git"
-            ]
+            "github.com": ["https://github.com/octocat/Hello-World.git"],
+            "gitlab.com": ["https://gitlab.com/gitlab-org/gitlab.git"],
+            "bitbucket.org": ["https://bitbucket.org/atlassian/atlassian-frontend.git"],
         }
 
         # Return specific test URLs for known hosts, or create a generic one
@@ -495,9 +492,7 @@ class GitIntegration:
             logger.debug("Clearing %d existing credential helpers", len(current_helpers))
 
             # Clear all credential helpers
-            result = run_command([
-                "git", "config", "--global", "--unset-all", "credential.helper"
-            ])
+            result = run_command(["git", "config", "--global", "--unset-all", "credential.helper"])
 
             if not result or result.returncode != 0:
                 logger.error("Failed to clear Git credential helpers")
@@ -568,9 +563,7 @@ class GitIntegration:
             logger.debug("Using credential helper command: %s", credential_helper)
 
             # Use --replace-all to handle multiple existing credential.helper values
-            result = run_command([
-                "git", "config", "--global", "--replace-all", "credential.helper", credential_helper
-            ])
+            result = run_command(["git", "config", "--global", "--replace-all", "credential.helper", credential_helper])
 
             if not result or result.returncode != 0:
                 logger.error("Failed to configure Git credential helper")
@@ -612,14 +605,10 @@ class GitIntegration:
         if os.name == "nt":
             # Windows: Use PowerShell compatible syntax
             # Use semicolon to separate commands (works in both cmd and PowerShell)
-            credential_helper = (
-                f"!echo username={escaped_username}; echo password={escaped_password}"
-            )
+            credential_helper = f"!echo username={escaped_username}; echo password={escaped_password}"
         else:
             # Unix/Linux: Use bash compatible syntax
-            credential_helper = (
-                f"!f() {{ echo username={escaped_username}; echo password={escaped_password}; }}; f"
-            )
+            credential_helper = f"!f() {{ echo username={escaped_username}; echo password={escaped_password}; }}; f"
 
         return credential_helper
 
@@ -654,9 +643,7 @@ class GitIntegration:
         Returns:
             bool: True if connection successful
         """
-        test_result = run_command(
-            ["ssh", "-T", "-o", "StrictHostKeyChecking=no", f"git@{hostname}"]
-        )
+        test_result = run_command(["ssh", "-T", "-o", "StrictHostKeyChecking=no", f"git@{hostname}"])
 
         if test_result is None:
             logger.error("SSH connection test failed")
@@ -687,32 +674,32 @@ class GitIntegration:
         logger.debug("Starting Git authentication health check")
 
         health_status = {
-            'overall': 'healthy',
-            'timestamp': time.time(),
-            'git_credentials': self._check_git_credentials(),
-            'ssh_keys': self._check_ssh_keys(),
-            'network': self._check_network_connectivity(),
-            'recommendations': []
+            "overall": "healthy",
+            "timestamp": time.time(),
+            "git_credentials": self._check_git_credentials(),
+            "ssh_keys": self._check_ssh_keys(),
+            "network": self._check_network_connectivity(),
+            "recommendations": [],
         }
 
         # Determine overall health status
         issues = []
-        if health_status['git_credentials']['status'] == 'error':
-            issues.append('git_credentials')
-        if health_status['ssh_keys']['status'] == 'error':
-            issues.append('ssh_keys')
-        if health_status['network']['status'] == 'error':
-            issues.append('network')
+        if health_status["git_credentials"]["status"] == "error":
+            issues.append("git_credentials")
+        if health_status["ssh_keys"]["status"] == "error":
+            issues.append("ssh_keys")
+        if health_status["network"]["status"] == "error":
+            issues.append("network")
 
         if len(issues) >= 2:
-            health_status['overall'] = 'error'
+            health_status["overall"] = "error"
         elif len(issues) == 1:
-            health_status['overall'] = 'warning'
+            health_status["overall"] = "warning"
 
         # Generate recommendations
-        health_status['recommendations'] = self._generate_recommendations(health_status)
+        health_status["recommendations"] = self._generate_recommendations(health_status)
 
-        logger.debug("Health check completed with overall status: %s", health_status['overall'])
+        logger.debug("Health check completed with overall status: %s", health_status["overall"])
         return health_status
 
     def clear_invalid_credentials(self, hosts: Optional[List[str]] = None) -> bool:
@@ -723,6 +710,7 @@ class GitIntegration:
 
         Args:
             hosts: Optional list of hosts to check. If None, checks common Git hosts.
+                  Currently not used but reserved for future functionality.
 
         Returns:
             bool: True if cleanup was successful, False otherwise
@@ -731,6 +719,8 @@ class GitIntegration:
             >>> agent = PersistentSSHAgent()
             >>> agent.git.clear_invalid_credentials(['github.com', 'gitlab.com'])
         """
+        # Note: hosts parameter is reserved for future use
+        _ = hosts
         logger.debug("Starting invalid credentials cleanup")
 
         try:
@@ -760,9 +750,7 @@ class GitIntegration:
             # Reconfigure with valid helpers only
             valid_helpers = [h for h in current_helpers if h not in invalid_helpers]
             for helper in valid_helpers:
-                result = run_command([
-                    "git", "config", "--global", "--add", "credential.helper", helper
-                ])
+                result = run_command(["git", "config", "--global", "--add", "credential.helper", helper])
                 if not result or result.returncode != 0:
                     logger.warning("Failed to restore valid credential helper: %s", helper)
 
@@ -773,7 +761,7 @@ class GitIntegration:
             logger.error("Failed to clear invalid credentials: %s", str(e))
             return False
 
-    def setup_smart_credentials(self, host: str, strategy: str = 'auto', **kwargs) -> bool:
+    def setup_smart_credentials(self, host: str, strategy: str = "auto", **kwargs) -> bool:
         """Set up Git credentials using intelligent authentication strategy.
 
         This method uses the authentication strategy system to intelligently
@@ -799,12 +787,11 @@ class GitIntegration:
 
         try:
             # Import here to avoid circular imports
+            # Import third-party modules
             from persistent_ssh_agent.auth_strategy import AuthenticationStrategyFactory
 
             # Create authentication strategy
-            auth_strategy = AuthenticationStrategyFactory.create_strategy(
-                strategy, self._ssh_agent, **kwargs
-            )
+            auth_strategy = AuthenticationStrategyFactory.create_strategy(strategy, self._ssh_agent, **kwargs)
 
             # Attempt authentication
             success = auth_strategy.authenticate(host, **kwargs)
@@ -844,19 +831,14 @@ class GitIntegration:
                 status = "error"
                 message = "Credentials not working for any tested hosts"
 
-            return {
-                "status": status,
-                "message": message,
-                "helpers": helpers,
-                "test_results": test_results
-            }
+            return {"status": status, "message": message, "helpers": helpers, "test_results": test_results}
 
         except Exception as e:
             return {
                 "status": "error",
-                "message": f"Failed to check Git credentials: {str(e)}",
+                "message": f"Failed to check Git credentials: {e}",
                 "helpers": [],
-                "test_results": {}
+                "test_results": {},
             }
 
     def _check_ssh_keys(self) -> Dict[str, Any]:
@@ -894,15 +876,15 @@ class GitIntegration:
                 "status": status,
                 "message": message,
                 "ssh_agent_active": ssh_agent_active,
-                "test_results": ssh_test_results
+                "test_results": ssh_test_results,
             }
 
         except Exception as e:
             return {
                 "status": "error",
-                "message": f"Failed to check SSH keys: {str(e)}",
+                "message": f"Failed to check SSH keys: {e}",
                 "ssh_agent_active": False,
-                "test_results": {}
+                "test_results": {},
             }
 
     def _check_network_connectivity(self) -> Dict[str, Any]:
@@ -918,9 +900,7 @@ class GitIntegration:
             for host in common_hosts:
                 try:
                     # Simple connectivity test using git ls-remote
-                    result = run_command([
-                        "git", "ls-remote", f"https://{host}/test/test.git"
-                    ], timeout=10)
+                    result = run_command(["git", "ls-remote", f"https://{host}/test/test.git"], timeout=10)
 
                     # Even if authentication fails, we can reach the host if we get a response
                     connectivity_results[host] = result is not None
@@ -942,17 +922,13 @@ class GitIntegration:
                 status = "error"
                 message = "No Git hosts are reachable"
 
-            return {
-                "status": status,
-                "message": message,
-                "connectivity_results": connectivity_results
-            }
+            return {"status": status, "message": message, "connectivity_results": connectivity_results}
 
         except Exception as e:
             return {
                 "status": "error",
-                "message": f"Failed to check network connectivity: {str(e)}",
-                "connectivity_results": {}
+                "message": f"Failed to check network connectivity: {e}",
+                "connectivity_results": {},
             }
 
     def _generate_recommendations(self, health_status: Dict[str, Any]) -> List[str]:
@@ -1019,11 +995,7 @@ class GitIntegration:
             # For system helpers (like 'manager', 'store'), assume they're valid
             # These are typically built into Git or the system
             system_helpers = ["manager", "store", "cache", "osxkeychain", "wincred"]
-            if any(helper.endswith(sh) for sh in system_helpers):
-                return True
-
-            # If we can't determine validity, assume it's invalid
-            return False
+            return any(helper.endswith(sh) for sh in system_helpers)
 
         except Exception as e:
             logger.debug("Error checking credential helper validity: %s", str(e))

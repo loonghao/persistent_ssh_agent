@@ -29,10 +29,9 @@ def normalize_path(path: str) -> str:
     return str(Path(path)).replace("\\", "/")
 
 
-def create_mock_subprocess_popen(returncode: int = 0,
-                                stdout: str = "",
-                                stderr: str = "",
-                                side_effect: Optional[Exception] = None) -> MagicMock:
+def create_mock_subprocess_popen(
+    returncode: int = 0, stdout: str = "", stderr: str = "", side_effect: Optional[Exception] = None
+) -> MagicMock:
     """Create a mock subprocess.Popen object.
 
     Args:
@@ -60,6 +59,7 @@ def mock_ssh_commands():
 
     This mocks subprocess.Popen to avoid platform-specific SSH command issues.
     """
+
     def mock_popen_factory(*args, **kwargs):
         # Default successful SSH command
         return create_mock_subprocess_popen(returncode=0, stdout="", stderr="")
@@ -67,9 +67,9 @@ def mock_ssh_commands():
     return patch("subprocess.Popen", side_effect=mock_popen_factory)
 
 
-def create_test_ssh_directory(tmp_path: Path,
-                             keys: Optional[List[str]] = None,
-                             config_content: Optional[str] = None) -> Path:
+def create_test_ssh_directory(
+    tmp_path: Path, keys: Optional[List[str]] = None, config_content: Optional[str] = None
+) -> Path:
     """Create a test SSH directory with keys and config.
 
     Args:
@@ -111,27 +111,17 @@ def skip_on_platform(platform: str):
     # Import third-party modules
     import pytest
 
-    platform_map = {
-        "windows": "win32",
-        "linux": "linux",
-        "darwin": "darwin"
-    }
+    platform_map = {"windows": "win32", "linux": "linux", "darwin": "darwin"}
 
     current_platform = sys.platform
     skip_platform = platform_map.get(platform, platform)
 
-    return pytest.mark.skipif(
-        current_platform.startswith(skip_platform),
-        reason=f"Test not supported on {platform}"
-    )
+    return pytest.mark.skipif(current_platform.startswith(skip_platform), reason=f"Test not supported on {platform}")
 
 
 def mock_ssh_agent_environment():
     """Mock SSH agent environment variables."""
-    return patch.dict(os.environ, {
-        "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
-        "SSH_AGENT_PID": "12345"
-    })
+    return patch.dict(os.environ, {"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "12345"})
 
 
 class MockSSHKeyManager:
@@ -194,12 +184,13 @@ def ensure_test_isolation(ssh_agent, tmp_path: Path):
         patch.object(ssh_agent, "_ssh_dir", ssh_dir),
         patch.object(ssh_agent.ssh_key_manager, "ssh_dir", ssh_dir),
         mock_ssh_commands(),
-        mock_ssh_agent_environment()
+        mock_ssh_agent_environment(),
     ]
 
     # Stack all patches
     # Import built-in modules
     from contextlib import ExitStack
+
     return ExitStack().enter_context(*patches)
 
 

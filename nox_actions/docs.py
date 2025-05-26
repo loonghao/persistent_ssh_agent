@@ -144,14 +144,7 @@ def docs(session: Session, builder: str = "html", language: Optional[str] = None
             env = {"SPHINX_LANGUAGE": lang}
             output_dir = f"build/html/{lang}"
 
-            session.run(
-                "sphinx-build",
-                "-b", builder,
-                "-D", f"language={lang}",
-                "source",
-                output_dir,
-                env=env
-            )
+            session.run("sphinx-build", "-b", builder, "-D", f"language={lang}", "source", output_dir, env=env)
 
     session.log("Documentation built successfully")
 
@@ -191,11 +184,13 @@ def docs_live(session: Session, language: Optional[str] = None) -> None:
         with session.chdir(str(docs_dir)):
             session.run(
                 "sphinx-build",
-                "-b", "html",
-                "-D", f"language={lang}",
+                "-b",
+                "html",
+                "-D",
+                f"language={lang}",
                 "source",
                 f"build/html/{lang}",
-                env={"SPHINX_LANGUAGE": lang}
+                env={"SPHINX_LANGUAGE": lang},
             )
 
     # Then start autobuild for the selected language
@@ -204,27 +199,45 @@ def docs_live(session: Session, language: Optional[str] = None) -> None:
         session.log(f"Starting live preview for language: {language}")
         session.run(
             "sphinx-autobuild",
-            "-b", "html",
-            "-D", f"language={language}",
-            "--host", "127.0.0.1",
-            "--port", "8000",
-            "--watch", "source",
-            "--ignore", "*.swp",
-            "--ignore", "*.pdf",
-            "--ignore", "*.log",
-            "--ignore", "*.out",
-            "--ignore", "_build",
-            "--ignore", "build",
-            "--re-ignore", r".*\/__pycache__\/.*",
-            "--re-ignore", r"\.pytest_cache\/.*",
-            "--re-ignore", r"\.git\/.*",
-            "--re-ignore", r"\.tox\/.*",
-            "--re-ignore", r"\.nox\/.*",
-            "--re-ignore", r"\.idea\/.*",
-            "--re-ignore", r"\.vscode\/.*",
+            "-b",
+            "html",
+            "-D",
+            f"language={language}",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8000",
+            "--watch",
+            "source",
+            "--ignore",
+            "*.swp",
+            "--ignore",
+            "*.pdf",
+            "--ignore",
+            "*.log",
+            "--ignore",
+            "*.out",
+            "--ignore",
+            "_build",
+            "--ignore",
+            "build",
+            "--re-ignore",
+            r".*\/__pycache__\/.*",
+            "--re-ignore",
+            r"\.pytest_cache\/.*",
+            "--re-ignore",
+            r"\.git\/.*",
+            "--re-ignore",
+            r"\.tox\/.*",
+            "--re-ignore",
+            r"\.nox\/.*",
+            "--re-ignore",
+            r"\.idea\/.*",
+            "--re-ignore",
+            r"\.vscode\/.*",
             "source",
             output_dir,
-            env=env
+            env=env,
         )
 
 
@@ -244,11 +257,14 @@ def docs_lint(session: Session) -> None:
     # Run doc8 only on RST files
     session.run(
         "doc8",
-        "--ignore", "D001",  # Ignore line length
-        "--ignore", "D002",  # Ignore trailing whitespace
-        "--ignore", "D004",  # Ignore RST directives
+        "--ignore",
+        "D001",  # Ignore line length
+        "--ignore",
+        "D002",  # Ignore trailing whitespace
+        "--ignore",
+        "D004",  # Ignore RST directives
         str(source_dir),
-        success_codes=[0, 1]  # Allow doc8 to fail
+        success_codes=[0, 1],  # Allow doc8 to fail
     )
 
     # Run sphinx-build with nitpicky mode, but don't treat warnings as errors
@@ -256,12 +272,14 @@ def docs_lint(session: Session) -> None:
     with session.chdir(str(docs_dir)):
         session.run(
             "sphinx-build",
-            "-b", "html",
+            "-b",
+            "html",
             # "-W",  # Warnings as errors - temporarily disabled
             "-n",  # Nitpicky mode
-            "-D", "language=en",
+            "-D",
+            "language=en",
             "source",
-            "build/lint-check"
+            "build/lint-check",
         )
 
 
@@ -299,12 +317,7 @@ def docs_i18n(session: Session) -> None:
 
     with session.chdir(str(docs_dir)):
         # Extract messages to .pot files
-        session.run(
-            "sphinx-build",
-            "-b", "gettext",
-            "source",
-            "build/gettext"
-        )
+        session.run("sphinx-build", "-b", "gettext", "source", "build/gettext")
 
         # Update .po files for all supported languages
         for lang in languages:
@@ -313,20 +326,10 @@ def docs_i18n(session: Session) -> None:
             lang_dir.mkdir(parents=True, exist_ok=True)
 
             # Update .po files
-            session.run(
-                "sphinx-intl",
-                "update",
-                "-p", "build/gettext",
-                "-d", str(locale_dir),
-                "-l", lang
-            )
+            session.run("sphinx-intl", "update", "-p", "build/gettext", "-d", str(locale_dir), "-l", lang)
 
             # Compile .po files to .mo files
-            session.run(
-                "sphinx-intl",
-                "build",
-                "-d", str(locale_dir)
-            )
+            session.run("sphinx-intl", "build", "-d", str(locale_dir))
 
     # Clean up temporary gettext files
     gettext_dir = docs_dir / "build" / "gettext"
@@ -361,12 +364,7 @@ def docs_build(session: Session) -> None:
 
     # First generate POT files
     with session.chdir(str(get_docs_dir())):
-        session.run(
-            "sphinx-build",
-            "-b", "gettext",
-            "source",
-            "build/gettext"
-        )
+        session.run("sphinx-build", "-b", "gettext", "source", "build/gettext")
 
         # Update PO files for Chinese
         session.run("sphinx-intl", "update", "-p", "build/gettext", "-l", "zh_CN")
@@ -377,11 +375,13 @@ def docs_build(session: Session) -> None:
             output_dir = f"build/html/{lang}"
             session.run(
                 "sphinx-build",
-                "-b", "html",
-                "-D", f"language={lang}",
+                "-b",
+                "html",
+                "-D",
+                f"language={lang}",
                 "source",
                 output_dir,
-                env={"SPHINX_LANGUAGE": lang}
+                env={"SPHINX_LANGUAGE": lang},
             )
 
     # Create a simple language selection page

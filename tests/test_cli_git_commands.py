@@ -1,13 +1,15 @@
 """Tests for Git-related CLI commands."""
 
+# Import built-in modules
 import os
 import subprocess
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
-import pytest
+# Import third-party modules
 from click.testing import CliRunner
-
 from persistent_ssh_agent.cli import main
+import pytest
 
 
 @pytest.fixture
@@ -18,9 +20,9 @@ def runner():
 
 def test_git_debug_command(runner):
     """Test git-debug CLI command."""
-    with patch("persistent_ssh_agent.cli.PersistentSSHAgent") as mock_agent_class, \
-         patch("persistent_ssh_agent.cli.run_command") as mock_run_command:
-
+    with patch("persistent_ssh_agent.cli.PersistentSSHAgent") as mock_agent_class, patch(
+        "persistent_ssh_agent.cli.run_command"
+    ) as mock_run_command:
         # Mock the SSH agent and its git methods
         mock_agent = MagicMock()
         mock_agent_class.return_value = mock_agent
@@ -28,8 +30,7 @@ def test_git_debug_command(runner):
 
         # Mock run_command for git config
         mock_run_command.return_value = subprocess.CompletedProcess(
-            args=[], returncode=0,
-            stdout="file:/path/to/.gitconfig\tcredential.helper=helper1\n"
+            args=[], returncode=0, stdout="file:/path/to/.gitconfig\tcredential.helper=helper1\n"
         )
 
         # Mock environment variables
@@ -184,6 +185,7 @@ def test_git_clear_command_with_exception(runner):
 # Tests for new Git credential functionality
 def test_git_integration_get_git_env_with_credentials():
     """Test GitIntegration.get_git_env_with_credentials method."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     agent = PersistentSSHAgent()
@@ -199,6 +201,7 @@ def test_git_integration_get_git_env_with_credentials():
 
 def test_git_integration_get_git_env_with_credentials_from_env():
     """Test GitIntegration.get_git_env_with_credentials method with environment variables."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch.dict(os.environ, {"GIT_USERNAME": "envuser", "GIT_PASSWORD": "envpass"}):
@@ -213,6 +216,7 @@ def test_git_integration_get_git_env_with_credentials_from_env():
 
 def test_git_integration_get_git_env_with_credentials_no_credentials():
     """Test GitIntegration.get_git_env_with_credentials method without credentials."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     # Only clear Git-related environment variables, keep HOME
@@ -227,6 +231,7 @@ def test_git_integration_get_git_env_with_credentials_no_credentials():
 
 def test_git_integration_get_credential_helper_command():
     """Test GitIntegration.get_credential_helper_command method."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     agent = PersistentSSHAgent()
@@ -241,6 +246,7 @@ def test_git_integration_get_credential_helper_command():
 
 def test_git_integration_get_credential_helper_command_from_env():
     """Test GitIntegration.get_credential_helper_command method with environment variables."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch.dict(os.environ, {"GIT_USERNAME": "envuser", "GIT_PASSWORD": "envpass"}):
@@ -254,6 +260,7 @@ def test_git_integration_get_credential_helper_command_from_env():
 
 def test_git_integration_get_credential_helper_command_no_credentials():
     """Test GitIntegration.get_credential_helper_command method without credentials."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     # Only clear Git-related environment variables, keep HOME
@@ -267,6 +274,7 @@ def test_git_integration_get_credential_helper_command_no_credentials():
 
 def test_git_integration_run_git_command_with_credentials():
     """Test GitIntegration.run_git_command_with_credentials method."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -276,9 +284,7 @@ def test_git_integration_run_git_command_with_credentials():
 
         agent = PersistentSSHAgent()
         result = agent.git.run_git_command_with_credentials(
-            ["git", "--version"],
-            username="testuser",
-            password="testpass"
+            ["git", "--version"], username="testuser", password="testpass"
         )
 
         assert result is not None
@@ -294,6 +300,7 @@ def test_git_integration_run_git_command_with_credentials():
 
 def test_git_integration_run_git_command_with_credentials_no_credentials():
     """Test GitIntegration.run_git_command_with_credentials method without credentials."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -315,6 +322,7 @@ def test_git_integration_run_git_command_with_credentials_no_credentials():
 
 def test_git_integration_run_git_command_with_credentials_non_git_command():
     """Test GitIntegration.run_git_command_with_credentials method with non-Git command."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -324,9 +332,7 @@ def test_git_integration_run_git_command_with_credentials_non_git_command():
 
         agent = PersistentSSHAgent()
         result = agent.git.run_git_command_with_credentials(
-            ["python", "--version"],
-            username="testuser",
-            password="testpass"
+            ["python", "--version"], username="testuser", password="testpass"
         )
 
         assert result is not None
@@ -338,6 +344,7 @@ def test_git_integration_run_git_command_with_credentials_non_git_command():
 # Tests for Git credentials testing functionality
 def test_git_integration_test_credentials_single_host():
     """Test GitIntegration.test_credentials method for a single host."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -346,11 +353,7 @@ def test_git_integration_test_credentials_single_host():
         mock_run.return_value = mock_result
 
         agent = PersistentSSHAgent()
-        results = agent.git.test_credentials(
-            host="github.com",
-            username="testuser",
-            password="testpass"
-        )
+        results = agent.git.test_credentials(host="github.com", username="testuser", password="testpass")
 
         assert isinstance(results, dict)
         assert "github.com" in results
@@ -366,6 +369,7 @@ def test_git_integration_test_credentials_single_host():
 
 def test_git_integration_test_credentials_single_host_failure():
     """Test GitIntegration.test_credentials method for a single host with invalid credentials."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -375,11 +379,7 @@ def test_git_integration_test_credentials_single_host_failure():
         mock_run.return_value = mock_result
 
         agent = PersistentSSHAgent()
-        results = agent.git.test_credentials(
-            host="github.com",
-            username="testuser",
-            password="wrongpass"
-        )
+        results = agent.git.test_credentials(host="github.com", username="testuser", password="wrongpass")
 
         assert isinstance(results, dict)
         assert "github.com" in results
@@ -388,6 +388,7 @@ def test_git_integration_test_credentials_single_host_failure():
 
 def test_git_integration_test_credentials_multiple_hosts():
     """Test GitIntegration.test_credentials method for multiple hosts."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -397,10 +398,7 @@ def test_git_integration_test_credentials_multiple_hosts():
         mock_run.return_value = mock_result
 
         agent = PersistentSSHAgent()
-        results = agent.git.test_credentials(
-            username="testuser",
-            password="testpass"
-        )
+        results = agent.git.test_credentials(username="testuser", password="testpass")
 
         assert isinstance(results, dict)
         assert "github.com" in results
@@ -413,6 +411,7 @@ def test_git_integration_test_credentials_multiple_hosts():
 
 def test_git_integration_test_credentials_no_credentials():
     """Test GitIntegration.test_credentials method without credentials."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     # Only clear Git-related environment variables, keep HOME
@@ -428,6 +427,7 @@ def test_git_integration_test_credentials_no_credentials():
 
 def test_git_integration_test_credentials_timeout():
     """Test GitIntegration.test_credentials method with timeout."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     with patch("persistent_ssh_agent.git.run_command") as mock_run:
@@ -435,12 +435,7 @@ def test_git_integration_test_credentials_timeout():
         mock_run.return_value = None
 
         agent = PersistentSSHAgent()
-        results = agent.git.test_credentials(
-            host="github.com",
-            timeout=5,
-            username="testuser",
-            password="testpass"
-        )
+        results = agent.git.test_credentials(host="github.com", timeout=5, username="testuser", password="testpass")
 
         assert isinstance(results, dict)
         assert "github.com" in results
@@ -453,6 +448,7 @@ def test_git_integration_test_credentials_timeout():
 
 def test_git_integration_get_test_urls_for_host():
     """Test GitIntegration._get_test_urls_for_host method."""
+    # Import third-party modules
     from persistent_ssh_agent import PersistentSSHAgent
 
     agent = PersistentSSHAgent()

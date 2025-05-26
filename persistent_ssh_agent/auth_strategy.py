@@ -6,15 +6,16 @@ fallback mechanisms and authentication result caching.
 """
 
 # Import built-in modules
+from abc import ABC
+from abc import abstractmethod
 import os
 import time
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
+from typing import Dict
+from typing import Optional
 
 # Import third-party modules
 from loguru import logger
-
-# Import local modules
 from persistent_ssh_agent.constants import AuthStrategyConstants
 
 
@@ -119,7 +120,11 @@ class SmartAuthenticationStrategy(AuthenticationStrategy):
         # Smart authentication: try based on last successful method or preferences
         last_method = self._last_successful_method.get(host)
 
-        if prefer_ssh or auth_strategy == AuthStrategyConstants.STRATEGY_SSH_FIRST or last_method == AuthStrategyConstants.AUTH_METHOD_SSH:
+        if (
+            prefer_ssh
+            or auth_strategy == AuthStrategyConstants.STRATEGY_SSH_FIRST
+            or last_method == AuthStrategyConstants.AUTH_METHOD_SSH
+        ):
             # Try SSH first, then credentials
             logger.debug("Trying SSH authentication first")
             if self._try_ssh_auth(host):
@@ -179,8 +184,8 @@ class SmartAuthenticationStrategy(AuthenticationStrategy):
             "environment_overrides": {
                 "force_ssh": self._get_env_bool(AuthStrategyConstants.ENV_FORCE_SSH_AUTH),
                 "prefer_ssh": self._get_env_bool(AuthStrategyConstants.ENV_PREFER_SSH_AUTH),
-                "auth_strategy": os.environ.get(AuthStrategyConstants.ENV_AUTH_STRATEGY, "")
-            }
+                "auth_strategy": os.environ.get(AuthStrategyConstants.ENV_AUTH_STRATEGY, ""),
+            },
         }
 
     def _try_ssh_auth(self, host: str) -> bool:
@@ -211,9 +216,7 @@ class SmartAuthenticationStrategy(AuthenticationStrategy):
         try:
             # Test if credentials are available and valid
             test_result = self._ssh_agent.git.test_credentials(
-                host=host,
-                username=kwargs.get('username'),
-                password=kwargs.get('password')
+                host=host, username=kwargs.get("username"), password=kwargs.get("password")
             )
             return test_result.get(host, False) if isinstance(test_result, dict) else test_result
         except Exception as e:
@@ -259,11 +262,7 @@ class SmartAuthenticationStrategy(AuthenticationStrategy):
             method: Successful authentication method
         """
         self._last_successful_method[host] = method
-        self._auth_cache[host] = {
-            "method": method,
-            "timestamp": time.time(),
-            "success": True
-        }
+        self._auth_cache[host] = {"method": method, "timestamp": time.time(), "success": True}
         logger.debug(f"Cached successful authentication method for {host}: {method}")
 
     def _get_env_bool(self, env_var: str) -> bool:
@@ -338,7 +337,7 @@ class SSHOnlyAuthenticationStrategy(AuthenticationStrategy):
         return {
             "strategy_type": "ssh_only",
             "ssh_agent_active": self._ssh_agent._ssh_agent_started,
-            "supported_methods": [AuthStrategyConstants.AUTH_METHOD_SSH]
+            "supported_methods": [AuthStrategyConstants.AUTH_METHOD_SSH],
         }
 
 
@@ -371,9 +370,7 @@ class CredentialsOnlyAuthenticationStrategy(AuthenticationStrategy):
         logger.debug(f"Credentials-only authentication for host: {host}")
         try:
             test_result = self._ssh_agent.git.test_credentials(
-                host=host,
-                username=kwargs.get('username'),
-                password=kwargs.get('password')
+                host=host, username=kwargs.get("username"), password=kwargs.get("password")
             )
             return test_result.get(host, False) if isinstance(test_result, dict) else test_result
         except Exception as e:
@@ -404,8 +401,8 @@ class CredentialsOnlyAuthenticationStrategy(AuthenticationStrategy):
         """
         return {
             "strategy_type": "credentials_only",
-            "git_integration_available": hasattr(self._ssh_agent, 'git'),
-            "supported_methods": [AuthStrategyConstants.AUTH_METHOD_CREDENTIALS]
+            "git_integration_available": hasattr(self._ssh_agent, "git"),
+            "supported_methods": [AuthStrategyConstants.AUTH_METHOD_CREDENTIALS],
         }
 
 
@@ -434,7 +431,7 @@ class AuthenticationStrategyFactory:
         strategy_type = strategy_type.lower()
 
         if strategy_type == AuthStrategyConstants.STRATEGY_SMART:
-            return SmartAuthenticationStrategy(ssh_agent, kwargs.get('preferences'))
+            return SmartAuthenticationStrategy(ssh_agent, kwargs.get("preferences"))
         if strategy_type == AuthStrategyConstants.STRATEGY_SSH_ONLY:
             return SSHOnlyAuthenticationStrategy(ssh_agent)
         if strategy_type == AuthStrategyConstants.STRATEGY_CREDENTIALS_ONLY:
@@ -452,7 +449,7 @@ class AuthenticationStrategyFactory:
         return [
             AuthStrategyConstants.STRATEGY_SMART,
             AuthStrategyConstants.STRATEGY_SSH_ONLY,
-            AuthStrategyConstants.STRATEGY_CREDENTIALS_ONLY
+            AuthStrategyConstants.STRATEGY_CREDENTIALS_ONLY,
         ]
 
     @staticmethod
@@ -470,6 +467,6 @@ __all__ = [
     "AuthenticationStrategy",
     "AuthenticationStrategyFactory",
     "CredentialsOnlyAuthenticationStrategy",
+    "SSHOnlyAuthenticationStrategy",
     "SmartAuthenticationStrategy",
-    "SSHOnlyAuthenticationStrategy"
 ]

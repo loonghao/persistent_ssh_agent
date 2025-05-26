@@ -182,7 +182,6 @@ class SSHConfigParser:
             "bindaddress": lambda _: True,  # Any address is valid
             "connecttimeout": lambda x: x.isdigit() and int(x) >= 0,
             "connectionattempts": lambda x: x.isdigit() and int(x) >= 1,
-
             # Security settings
             "stricthostkeychecking": lambda x: x.lower() in ("yes", "no", "accept-new", "off", "ask"),
             "userknownhostsfile": lambda _: True,  # Any path is valid
@@ -193,37 +192,32 @@ class SSHConfigParser:
             "gssapiauthentication": lambda x: x.lower() in ("yes", "no"),
             "preferredauthentications": lambda x: all(
                 auth in ["gssapi-with-mic", "hostbased", "publickey", "keyboard-interactive", "password"]
-                for auth in x.split(",")),
-
+                for auth in x.split(",")
+            ),
             # Connection optimization
             "compression": lambda x: x.lower() in ("yes", "no"),
             "tcpkeepalive": lambda x: x.lower() in ("yes", "no"),
             "serveralivecountmax": lambda x: x.isdigit() and int(x) >= 0,
             "serveraliveinterval": lambda x: x.isdigit() and int(x) >= 0,
-
             # Proxy and forwarding
             "proxycommand": lambda _: True,  # Any command is valid
             "proxyhost": lambda _: True,  # Any host is valid
             "proxyport": lambda x: x.isdigit() and 1 <= int(x) <= 65535,
             "proxyjump": lambda _: True,  # Any jump specification is valid
-            "dynamicforward": lambda x: all(
-                p.isdigit() and 1 <= int(p) <= 65535 for p in x.split(":") if p.isdigit()),
+            "dynamicforward": lambda x: all(p.isdigit() and 1 <= int(p) <= 65535 for p in x.split(":") if p.isdigit()),
             "localforward": lambda _: True,  # Port forwarding specification
             "remoteforward": lambda _: True,  # Port forwarding specification
             "forwardagent": lambda x: x.lower() in ("yes", "no"),
-
             # Environment
             "sendenv": lambda _: True,  # Any environment variable pattern is valid
             "setenv": lambda _: True,  # Any environment variable setting is valid
             "requesttty": lambda x: x.lower() in ("yes", "no", "force", "auto"),
             "permittylocalcommand": lambda x: x.lower() in ("yes", "no"),
             "typylocalcommand": lambda _: True,  # Any command is valid
-
             # Multiplexing
             "controlmaster": lambda x: x.lower() in ("yes", "no", "ask", "auto", "autoask"),
             "controlpath": lambda _: True,  # Any path is valid
             "controlpersist": lambda _: True,  # Any time specification is valid
-
             # Misc
             "addkeystoagent": lambda x: x.lower() in ("yes", "no", "ask", "confirm"),
             "canonicaldomains": lambda _: True,  # Any domain list is valid
@@ -233,8 +227,9 @@ class SSHConfigParser:
             "canonicalizepermittedcnames": lambda _: True,  # Any CNAME specification is valid
         }
 
-    def _process_include_directive(self, line: str, ssh_config_path: Path,
-                                   process_config_line: Callable[[str], None]) -> None:
+    def _process_include_directive(
+        self, line: str, ssh_config_path: Path, process_config_line: Callable[[str], None]
+    ) -> None:
         """Process Include directive in SSH config."""
         include_path = line.split(None, 1)[1]
         include_path = os.path.expanduser(include_path)
@@ -255,9 +250,13 @@ class SSHConfigParser:
                 except Exception as e:
                     logger.debug(f"Failed to read include file {include_file}: {e}")
 
-    def _process_config_key_value(self, line: str, current_host: str,
-                                  config: Dict[str, Dict[str, SSHOptionValue]],
-                                  get_validation_error: Callable[[str, str], Optional[str]]) -> None:
+    def _process_config_key_value(
+        self,
+        line: str,
+        current_host: str,
+        config: Dict[str, Dict[str, SSHOptionValue]],
+        get_validation_error: Callable[[str, str], Optional[str]],
+    ) -> None:
         """Process a key-value configuration line."""
         try:
             # Split line into key and value, supporting both space and = separators

@@ -24,9 +24,13 @@ SSHOptionValue = Union[str, List[str]]
 logger = logging.getLogger(__name__)
 
 
-def run_command(command: List[str], shell: bool = False,
-                check_output: bool = True, timeout: Optional[int] = None,
-                env: Optional[Dict[str, str]] = None) -> Optional[CompletedProcess]:
+def run_command(
+    command: List[str],
+    shell: bool = False,
+    check_output: bool = True,
+    timeout: Optional[int] = None,
+    env: Optional[Dict[str, str]] = None,
+) -> Optional[CompletedProcess]:
     """Run a command and return its output.
 
     Args:
@@ -41,13 +45,7 @@ def run_command(command: List[str], shell: bool = False,
     """
     try:
         result = subprocess.run(
-            command,
-            shell=shell,
-            capture_output=check_output,
-            text=True,
-            timeout=timeout,
-            env=env,
-            check=False
+            command, shell=shell, capture_output=check_output, text=True, timeout=timeout, env=env, check=False
         )
         return result
     except subprocess.TimeoutExpired:

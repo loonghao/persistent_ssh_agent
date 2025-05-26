@@ -17,8 +17,7 @@ def test_load_agent_info_expired():
     mock_file = MagicMock()
     mock_file.__enter__.return_value = mock_file
     mock_file.read.return_value = (
-        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", '
-        '"timestamp": 0, "platform": "posix"}'
+        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", "timestamp": 0, "platform": "posix"}'
     )
 
     # Mock the agent info file
@@ -28,12 +27,15 @@ def test_load_agent_info_expired():
         # Mock open to return our mock file
         with patch("builtins.open", return_value=mock_file):
             # Mock json.load to return our mock agent info
-            with patch("json.load", return_value={
-                "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
-                "SSH_AGENT_PID": "123",
-                "timestamp": 0,  # Very old timestamp
-                "platform": "posix"
-            }):
+            with patch(
+                "json.load",
+                return_value={
+                    "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+                    "SSH_AGENT_PID": "123",
+                    "timestamp": 0,  # Very old timestamp
+                    "platform": "posix",
+                },
+            ):
                 # Call _load_agent_info
                 result = agent._load_agent_info()
 
@@ -49,8 +51,7 @@ def test_load_agent_info_platform_mismatch():
     mock_file = MagicMock()
     mock_file.__enter__.return_value = mock_file
     mock_file.read.return_value = (
-        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", '
-        '"timestamp": 9999999999, "platform": "posix"}'
+        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", "timestamp": 9999999999, "platform": "posix"}'
     )
 
     # Mock the agent info file
@@ -60,12 +61,15 @@ def test_load_agent_info_platform_mismatch():
         # Mock open to return our mock file
         with patch("builtins.open", return_value=mock_file):
             # Mock json.load to return our mock agent info
-            with patch("json.load", return_value={
-                "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
-                "SSH_AGENT_PID": "123",
-                "timestamp": 9999999999,  # Future timestamp
-                "platform": "posix"  # Different from os.name in the test
-            }):
+            with patch(
+                "json.load",
+                return_value={
+                    "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+                    "SSH_AGENT_PID": "123",
+                    "timestamp": 9999999999,  # Future timestamp
+                    "platform": "posix",  # Different from os.name in the test
+                },
+            ):
                 # Mock os.name to be "nt" (Windows)
                 with patch("os.name", "nt"):
                     # Call _load_agent_info
@@ -83,8 +87,7 @@ def test_load_agent_info_ssh_add_failure():
     mock_file = MagicMock()
     mock_file.__enter__.return_value = mock_file
     mock_file.read.return_value = (
-        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", '
-        '"timestamp": 9999999999, "platform": "nt"}'
+        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", "timestamp": 9999999999, "platform": "nt"}'
     )
 
     # Mock the agent info file
@@ -94,12 +97,15 @@ def test_load_agent_info_ssh_add_failure():
         # Mock open to return our mock file
         with patch("builtins.open", return_value=mock_file):
             # Mock json.load to return our mock agent info
-            with patch("json.load", return_value={
-                "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
-                "SSH_AGENT_PID": "123",
-                "timestamp": 9999999999,  # Future timestamp
-                "platform": "nt"  # Same as os.name in the test
-            }):
+            with patch(
+                "json.load",
+                return_value={
+                    "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+                    "SSH_AGENT_PID": "123",
+                    "timestamp": 9999999999,  # Future timestamp
+                    "platform": "nt",  # Same as os.name in the test
+                },
+            ):
                 # Mock os.name to be "nt" (Windows)
                 with patch("os.name", "nt"):
                     # Mock run_command to return None (failure)
@@ -119,8 +125,7 @@ def test_load_agent_info_ssh_add_not_running():
     mock_file = MagicMock()
     mock_file.__enter__.return_value = mock_file
     mock_file.read.return_value = (
-        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", '
-        '"timestamp": 9999999999, "platform": "nt"}'
+        '{"SSH_AUTH_SOCK": "/tmp/ssh-agent.sock", "SSH_AGENT_PID": "123", "timestamp": 9999999999, "platform": "nt"}'
     )
 
     # Mock the agent info file
@@ -130,12 +135,15 @@ def test_load_agent_info_ssh_add_not_running():
         # Mock open to return our mock file
         with patch("builtins.open", return_value=mock_file):
             # Mock json.load to return our mock agent info
-            with patch("json.load", return_value={
-                "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
-                "SSH_AGENT_PID": "123",
-                "timestamp": 9999999999,  # Future timestamp
-                "platform": "nt"  # Same as os.name in the test
-            }):
+            with patch(
+                "json.load",
+                return_value={
+                    "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
+                    "SSH_AGENT_PID": "123",
+                    "timestamp": 9999999999,  # Future timestamp
+                    "platform": "nt",  # Same as os.name in the test
+                },
+            ):
                 # Mock os.name to be "nt" (Windows)
                 with patch("os.name", "nt"):
                     # Mock run_command to return returncode 2 (agent not running)
@@ -176,8 +184,7 @@ def test_start_ssh_agent_reuse_without_key():
             mock_result = MagicMock()
             mock_result.returncode = 0
             mock_result.stdout = (
-                "SSH_AUTH_SOCK=/tmp/ssh-agent.sock; export SSH_AUTH_SOCK;\n"
-                "SSH_AGENT_PID=123; export SSH_AGENT_PID;"
+                "SSH_AUTH_SOCK=/tmp/ssh-agent.sock; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
             )
             with patch("subprocess.run", return_value=mock_result):
                 # Mock _add_ssh_key to return True
@@ -259,10 +266,7 @@ def test_try_add_key_without_passphrase_needs_passphrase():
     # Mock subprocess.Popen directly
     mock_process = MagicMock()
     mock_process.returncode = 1
-    mock_process.communicate.return_value = (
-        "stdout",
-        "Enter passphrase for /home/user/.ssh/id_rsa:"
-    )
+    mock_process.communicate.return_value = ("stdout", "Enter passphrase for /home/user/.ssh/id_rsa:")
     with patch("subprocess.Popen", return_value=mock_process):
         # Call _try_add_key_without_passphrase
         success, needs_passphrase = agent._try_add_key_without_passphrase("~/.ssh/id_rsa")

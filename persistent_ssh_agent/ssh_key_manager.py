@@ -113,11 +113,7 @@ class SSHKeyManager:
             subprocess.Popen: Process object for ssh-add command
         """
         return subprocess.Popen(
-            ["ssh-add", identity_file],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
+            ["ssh-add", identity_file], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
 
     def try_add_key_without_passphrase(self, identity_file: str) -> Tuple[bool, bool]:
@@ -254,6 +250,7 @@ class SSHKeyManager:
         try:
             # Import third-party modules
             from persistent_ssh_agent.cli import ConfigManager
+
             config_manager = ConfigManager()
             cli_passphrase = config_manager.get_passphrase()
             if cli_passphrase:

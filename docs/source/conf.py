@@ -103,10 +103,7 @@ templates_path = ["_templates"]
 language = os.getenv("SPHINX_LANGUAGE", "en")
 
 # Mapping of supported languages
-supported_languages = {
-    "en": "English",
-    "zh_CN": "简体中文"
-}
+supported_languages = {"en": "English", "zh_CN": "简体中文"}
 
 # Locale directories for translations
 locale_dirs = ["locale/"]
@@ -115,10 +112,7 @@ gettext_uuid = True
 gettext_location = True
 
 # Language to use for generating the HTML full-text search index.
-html_search_language = {
-    "en": "en",
-    "zh_CN": "zh"
-}.get(language, "en")
+html_search_language = {"en": "en", "zh_CN": "zh"}.get(language, "en")
 
 # Language links configuration
 language_links = {
@@ -127,7 +121,7 @@ language_links = {
     },
     "zh_CN": {
         "en": "../en/",
-    }
+    },
 }
 
 # HTML context for templates
@@ -141,6 +135,7 @@ html_context = {
 
 # Configure master document
 master_doc = "index"
+
 
 # -- Custom configuration --------------------------------------------------
 def setup(app):

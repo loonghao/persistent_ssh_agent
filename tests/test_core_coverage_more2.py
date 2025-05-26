@@ -127,9 +127,7 @@ def test_add_ssh_key_failure():
     with patch("os.path.exists", return_value=True):
         with patch("os.path.expanduser", return_value="/home/user/.ssh/id_rsa"):
             # Mock _try_add_key_without_passphrase to return failure
-            with patch.object(
-                agent, "_try_add_key_without_passphrase", return_value=(False, False)
-            ):
+            with patch.object(agent, "_try_add_key_without_passphrase", return_value=(False, False)):
                 # Call _add_ssh_key
                 result = agent._add_ssh_key("~/.ssh/id_rsa")
 

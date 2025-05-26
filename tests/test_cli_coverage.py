@@ -179,10 +179,8 @@ def test_config_manager_derive_key_from_system():
             with patch("getpass.getuser", side_effect=Exception("Not available")):
                 with patch.dict(os.environ, {"USER": ""}):
                     with patch.dict(os.environ, {"USERNAME": ""}):
-                        with patch("socket.gethostname",
-                                   side_effect=Exception("Not available")):
-                            with patch.object(manager, "_get_machine_id",
-                                             side_effect=Exception("Not available")):
+                        with patch("socket.gethostname", side_effect=Exception("Not available")):
+                            with patch.object(manager, "_get_machine_id", side_effect=Exception("Not available")):
                                 with patch("persistent_ssh_agent.cli.logger") as mock_logger:
                                     key, salt = manager._derive_key_from_system()
                                     assert isinstance(key, bytes)

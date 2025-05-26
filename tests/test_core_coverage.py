@@ -58,9 +58,9 @@ Host github.com
 """)
 
     # Mock the SSH directory path and setup_ssh
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
-         patch.object(ssh_manager, "setup_ssh") as mock_setup, \
-         patch.object(ssh_manager, "_get_identity_file") as mock_get_identity:
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), patch.object(
+        ssh_manager, "setup_ssh"
+    ) as mock_setup, patch.object(ssh_manager, "_get_identity_file") as mock_get_identity:
         mock_setup.return_value = True
         mock_get_identity.return_value = str(key_file)
 
@@ -100,12 +100,14 @@ def test_load_agent_info_invalid_data(ssh_manager):
         assert not ssh_manager._load_agent_info()
 
     # Test with expired timestamp
-    with patch("builtins.open", mock_open(read_data=json.dumps({
-        "SSH_AUTH_SOCK": "test_sock",
-        "SSH_AGENT_PID": "test_pid",
-        "timestamp": 0,
-        "platform": os.name
-    }))):
+    with patch(
+        "builtins.open",
+        mock_open(
+            read_data=json.dumps(
+                {"SSH_AUTH_SOCK": "test_sock", "SSH_AGENT_PID": "test_pid", "timestamp": 0, "platform": os.name}
+            )
+        ),
+    ):
         assert not ssh_manager._load_agent_info()
 
 
@@ -114,19 +116,13 @@ def test_verify_loaded_key(ssh_manager):
     with patch("subprocess.run") as mock_subprocess_run:
         # Test successful verification
         mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=["ssh-add", "-l"],
-            returncode=0,
-            stdout="test_key",
-            stderr=""
+            args=["ssh-add", "-l"], returncode=0, stdout="test_key", stderr=""
         )
         assert ssh_manager._verify_loaded_key("test_key")
 
         # Test failed verification
         mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=["ssh-add", "-l"],
-            returncode=1,
-            stdout="",
-            stderr="error"
+            args=["ssh-add", "-l"], returncode=1, stdout="", stderr="error"
         )
         assert not ssh_manager._verify_loaded_key("test_key")
 
@@ -139,21 +135,11 @@ def test_start_ssh_agent_failure_modes(ssh_manager):
     """Test SSH agent startup failure modes."""
     with patch("subprocess.run") as mock_run:
         # Test agent start failure
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["ssh-agent"],
-            returncode=1,
-            stdout="",
-            stderr="error"
-        )
+        mock_run.return_value = subprocess.CompletedProcess(args=["ssh-agent"], returncode=1, stdout="", stderr="error")
         assert not ssh_manager._start_ssh_agent("test_key")
 
         # Test empty agent output
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["ssh-agent"],
-            returncode=0,
-            stdout="",
-            stderr=""
-        )
+        mock_run.return_value = subprocess.CompletedProcess(args=["ssh-agent"], returncode=0, stdout="", stderr="")
         assert not ssh_manager._start_ssh_agent("test_key")
 
 
@@ -219,8 +205,7 @@ def test_get_identity_file_sources(ssh_manager, tmp_path):
     key_file = ssh_dir / "id_rsa"
     key_file.write_text("test content")
 
-    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), \
-         patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
+    with patch.object(ssh_manager, "_ssh_dir", ssh_dir), patch.object(ssh_manager.ssh_key_manager, "ssh_dir", ssh_dir):
         # Test environment variable source
         with patch.dict(os.environ, {"SSH_IDENTITY_FILE": str(key_file)}):
             assert _normalize_path(ssh_manager._get_identity_file("github.com")) == _normalize_path(str(key_file))
@@ -233,6 +218,7 @@ def test_get_identity_file_sources(ssh_manager, tmp_path):
         # Recreate SSH config parser with test directory
         # Import third-party modules
         from persistent_ssh_agent.ssh_config_parser import SSHConfigParser
+
         ssh_manager.ssh_config_parser = SSHConfigParser(ssh_dir)
 
         assert _normalize_path(ssh_manager._get_identity_file("github.com")) == _normalize_path(str(key_file))
@@ -270,7 +256,7 @@ def test_test_ssh_connection_scenarios(ssh_manager):
             args=["ssh", "-T", "-o", "StrictHostKeyChecking=no", "git@test_host"],
             returncode=1,  # Git servers often return 1 for successful auth
             stdout="Hi user! You've successfully authenticated",
-            stderr=""
+            stderr="",
         )
         assert ssh_manager._test_ssh_connection("test_host")
 
@@ -279,7 +265,7 @@ def test_test_ssh_connection_scenarios(ssh_manager):
             args=["ssh", "-T", "-o", "StrictHostKeyChecking=no", "git@test_host"],
             returncode=255,  # SSH specific error code
             stdout="",
-            stderr="Connection refused"
+            stderr="Connection refused",
         )
         assert not ssh_manager._test_ssh_connection("test_host")
 
@@ -292,11 +278,11 @@ def test_setup_ssh_with_identity_file(ssh_manager):
     """Test SSH setup with identity file."""
     test_key = "/tmp/test_key"
 
-    with patch.object(ssh_manager, "_start_ssh_agent") as mock_start, \
-         patch.object(ssh_manager, "_test_ssh_connection") as mock_test, \
-         patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, \
-         patch("os.path.exists") as mock_exists:
-
+    with patch.object(ssh_manager, "_start_ssh_agent") as mock_start, patch.object(
+        ssh_manager, "_test_ssh_connection"
+    ) as mock_test, patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, patch(
+        "os.path.exists"
+    ) as mock_exists:
         # Test successful setup
         mock_start.return_value = True
         mock_test.return_value = True
@@ -372,10 +358,9 @@ def test_try_add_key_without_passphrase(ssh_manager):
 
 def test_error_handling_scenarios(ssh_manager):
     """Test various error handling scenarios."""
-    with patch("os.path.exists") as mock_exists, \
-         patch("builtins.open", mock_open()) as mock_file, \
-         patch("json.dump") as mock_dump:
-
+    with patch("os.path.exists") as mock_exists, patch("builtins.open", mock_open()) as mock_file, patch(
+        "json.dump"
+    ) as mock_dump:
         # Test file operation errors
         mock_exists.return_value = True
         mock_dump.side_effect = IOError("Mock IO Error")
@@ -403,21 +388,15 @@ def test_ssh_key_management_edge_cases(ssh_manager):
 
         # Test add key with invalid process
         mock_run.side_effect = None
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=[],
-            returncode=1,
-            stdout=b"",
-            stderr=b"Invalid key"
-        )
+        mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout=b"", stderr=b"Invalid key")
         assert not ssh_manager._add_ssh_key("test_key")
 
 
 def test_identity_file_resolution(ssh_manager):
     """Test identity file resolution."""
-    with patch("os.path.expanduser") as mock_expand, \
-         patch("os.path.abspath") as mock_abspath, \
-         patch("os.path.exists") as mock_exists:
-
+    with patch("os.path.expanduser") as mock_expand, patch("os.path.abspath") as mock_abspath, patch(
+        "os.path.exists"
+    ) as mock_exists:
         # Test with absolute path
         mock_expand.return_value = "/absolute/path/key"
         mock_abspath.return_value = "/absolute/path/key"
@@ -447,16 +426,16 @@ def test_identity_file_resolution(ssh_manager):
 
 def test_available_keys_handling(ssh_manager):
     """Test handling of available SSH keys."""
-    with patch("persistent_ssh_agent.utils.run_command") as mock_run, \
-         patch("os.path.exists") as mock_exists, \
-         patch("glob.glob") as mock_glob:
+    with patch("persistent_ssh_agent.utils.run_command") as mock_run, patch("os.path.exists") as mock_exists, patch(
+        "glob.glob"
+    ) as mock_glob:
         # Mock ssh-add -l output
         mock_run.return_value = subprocess.CompletedProcess(
             args=[],
             returncode=0,
             stdout=b"""2048 SHA256:abc123 /home/user/.ssh/id_rsa (RSA)
 2048 SHA256:def456 /home/user/.ssh/id_rsa2 (RSA)""",
-            stderr=b""
+            stderr=b"",
         )
 
         # Mock file existence checks
@@ -466,7 +445,7 @@ def test_available_keys_handling(ssh_manager):
                 "/home/user/.ssh/id_rsa",
                 "/home/user/.ssh/id_rsa.pub",
                 "/home/user/.ssh/id_rsa2",
-                "/home/user/.ssh/id_rsa2.pub"
+                "/home/user/.ssh/id_rsa2.pub",
             ]
             return path_str in valid_paths
 
@@ -482,8 +461,9 @@ def test_available_keys_handling(ssh_manager):
         mock_glob.side_effect = glob_side_effect
 
         # Mock the _ssh_dir property and ssh_key_manager
-        with patch.object(ssh_manager, "_ssh_dir", Path("/home/user/.ssh")), \
-             patch.object(ssh_manager.ssh_key_manager, "ssh_dir", Path("/home/user/.ssh")):
+        with patch.object(ssh_manager, "_ssh_dir", Path("/home/user/.ssh")), patch.object(
+            ssh_manager.ssh_key_manager, "ssh_dir", Path("/home/user/.ssh")
+        ):
             # Test getting available keys
             keys = ssh_manager._get_available_keys()
             # Should find both id_rsa (base key) and id_rsa2 (numbered key)
@@ -494,18 +474,16 @@ def test_available_keys_handling(ssh_manager):
 
 def test_ssh_agent_info_handling(ssh_manager):
     """Test SSH agent info handling."""
-    with patch("builtins.open", mock_open()), \
-         patch("json.load") as mock_load, \
-         patch("pathlib.Path.exists") as mock_exists, \
-         patch("subprocess.run") as mock_subprocess_run:
-
+    with patch("builtins.open", mock_open()), patch("json.load") as mock_load, patch(
+        "pathlib.Path.exists"
+    ) as mock_exists, patch("subprocess.run") as mock_subprocess_run:
         # Set up mocks for successful load
         mock_exists.return_value = True
         mock_load.return_value = {
             "timestamp": time.time(),
             "SSH_AUTH_SOCK": "test_sock",
             "SSH_AGENT_PID": "test_pid",
-            "platform": os.name
+            "platform": os.name,
         }
         mock_subprocess_run.return_value = subprocess.CompletedProcess(
             args=["ssh-add", "-l"], returncode=0, stdout=b"", stderr=b""
@@ -519,10 +497,7 @@ def test_ssh_agent_info_handling(ssh_manager):
         assert os.environ.get("SSH_AGENT_PID") == "test_pid"
 
         # Test with missing fields
-        mock_load.return_value = {
-            "timestamp": time.time(),
-            "SSH_AUTH_SOCK": "test_sock"
-        }
+        mock_load.return_value = {"timestamp": time.time(), "SSH_AUTH_SOCK": "test_sock"}
         assert not ssh_manager._load_agent_info()
 
         # Test with expired timestamp
@@ -530,7 +505,7 @@ def test_ssh_agent_info_handling(ssh_manager):
             "timestamp": time.time() - 90000,  # Expired
             "SSH_AUTH_SOCK": "test_sock",
             "SSH_AGENT_PID": "test_pid",
-            "platform": os.name
+            "platform": os.name,
         }
         assert not ssh_manager._load_agent_info()
 
@@ -544,7 +519,7 @@ def test_ssh_agent_info_handling(ssh_manager):
             "timestamp": time.time(),
             "SSH_AUTH_SOCK": "test_sock",
             "SSH_AGENT_PID": "test_pid",
-            "platform": os.name
+            "platform": os.name,
         }
         mock_subprocess_run.return_value = subprocess.CompletedProcess(
             args=["ssh-add", "-l"], returncode=2, stdout=b"", stderr=b""
@@ -554,19 +529,17 @@ def test_ssh_agent_info_handling(ssh_manager):
 
 def test_ssh_connection_handling(ssh_manager):
     """Test SSH connection handling."""
-    with patch("subprocess.run") as mock_subprocess_run, \
-         patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, \
-         patch("os.path.exists") as mock_exists, \
-         patch.object(ssh_manager, "_start_ssh_agent") as mock_start_agent:
-
+    with patch("subprocess.run") as mock_subprocess_run, patch.object(
+        ssh_manager, "_get_identity_file"
+    ) as mock_get_identity, patch("os.path.exists") as mock_exists, patch.object(
+        ssh_manager, "_start_ssh_agent"
+    ) as mock_start_agent:
         mock_get_identity.return_value = "/path/to/key"
         mock_exists.return_value = True
         mock_start_agent.return_value = True
 
         # Test successful connection (returncode=1 is success for Git servers)
-        mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=1, stdout=b"", stderr=b""
-        )
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout=b"", stderr=b"")
         assert ssh_manager._test_ssh_connection("test.example.com")
 
         # Test failed connection
@@ -582,11 +555,11 @@ def test_ssh_connection_handling(ssh_manager):
 
 def test_git_ssh_command_generation(ssh_manager):
     """Test Git SSH command generation."""
-    with patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, \
-         patch("os.path.exists") as mock_exists, \
-         patch.object(ssh_manager, "_start_ssh_agent") as mock_start_agent, \
-         patch.object(ssh_manager, "_test_ssh_connection") as mock_test_connection:
-
+    with patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, patch(
+        "os.path.exists"
+    ) as mock_exists, patch.object(ssh_manager, "_start_ssh_agent") as mock_start_agent, patch.object(
+        ssh_manager, "_test_ssh_connection"
+    ) as mock_test_connection:
         # Test with valid identity file
         mock_get_identity.return_value = "/path/to/key"
         mock_exists.return_value = True
@@ -605,11 +578,11 @@ def test_git_ssh_command_generation(ssh_manager):
 
 def test_ssh_setup_with_custom_config(ssh_manager):
     """Test SSH setup with custom configuration."""
-    with patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, \
-         patch.object(ssh_manager, "_start_ssh_agent") as mock_start_agent, \
-         patch.object(ssh_manager, "_test_ssh_connection") as mock_test_connection, \
-         patch("os.path.exists") as mock_exists:
-
+    with patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, patch.object(
+        ssh_manager, "_start_ssh_agent"
+    ) as mock_start_agent, patch.object(ssh_manager, "_test_ssh_connection") as mock_test_connection, patch(
+        "os.path.exists"
+    ) as mock_exists:
         # Test successful setup
         mock_get_identity.return_value = "/path/to/key"
         mock_exists.return_value = True
@@ -629,9 +602,7 @@ def test_ssh_setup_with_custom_config(ssh_manager):
 
 def test_ssh_agent_start_failure_scenarios(ssh_manager):
     """Test SSH agent start failure scenarios."""
-    with patch("persistent_ssh_agent.utils.run_command") as mock_run, \
-         patch("os.environ") as mock_environ:
-
+    with patch("persistent_ssh_agent.utils.run_command") as mock_run, patch("os.environ") as mock_environ:
         # Test agent start command failure
         mock_run.return_value = None
         mock_environ.copy.return_value = {}
@@ -639,9 +610,10 @@ def test_ssh_agent_start_failure_scenarios(ssh_manager):
 
         # Test agent environment variable setting failure
         mock_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=0,
+            args=[],
+            returncode=0,
             stdout=b"SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;\n",
-            stderr=b""
+            stderr=b"",
         )
         mock_environ.__setitem__.side_effect = Exception("Mock environ error")
         assert not ssh_manager._start_ssh_agent("test_key")
@@ -649,9 +621,7 @@ def test_ssh_agent_start_failure_scenarios(ssh_manager):
 
 def test_file_operation_errors(ssh_manager):
     """Test file operation error scenarios."""
-    with patch("builtins.open") as mock_open, \
-         patch("os.path.exists") as mock_exists:
-
+    with patch("builtins.open") as mock_open, patch("os.path.exists") as mock_exists:
         # Test file read error
         mock_exists.return_value = True
         mock_open.side_effect = PermissionError("Mock permission error")
@@ -667,6 +637,7 @@ def test_ssh_config_parsing_errors(ssh_manager):
     """Test SSH config parsing error scenarios."""
     # Import built-in modules
     from textwrap import dedent
+
     config_data = dedent("""
         Host test
             HostName test.example.com
@@ -675,8 +646,7 @@ def test_ssh_config_parsing_errors(ssh_manager):
             IdentityFile ~/.ssh/test_key
     """).lstrip()
 
-    with patch("pathlib.Path.exists") as mock_exists, \
-         patch("builtins.open", mock_open(read_data=config_data)):
+    with patch("pathlib.Path.exists") as mock_exists, patch("builtins.open", mock_open(read_data=config_data)):
         mock_exists.return_value = True
         config = ssh_manager._parse_ssh_config()
 
@@ -701,11 +671,9 @@ def test_ssh_config_parsing_errors(ssh_manager):
 
 def test_ssh_key_management_failures(ssh_manager):
     """Test SSH key management failure scenarios."""
-    with patch("persistent_ssh_agent.utils.run_command") as mock_run, \
-         patch("os.path.exists") as mock_exists, \
-         patch("builtins.open", mock_open(read_data="test key data")), \
-         patch("subprocess.Popen") as mock_popen:
-
+    with patch("persistent_ssh_agent.utils.run_command") as mock_run, patch("os.path.exists") as mock_exists, patch(
+        "builtins.open", mock_open(read_data="test key data")
+    ), patch("subprocess.Popen") as mock_popen:
         # Mock Popen to avoid actual subprocess creation
         mock_process = MagicMock()
         mock_process.communicate.return_value = (b"", b"Error loading key")
@@ -732,9 +700,9 @@ def test_ssh_key_management_failures(ssh_manager):
 
 def test_ssh_connection_failures(ssh_manager):
     """Test SSH connection failure scenarios."""
-    with patch("persistent_ssh_agent.utils.run_command") as mock_run, \
-         patch.object(ssh_manager, "_get_identity_file") as mock_get_identity:
-
+    with patch("persistent_ssh_agent.utils.run_command") as mock_run, patch.object(
+        ssh_manager, "_get_identity_file"
+    ) as mock_get_identity:
         # Test connection with invalid hostname
         assert not ssh_manager._test_ssh_connection("invalid@host")
 
@@ -752,9 +720,7 @@ def test_ssh_connection_failures(ssh_manager):
 
 def test_git_command_edge_cases(ssh_manager):
     """Test Git command generation edge cases."""
-    with patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, \
-         patch("os.path.exists") as mock_exists:
-
+    with patch.object(ssh_manager, "_get_identity_file") as mock_get_identity, patch("os.path.exists") as mock_exists:
         # Test with missing identity file
         mock_get_identity.return_value = None
         assert ssh_manager.git.get_git_ssh_command("github.com") is None
@@ -780,8 +746,7 @@ def test_git_credential_helper(ssh_manager, tmp_path):
         os.chmod(credential_helper, 0o755)
 
     # Test get_git_credential_command
-    with patch("os.path.exists", return_value=True), \
-         patch("os.access", return_value=True):
+    with patch("os.path.exists", return_value=True), patch("os.access", return_value=True):
         helper_path = ssh_manager.git.get_git_credential_command(str(credential_helper))
         assert helper_path is not None
         assert str(credential_helper).replace("\\", "/") in helper_path
@@ -791,8 +756,9 @@ def test_git_credential_helper(ssh_manager, tmp_path):
         assert ssh_manager.git.get_git_credential_command("/non/existent/path") is None
 
     # Test configure_git_with_credential_helper
-    with patch.object(ssh_manager.git, "get_git_credential_command") as mock_get_credential, \
-         patch("subprocess.run") as mock_subprocess_run:
+    with patch.object(ssh_manager.git, "get_git_credential_command") as mock_get_credential, patch(
+        "subprocess.run"
+    ) as mock_subprocess_run:
         mock_get_credential.return_value = str(credential_helper)
         mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
 
@@ -822,8 +788,9 @@ def test_setup_git_credentials(ssh_manager):
         assert "credential.helper" in config_call_args
 
     # Test with environment variables
-    with patch.dict(os.environ, {"GIT_USERNAME": "envuser", "GIT_PASSWORD": "envpass"}), \
-         patch("subprocess.run") as mock_subprocess_run:
+    with patch.dict(os.environ, {"GIT_USERNAME": "envuser", "GIT_PASSWORD": "envpass"}), patch(
+        "subprocess.run"
+    ) as mock_subprocess_run:
         mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
 
         assert ssh_manager.git.setup_git_credentials() is True
@@ -863,18 +830,14 @@ def test_setup_git_credentials_stderr_handling(ssh_manager):
 
     # Test with empty stderr
     with patch("subprocess.run") as mock_subprocess_run:
-        mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=1, stderr=""
-        )
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stderr="")
 
         result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
         assert result is False
 
     # Test with None stderr
     with patch("subprocess.run") as mock_subprocess_run:
-        mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=1, stderr=None
-        )
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stderr=None)
 
         result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
         assert result is False
@@ -893,18 +856,14 @@ def test_get_current_credential_helpers(ssh_manager):
 
     # Test with single helper
     with patch("subprocess.run") as mock_subprocess_run:
-        mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=0, stdout="helper1\n"
-        )
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\n")
 
         helpers = ssh_manager.git.get_current_credential_helpers()
         assert helpers == ["helper1"]
 
     # Test with no helpers
     with patch("subprocess.run") as mock_subprocess_run:
-        mock_subprocess_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=1, stdout=""
-        )
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=1, stdout="")
 
         helpers = ssh_manager.git.get_current_credential_helpers()
         assert helpers == []
@@ -941,7 +900,7 @@ def test_clear_credential_helpers(ssh_manager):
         # Mock get_current_credential_helpers to return helpers
         mock_subprocess_run.side_effect = [
             subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\nhelper2\n"),
-            subprocess.CompletedProcess(args=[], returncode=0)
+            subprocess.CompletedProcess(args=[], returncode=0),
         ]
 
         result = ssh_manager.git.clear_credential_helpers()
@@ -969,7 +928,7 @@ def test_clear_credential_helpers(ssh_manager):
     with patch("subprocess.run") as mock_subprocess_run:
         mock_subprocess_run.side_effect = [
             subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\n"),
-            subprocess.CompletedProcess(args=[], returncode=1, stderr="Error clearing helpers")
+            subprocess.CompletedProcess(args=[], returncode=1, stderr="Error clearing helpers"),
         ]
 
         result = ssh_manager.git.clear_credential_helpers()
@@ -983,9 +942,10 @@ def test_setup_git_credentials_with_multiple_values_error(ssh_manager):
         mock_subprocess_run.side_effect = [
             subprocess.CompletedProcess(args=[], returncode=0, stdout="helper1\nhelper2\n"),
             subprocess.CompletedProcess(
-                args=[], returncode=1,
-                stderr="warning: credential.helper has multiple values\nerror: cannot overwrite multiple values"
-            )
+                args=[],
+                returncode=1,
+                stderr="warning: credential.helper has multiple values\nerror: cannot overwrite multiple values",
+            ),
         ]
 
         result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
@@ -1021,7 +981,7 @@ def test_credential_escaping(ssh_manager):
 
     # Test Unix escaping
     with patch("os.name", "posix"):
-        escaped = ssh_manager.git._escape_credential_value('test"value\'special')
+        escaped = ssh_manager.git._escape_credential_value("test\"value'special")
         assert '\\"' in escaped  # Double quotes should be escaped
         # Test that single quotes are properly escaped
         assert "'\"'\"'" in escaped
@@ -1045,12 +1005,12 @@ def test_error_handling_edge_cases(ssh_manager):
     """Test error handling edge cases."""
     # Import built-in modules
     import time
-    with patch("persistent_ssh_agent.utils.run_command") as mock_run, \
-         patch("builtins.open", mock_open()) as mock_file, \
-         patch("os.path.exists") as mock_exists, \
-         patch("json.load") as mock_load, \
-         patch("os.name", "nt"):  # Mock Windows platform for consistent testing
 
+    with patch("persistent_ssh_agent.utils.run_command") as mock_run, patch(
+        "builtins.open", mock_open()
+    ) as mock_file, patch("os.path.exists") as mock_exists, patch("json.load") as mock_load, patch(
+        "os.name", "nt"
+    ):  # Mock Windows platform for consistent testing
         # Test file read error with permission denied
         mock_exists.return_value = True
         mock_file.side_effect = PermissionError("Mock permission error")
@@ -1067,10 +1027,13 @@ def test_error_handling_edge_cases(ssh_manager):
             "timestamp": time.time(),
             "SSH_AUTH_SOCK": "test_sock",
             "SSH_AGENT_PID": "test_pid",
-            "platform": "nt"  # Match the mocked Windows platform
+            "platform": "nt",  # Match the mocked Windows platform
         }
         mock_run.return_value = subprocess.CompletedProcess(
-            args=[], returncode=2, stdout=b"", stderr=b""  # Return code 2 indicates agent not running
+            args=[],
+            returncode=2,
+            stdout=b"",
+            stderr=b"",  # Return code 2 indicates agent not running
         )
         with patch.dict(os.environ, {}, clear=True):
             assert not ssh_manager._load_agent_info()
@@ -1080,7 +1043,7 @@ def test_error_handling_edge_cases(ssh_manager):
             "timestamp": time.time(),
             "SSH_AUTH_SOCK": "test_sock",
             "SSH_AGENT_PID": "test_pid",
-            "platform": "posix"  # Mismatch with Windows platform
+            "platform": "posix",  # Mismatch with Windows platform
         }
         assert not ssh_manager._load_agent_info()
 
@@ -1089,6 +1052,7 @@ def test_ssh_config_advanced_parsing(ssh_manager):
     """Test advanced SSH config parsing scenarios."""
     # Import built-in modules
     from textwrap import dedent
+
     config_data = dedent("""
         Host *
             Port 22
@@ -1115,8 +1079,7 @@ def test_ssh_config_advanced_parsing(ssh_manager):
         Include ~/.ssh/config.d/*.conf
     """).lstrip()
 
-    with patch("pathlib.Path.exists") as mock_exists, \
-         patch("builtins.open", mock_open(read_data=config_data)):
+    with patch("pathlib.Path.exists") as mock_exists, patch("builtins.open", mock_open(read_data=config_data)):
         mock_exists.return_value = True
 
         # Mock glob for Include directive
@@ -1154,11 +1117,16 @@ def test_ssh_config_advanced_parsing(ssh_manager):
 
             # Test Include directive
             mock_glob.return_value = ["/path/to/included.conf"]
-            with patch("builtins.open", mock_open(read_data="""
+            with patch(
+                "builtins.open",
+                mock_open(
+                    read_data="""
 Host included
     HostName included.example.com
     User includeduser
-""")):
+"""
+                ),
+            ):
                 config = ssh_manager._parse_ssh_config()
                 assert "included" in config
                 assert config["included"]["hostname"] == "included.example.com"
@@ -1206,7 +1174,7 @@ def test_agent_reuse_enabled(tmp_path):
         "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
         "SSH_AGENT_PID": "12345",
         "timestamp": time.time(),
-        "platform": "nt" if os.name == "nt" else "posix"
+        "platform": "nt" if os.name == "nt" else "posix",
     }
     with open(agent._agent_info_file, "w") as f:
         json.dump(agent_info, f)
@@ -1238,7 +1206,7 @@ def test_agent_reuse_disabled(tmp_path):
         "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
         "SSH_AGENT_PID": "12345",
         "timestamp": time.time(),
-        "platform": "nt" if os.name == "nt" else "posix"
+        "platform": "nt" if os.name == "nt" else "posix",
     }
     with open(agent._agent_info_file, "w") as f:
         json.dump(agent_info, f)
@@ -1275,7 +1243,7 @@ def test_agent_reuse_expired(tmp_path):
         "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
         "SSH_AGENT_PID": "12345",
         "timestamp": time.time() - 2,  # Expired
-        "platform": "nt" if os.name == "nt" else "posix"
+        "platform": "nt" if os.name == "nt" else "posix",
     }
     with open(agent._agent_info_file, "w") as f:
         json.dump(agent_info, f)
@@ -1298,7 +1266,7 @@ def test_agent_reuse_with_existing_key(tmp_path):
         "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
         "SSH_AGENT_PID": "12345",
         "timestamp": time.time(),
-        "platform": "nt" if os.name == "nt" else "posix"
+        "platform": "nt" if os.name == "nt" else "posix",
     }
     with open(agent._agent_info_file, "w") as f:
         json.dump(agent_info, f)
@@ -1335,7 +1303,7 @@ def test_agent_reuse_with_key_not_loaded(tmp_path):
         "SSH_AUTH_SOCK": "/tmp/ssh-agent.sock",
         "SSH_AGENT_PID": "12345",
         "timestamp": time.time(),
-        "platform": "nt" if os.name == "nt" else "posix"
+        "platform": "nt" if os.name == "nt" else "posix",
     }
     with open(agent._agent_info_file, "w") as f:
         json.dump(agent_info, f)
