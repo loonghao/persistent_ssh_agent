@@ -197,15 +197,16 @@ def test_run_command_success():
     # Mock subprocess.run to return success
     mock_result = MagicMock()
     mock_result.returncode = 0
-    mock_result.stdout = "success"
+    mock_result.stdout = b"success"  # Should be bytes for new implementation
+    mock_result.stderr = b""
     with patch("subprocess.run", return_value=mock_result):
         # Call run_command
         result = run_command(["echo", "test"])
 
         # Verify the result
-        assert result is mock_result
+        assert result is not None
         assert result.returncode == 0
-        assert result.stdout == "success"
+        assert result.stdout == "success"  # Should be decoded to string
 
 
 def test_run_command_failure():

@@ -115,6 +115,7 @@ def test_start_ssh_agent_reuse(ssh_manager, mocker):
     class MockResult:
         returncode = 0
         stdout = "SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
+        stderr = ""
 
     def mock_run_command_side_effect(command, **kwargs):
         if command == ["ssh-agent", "-s"] or command == ["ssh-add", "-l"]:
@@ -188,6 +189,7 @@ def test_start_ssh_agent_platform_specific(ssh_manager, mocker):
     class MockResult:
         returncode = 0
         stdout = "SSH_AUTH_SOCK=/tmp/ssh-XXX/agent.123; export SSH_AUTH_SOCK;\nSSH_AGENT_PID=123; export SSH_AGENT_PID;"
+        stderr = ""
 
     def mock_run_command_side_effect(command, **kwargs):
         if command == ["ssh-agent", "-s"] or command == ["ssh-agent"] or command == ["ssh-add", "-l"]:
