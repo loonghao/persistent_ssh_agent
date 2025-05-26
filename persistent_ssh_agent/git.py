@@ -210,6 +210,43 @@ class GitIntegration:
             logger.debug("Failed to get current credential helpers: %s", str(e))
             return []
 
+    def clear_credential_helpers(self) -> bool:
+        """Clear all existing Git credential helpers.
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Check if there are any credential helpers to clear
+            current_helpers = self.get_current_credential_helpers()
+            if not current_helpers:
+                logger.debug("No credential helpers to clear")
+                return True
+
+            logger.debug("Clearing %d existing credential helpers", len(current_helpers))
+
+            # Clear all credential helpers
+            result = run_command([
+                "git", "config", "--global", "--unset-all", "credential.helper"
+            ])
+
+            if not result or result.returncode != 0:
+                logger.error("Failed to clear Git credential helpers")
+                if result and result.stderr:
+                    # Handle both string and bytes stderr output
+                    stderr_msg = result.stderr
+                    if isinstance(stderr_msg, bytes):
+                        stderr_msg = stderr_msg.decode("utf-8", errors="replace")
+                    logger.error("Git config error: %s", stderr_msg.strip())
+                return False
+
+            logger.debug("Successfully cleared all credential helpers")
+            return True
+
+        except Exception as e:
+            logger.error("Failed to clear Git credential helpers: %s", str(e))
+            return False
+
     def setup_git_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> bool:
         """Set up Git credential helper with environment variables (simplified version).
 
@@ -270,6 +307,12 @@ class GitIntegration:
                     if isinstance(stderr_msg, bytes):
                         stderr_msg = stderr_msg.decode("utf-8", errors="replace")
                     logger.error("Git config error: %s", stderr_msg.strip())
+
+                    # Provide helpful suggestions for common errors
+                    if "multiple values" in stderr_msg.lower():
+                        logger.info("💡 Suggestion: Try clearing existing credential helpers first:")
+                        logger.info("   uvx persistent_ssh_agent git-clear")
+                        logger.info("   Then run git-setup again")
                 return False
 
             logger.debug("Git credentials configured successfully")

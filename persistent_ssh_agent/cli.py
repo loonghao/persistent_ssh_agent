@@ -1129,13 +1129,13 @@ def git_debug_cmd(ctx):
         try:
             result = run_command(["git", "config", "--global", "--list", "--show-origin"])
             if result and result.returncode == 0:
-                lines = result.stdout.strip().split('\n')
+                lines = result.stdout.strip().split("\n")
                 global_config_file = None
                 for line in lines:
-                    if 'credential.helper=' in line:
-                        parts = line.split('\t', 1)
+                    if "credential.helper=" in line:
+                        parts = line.split("\t", 1)
                         if len(parts) == 2:
-                            config_file = parts[0].replace('file:', '')
+                            config_file = parts[0].replace("file:", "")
                             if global_config_file != config_file:
                                 global_config_file = config_file
                                 logger.info(f"  Global: {config_file}")
@@ -1145,9 +1145,9 @@ def git_debug_cmd(ctx):
                     # Try to get global config file location
                     result = run_command(["git", "config", "--global", "--list", "--show-origin"])
                     if result and result.returncode == 0 and result.stdout:
-                        first_line = result.stdout.strip().split('\n')[0]
-                        if '\t' in first_line:
-                            config_file = first_line.split('\t')[0].replace('file:', '')
+                        first_line = result.stdout.strip().split("\n")[0]
+                        if "\t" in first_line:
+                            config_file = first_line.split("\t")[0].replace("file:", "")
                             logger.info(f"  Global: {config_file}")
         except Exception as e:
             logger.warning(f"Could not determine Git config file location: {e}")
@@ -1170,7 +1170,7 @@ def git_debug_cmd(ctx):
         logger.info("\n💡 Troubleshooting tips:")
         if len(current_helpers) > 1:
             logger.info("  - Multiple credential helpers detected")
-            logger.info("  - Use 'git config --global --unset-all credential.helper' to clear all")
+            logger.info("  - Use 'uvx persistent_ssh_agent git-clear' to clear all")
             logger.info("  - Then run 'uvx persistent_ssh_agent git-setup' again")
         elif not current_helpers:
             logger.info("  - No credential helpers configured")
@@ -1180,6 +1180,46 @@ def git_debug_cmd(ctx):
 
     except Exception as e:
         logger.error("Failed to debug Git configuration: %s", str(e))
+        if ctx.obj.get("debug", False):
+            logger.exception("Full traceback:")
+        sys.exit(1)
+
+
+@main.command("git-clear", help="Clear all Git credential helpers")
+@click.option("--confirm", is_flag=True, help="Skip confirmation prompt")
+@click.pass_context
+def git_clear_cmd(ctx, confirm):
+    """Clear all Git credential helpers."""
+    try:
+        ssh_agent = PersistentSSHAgent()
+
+        # Get current credential helpers
+        current_helpers = ssh_agent.git.get_current_credential_helpers()
+
+        if not current_helpers:
+            logger.info("✅ No credential helpers found to clear")
+            return
+
+        # Show what will be cleared
+        logger.info("🔍 Found %d credential helper(s) to clear:", len(current_helpers))
+        for i, helper in enumerate(current_helpers, 1):
+            logger.info(f"  {i}. {helper}")
+
+        # Confirm action unless --confirm flag is used
+        if not confirm and not click.confirm("\n⚠️  Are you sure you want to clear all credential helpers?"):
+            logger.info("❌ Operation cancelled")
+            return
+
+        # Clear credential helpers
+        if ssh_agent.git.clear_credential_helpers():
+            logger.info("✅ Successfully cleared all Git credential helpers")
+            logger.info("💡 You can now run 'uvx persistent_ssh_agent git-setup --prompt' to configure new credentials")
+        else:
+            logger.error("❌ Failed to clear Git credential helpers")
+            sys.exit(1)
+
+    except Exception as e:
+        logger.error("Failed to clear Git credential helpers: %s", str(e))
         if ctx.obj.get("debug", False):
             logger.exception("Full traceback:")
         sys.exit(1)
