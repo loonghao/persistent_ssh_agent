@@ -954,37 +954,49 @@ def test_setup_git_credentials_with_multiple_values_error(ssh_manager):
 
 
 def test_platform_specific_credential_helper(ssh_manager):
-    """Test platform-specific credential helper generation."""
-    # Test Windows credential helper
+    """Test platform-specific credential helper file creation."""
+    # Test Windows credential helper file creation
     with patch("os.name", "nt"):
-        helper = ssh_manager.git._create_platform_credential_helper("testuser", "testpass")
-        assert ";" in helper  # Windows uses semicolon to separate commands (PowerShell compatible)
-        assert "echo username=testuser" in helper
-        assert "echo password=testpass" in helper
-        assert helper.startswith("!")
-        assert "&&" not in helper  # Should not use cmd.exe specific syntax
+        helper_path = ssh_manager.git._create_credential_helper_file("testuser", "testpass")
+        assert helper_path is not None
+        assert helper_path.endswith(".bat")
+        assert os.path.exists(helper_path)
 
-    # Test Unix credential helper
+        # Verify file contents
+        with open(helper_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "testuser" in content
+            assert "testpass" in content
+            assert "@echo off" in content
+
+    # Test Unix credential helper file creation
     with patch("os.name", "posix"):
-        helper = ssh_manager.git._create_platform_credential_helper("testuser", "testpass")
-        assert "{ echo username=testuser; echo password=testpass; }" in helper
-        assert helper.startswith("!")
+        helper_path = ssh_manager.git._create_credential_helper_file("testuser", "testpass")
+        assert helper_path is not None
+        assert helper_path.endswith(".sh")
+        assert os.path.exists(helper_path)
+
+        # Verify file contents
+        with open(helper_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "testuser" in content
+            assert "testpass" in content
+            assert "#!/bin/sh" in content
 
 
-def test_credential_escaping(ssh_manager):
-    """Test credential value escaping for different platforms."""
-    # Test Windows escaping
-    with patch("os.name", "nt"):
-        escaped = ssh_manager.git._escape_credential_value('test"value%special')
-        assert '""' in escaped  # Double quotes should be escaped
-        assert "%%" in escaped  # Percent signs should be escaped
+def test_credential_helper_file_cleanup(ssh_manager):
+    """Test credential helper file cleanup functionality."""
+    # Create a temporary credential helper file
+    helper_path = ssh_manager.git._create_credential_helper_file("testuser", "testpass")
+    assert helper_path is not None
+    assert os.path.exists(helper_path)
 
-    # Test Unix escaping
-    with patch("os.name", "posix"):
-        escaped = ssh_manager.git._escape_credential_value("test\"value'special")
-        assert '\\"' in escaped  # Double quotes should be escaped
-        # Test that single quotes are properly escaped
-        assert "'\"'\"'" in escaped
+    # Test cleanup
+    ssh_manager.git._cleanup_credential_helper_file(helper_path)
+    assert not os.path.exists(helper_path)
+
+    # Test cleanup of non-existent file (should not raise error)
+    ssh_manager.git._cleanup_credential_helper_file("/non/existent/file")  # Should not raise
 
 
 def test_context_manager(ssh_manager):

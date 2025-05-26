@@ -80,6 +80,7 @@ def run_command(
     timeout: Optional[int] = None,
     env: Optional[Dict[str, str]] = None,
     encoding: Optional[str] = None,
+    input_data: Optional[str] = None,
 ) -> Optional[CompletedProcess]:
     """Run a command and return its output with robust encoding handling.
 
@@ -87,9 +88,10 @@ def run_command(
         command: Command and arguments to run
         shell: Whether to run command through shell
         check_output: Whether to capture command output
-        timeout: Command timeout in seconds
+        timeout: Command timeout in seconds (default: 30 seconds for Git commands)
         env: Environment variables for command
         encoding: Optional encoding hint for output decoding
+        input_data: Optional input data to send to the process
 
     Returns:
         CompletedProcess: CompletedProcess object if successful, None on error
@@ -99,17 +101,48 @@ def run_command(
         1. Capturing raw bytes output
         2. Intelligently detecting and converting encoding
         3. Providing fallback mechanisms for encoding errors
+        4. Automatic timeout for Git commands to prevent hanging
     """
     try:
+        # Set default timeout for Git commands to prevent hanging
+        if timeout is None and command and command[0] == "git":
+            timeout = 30  # 30 seconds default for Git commands
+
+        # Prepare input data if provided
+        input_bytes = None
+        if input_data:
+            input_bytes = input_data.encode("utf-8")
+
+        # Add non-interactive flags for Git commands to prevent hanging
+        enhanced_command = command.copy()
+        if command and command[0] == "git":
+            # Add batch mode and non-interactive flags
+            git_flags = []
+
+            # Check if this is a submodule command
+            if len(command) > 1 and command[1] == "submodule":
+                git_flags.extend(["-c", "core.askpass=true"])  # Prevent password prompts
+
+            # Check if this is a credential-related command
+            if any(arg.startswith("credential.helper=") for arg in command):
+                git_flags.extend(["-c", "core.askpass=true"])  # Prevent password prompts
+
+            # Insert flags after 'git' but before subcommand
+            if git_flags:
+                enhanced_command = [command[0]] + git_flags + command[1:]
+
+        logger.debug("Running command with timeout %s: %s", timeout, enhanced_command)
+
         # Capture raw bytes to handle encoding ourselves
         result = subprocess.run(
-            command,
+            enhanced_command,
             shell=shell,
             capture_output=check_output,
             text=False,  # Get raw bytes
             timeout=timeout,
             env=env,
-            check=False
+            check=False,
+            input=input_bytes
         )
 
         # If we captured output, decode it properly
@@ -120,8 +153,15 @@ def run_command(
 
         return result
 
-    except subprocess.TimeoutExpired:
-        logger.error("Command timed out: %s", command)
+    except subprocess.TimeoutExpired as e:
+        logger.error("Command timed out after %s seconds: %s", timeout, command)
+        # Try to kill the process if it's still running
+        try:
+            if hasattr(e, "process") and e.process:
+                e.process.kill()
+                e.process.wait(timeout=5)
+        except Exception:
+            pass  # Best effort cleanup
         return None
     except Exception as e:
         logger.error("Command failed: %s - %s", command, e)
