@@ -1,3 +1,13 @@
+## v0.9.0 (2025-05-26)
+
+### Feat
+
+- add Git credential helper clearing functionality and improve test coverage
+
+### Fix
+
+- handle multiple Git credential helpers with --replace-all flag
+
 ## v0.8.2 (2025-05-26)
 
 ### Fix
