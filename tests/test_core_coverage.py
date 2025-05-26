@@ -811,13 +811,15 @@ def test_setup_git_credentials(ssh_manager):
         mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
 
         assert ssh_manager.git.setup_git_credentials("testuser", "testpass") is True
-        mock_subprocess_run.assert_called_once()
+        # Should be called twice: once for get_current_credential_helpers, once for config
+        assert mock_subprocess_run.call_count == 2
 
-        # Verify the command contains the credentials
-        call_args = mock_subprocess_run.call_args[0][0]
-        assert "git" in call_args
-        assert "config" in call_args
-        assert "credential.helper" in call_args
+        # Verify the second call (config command) contains the credentials
+        config_call_args = mock_subprocess_run.call_args_list[1][0][0]
+        assert "git" in config_call_args
+        assert "config" in config_call_args
+        assert "--replace-all" in config_call_args
+        assert "credential.helper" in config_call_args
 
     # Test with environment variables
     with patch.dict(os.environ, {"GIT_USERNAME": "envuser", "GIT_PASSWORD": "envpass"}), \
@@ -825,7 +827,8 @@ def test_setup_git_credentials(ssh_manager):
         mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
 
         assert ssh_manager.git.setup_git_credentials() is True
-        mock_subprocess_run.assert_called_once()
+        # Should be called twice: once for get_current_credential_helpers, once for config
+        assert mock_subprocess_run.call_count == 2
 
     # Test with missing credentials
     with patch.dict(os.environ, {}, clear=True):
@@ -875,6 +878,60 @@ def test_setup_git_credentials_stderr_handling(ssh_manager):
 
         result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
         assert result is False
+
+
+def test_get_current_credential_helpers(ssh_manager):
+    """Test getting current Git credential helpers."""
+    # Test with multiple helpers
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="helper1\nhelper2\n"
+        )
+
+        helpers = ssh_manager.git.get_current_credential_helpers()
+        assert helpers == ["helper1", "helper2"]
+
+    # Test with single helper
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="helper1\n"
+        )
+
+        helpers = ssh_manager.git.get_current_credential_helpers()
+        assert helpers == ["helper1"]
+
+    # Test with no helpers
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(
+            args=[], returncode=1, stdout=""
+        )
+
+        helpers = ssh_manager.git.get_current_credential_helpers()
+        assert helpers == []
+
+    # Test with command failure
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = None
+
+        helpers = ssh_manager.git.get_current_credential_helpers()
+        assert helpers == []
+
+
+def test_setup_git_credentials_with_replace_all(ssh_manager):
+    """Test Git credentials setup uses --replace-all flag."""
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value = subprocess.CompletedProcess(args=[], returncode=0)
+
+        result = ssh_manager.git.setup_git_credentials("testuser", "testpass")
+        assert result is True
+
+        # Verify --replace-all flag is used
+        call_args = mock_subprocess_run.call_args[0][0]
+        assert "git" in call_args
+        assert "config" in call_args
+        assert "--global" in call_args
+        assert "--replace-all" in call_args
+        assert "credential.helper" in call_args
 
 
 def test_platform_specific_credential_helper(ssh_manager):
