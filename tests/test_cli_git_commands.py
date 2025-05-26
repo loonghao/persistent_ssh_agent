@@ -240,8 +240,15 @@ def test_git_integration_get_credential_helper_command():
     helper = agent.git.get_credential_helper_command("testuser", "testpass")
 
     assert helper is not None
-    assert "testuser" in helper
-    assert "testpass" in helper
+    # Now returns a file path instead of inline command
+    assert helper.endswith((".bat", ".sh"))
+    assert os.path.exists(helper)
+
+    # Verify the file contains the credentials
+    with open(helper, "r", encoding="utf-8") as f:
+        content = f.read()
+        assert "testuser" in content
+        assert "testpass" in content
 
 
 def test_git_integration_get_credential_helper_command_from_env():
@@ -254,8 +261,15 @@ def test_git_integration_get_credential_helper_command_from_env():
         helper = agent.git.get_credential_helper_command()
 
         assert helper is not None
-        assert "envuser" in helper
-        assert "envpass" in helper
+        # Now returns a file path instead of inline command
+        assert helper.endswith((".bat", ".sh"))
+        assert os.path.exists(helper)
+
+        # Verify the file contains the credentials
+        with open(helper, "r", encoding="utf-8") as f:
+            content = f.read()
+            assert "envuser" in content
+            assert "envpass" in content
 
 
 def test_git_integration_get_credential_helper_command_no_credentials():

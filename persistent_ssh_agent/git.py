@@ -296,8 +296,11 @@ class GitIntegration:
             logger.warning("No Git credentials provided, running command without authentication")
             return run_command(command)
 
-        # Create credential helper command
-        credential_helper = self._create_platform_credential_helper(git_username, git_password)
+        # Create credential helper script file
+        credential_helper_path = self._create_credential_helper_file(git_username, git_password)
+        if not credential_helper_path:
+            logger.error("Failed to create credential helper script")
+            return None
 
         # Add credential helper to the git command using -c option
         if command[0] == "git":
@@ -305,7 +308,7 @@ class GitIntegration:
             enhanced_command = [
                 command[0],  # 'git'
                 "-c",
-                f"credential.helper={credential_helper}",
+                f"credential.helper={credential_helper_path}",
                 *command[1:],  # rest of the command
             ]
         else:
@@ -342,10 +345,10 @@ class GitIntegration:
             logger.debug("No Git credentials provided for credential helper")
             return None
 
-        # Create and return credential helper command
-        credential_helper = self._create_platform_credential_helper(git_username, git_password)
-        logger.debug("Generated credential helper command")
-        return credential_helper
+        # Create and return credential helper script path
+        credential_helper_path = self._create_credential_helper_file(git_username, git_password)
+        logger.debug("Generated credential helper script: %s", credential_helper_path)
+        return credential_helper_path
 
     def test_credentials(
         self,
@@ -407,12 +410,15 @@ class GitIntegration:
             for test_url in test_urls:
                 logger.debug("Testing credentials for %s with URL: %s", host, test_url)
 
-                # Create credential helper command
-                credential_helper = self._create_platform_credential_helper(git_username, git_password)
+                # Create credential helper script
+                credential_helper_path = self._create_credential_helper_file(git_username, git_password)
+                if not credential_helper_path:
+                    logger.error("Failed to create credential helper script for %s", host)
+                    return False
 
                 # Run git ls-remote with credentials
                 result = run_command(
-                    ["git", "-c", f"credential.helper={credential_helper}", "ls-remote", test_url], timeout=timeout
+                    ["git", "-c", f"credential.helper={credential_helper_path}", "ls-remote", test_url], timeout=timeout
                 )
 
                 if result and result.returncode == 0:
@@ -557,13 +563,18 @@ class GitIntegration:
             else:
                 logger.debug("No existing credential helpers found")
 
-            # Create platform-specific credential helper command
-            credential_helper = self._create_platform_credential_helper(git_username, git_password)
+            # Create platform-specific credential helper script
+            credential_helper_path = self._create_credential_helper_file(git_username, git_password)
+            if not credential_helper_path:
+                logger.error("Failed to create credential helper script")
+                return False
 
-            logger.debug("Using credential helper command: %s", credential_helper)
+            logger.debug("Using credential helper script: %s", credential_helper_path)
 
             # Use --replace-all to handle multiple existing credential.helper values
-            result = run_command(["git", "config", "--global", "--replace-all", "credential.helper", credential_helper])
+            result = run_command([
+                "git", "config", "--global", "--replace-all", "credential.helper", credential_helper_path
+            ])
 
             if not result or result.returncode != 0:
                 logger.error("Failed to configure Git credential helper")
@@ -588,49 +599,72 @@ class GitIntegration:
             logger.error("Failed to set up Git credentials: %s", str(e))
             return False
 
-    def _create_platform_credential_helper(self, username: str, password: str) -> str:
-        """Create platform-specific credential helper command.
+    def _create_credential_helper_file(self, username: str, password: str) -> Optional[str]:
+        """Create a temporary credential helper script file.
 
         Args:
             username: Git username
             password: Git password/token
 
         Returns:
-            str: Platform-specific credential helper command
+            str: Path to the credential helper script file, or None if creation failed
         """
-        # Escape special characters in credentials
-        escaped_username = self._escape_credential_value(username)
-        escaped_password = self._escape_credential_value(password)
+        try:
+            # Import built-in modules
+            import stat
+            import tempfile
 
-        if os.name == "nt":
-            # Windows: Use PowerShell compatible syntax
-            # Use semicolon to separate commands (works in both cmd and PowerShell)
-            credential_helper = f"!echo username={escaped_username}; echo password={escaped_password}"
-        else:
-            # Unix/Linux: Use bash compatible syntax
-            credential_helper = f"!f() {{ echo username={escaped_username}; echo password={escaped_password}; }}; f"
+            # Create temporary file for credential helper script
+            fd, script_path = tempfile.mkstemp(
+                suffix=".sh" if os.name != "nt" else ".bat",
+                prefix="git_credential_helper_",
+                text=True
+            )
 
-        return credential_helper
+            try:
+                with os.fdopen(fd, "w") as f:
+                    if os.name == "nt":
+                        # Windows batch file
+                        f.write("@echo off\n")
+                        f.write(f"echo username={username}\n")
+                        f.write(f"echo password={password}\n")
+                    else:
+                        # Unix shell script
+                        f.write("#!/bin/sh\n")
+                        f.write(f"printf 'username={username}\\n'\n")
+                        f.write(f"printf 'password={password}\\n'\n")
 
-    def _escape_credential_value(self, value: str) -> str:
-        """Escape special characters in credential values.
+                # Make script executable on Unix systems
+                if os.name != "nt":
+                    os.chmod(script_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
+
+                logger.debug("Created credential helper script: %s", script_path)
+                return script_path
+
+            except Exception as e:
+                # Clean up file descriptor if writing failed
+                # Import built-in modules
+                import contextlib
+                with contextlib.suppress(Exception):
+                    os.close(fd)
+                raise e
+
+        except Exception as e:
+            logger.error("Failed to create credential helper script: %s", e)
+            return None
+
+    def _cleanup_credential_helper_file(self, script_path: str) -> None:
+        """Clean up temporary credential helper script file.
 
         Args:
-            value: Credential value to escape
-
-        Returns:
-            str: Escaped credential value
+            script_path: Path to the credential helper script to remove
         """
-        # Escape characters that could cause issues in shell commands
-        # For both Windows and Unix, we need to handle quotes and special chars
-        if os.name == "nt":
-            # Windows cmd.exe escaping
-            # Escape double quotes and percent signs
-            return value.replace('"', '""').replace("%", "%%")
-
-        # Unix/Linux bash escaping
-        # Escape backslashes first, then double quotes, then single quotes
-        return value.replace("\\", "\\\\").replace('"', '\\"').replace("'", "'\"'\"'")
+        try:
+            if os.path.exists(script_path):
+                os.remove(script_path)
+                logger.debug("Cleaned up credential helper script: %s", script_path)
+        except Exception as e:
+            logger.warning("Failed to clean up credential helper script %s: %s", script_path, e)
 
     def _test_ssh_connection(self, hostname: str) -> bool:
         """Test SSH connection to a host.

@@ -17,6 +17,7 @@ docs/build/
 
 # Virtual environments and build
 /venv/
+.venv/
 /.nox/
 /build/
 /.zip/
