@@ -24,14 +24,64 @@ SSHOptionValue = Union[str, List[str]]
 logger = logging.getLogger(__name__)
 
 
+def _decode_subprocess_output(data: bytes, encoding_hint: Optional[str] = None) -> str:
+    """Decode subprocess output with intelligent encoding detection.
+
+    Args:
+        data: Raw bytes from subprocess
+        encoding_hint: Optional encoding hint to try first
+
+    Returns:
+        str: Decoded string
+    """
+    if not data:
+        return ""
+
+    # List of encodings to try in order
+    encodings_to_try = []
+
+    # Add encoding hint if provided
+    if encoding_hint:
+        encodings_to_try.append(encoding_hint)
+
+    # Add common encodings based on platform
+    if os.name == "nt":
+        # Windows: try UTF-8 first, then system default (usually GBK for Chinese), then fallbacks
+        encodings_to_try.extend(["utf-8", "gbk", "cp936", "latin1"])
+    else:
+        # Unix/Linux: try UTF-8 first, then fallbacks
+        encodings_to_try.extend(["utf-8", "latin1"])
+
+    # Try each encoding
+    for encoding in encodings_to_try:
+        try:
+            return data.decode(encoding)
+        except (UnicodeDecodeError, LookupError):
+            continue
+
+    # If all encodings fail, use UTF-8 with error replacement
+    try:
+        result = data.decode("utf-8", errors="replace")
+        logger.warning(
+            "Failed to decode subprocess output with standard encodings, "
+            "using UTF-8 with replacement characters"
+        )
+        return result
+    except Exception as e:
+        logger.error("Critical encoding error: %s", e)
+        # Last resort: return a safe representation
+        return repr(data)[2:-1]  # Remove b' and ' from repr
+
+
 def run_command(
     command: List[str],
     shell: bool = False,
     check_output: bool = True,
     timeout: Optional[int] = None,
     env: Optional[Dict[str, str]] = None,
+    encoding: Optional[str] = None,
 ) -> Optional[CompletedProcess]:
-    """Run a command and return its output.
+    """Run a command and return its output with robust encoding handling.
 
     Args:
         command: Command and arguments to run
@@ -39,15 +89,37 @@ def run_command(
         check_output: Whether to capture command output
         timeout: Command timeout in seconds
         env: Environment variables for command
+        encoding: Optional encoding hint for output decoding
 
     Returns:
         CompletedProcess: CompletedProcess object if successful, None on error
+
+    Note:
+        This function handles encoding issues by:
+        1. Capturing raw bytes output
+        2. Intelligently detecting and converting encoding
+        3. Providing fallback mechanisms for encoding errors
     """
     try:
+        # Capture raw bytes to handle encoding ourselves
         result = subprocess.run(
-            command, shell=shell, capture_output=check_output, text=True, timeout=timeout, env=env, check=False
+            command,
+            shell=shell,
+            capture_output=check_output,
+            text=False,  # Get raw bytes
+            timeout=timeout,
+            env=env,
+            check=False
         )
+
+        # If we captured output, decode it properly
+        if check_output and result.stdout is not None and isinstance(result.stdout, bytes):
+            result.stdout = _decode_subprocess_output(result.stdout, encoding)  # type: ignore
+        if check_output and result.stderr is not None and isinstance(result.stderr, bytes):
+            result.stderr = _decode_subprocess_output(result.stderr, encoding)  # type: ignore
+
         return result
+
     except subprocess.TimeoutExpired:
         logger.error("Command timed out: %s", command)
         return None
