@@ -194,6 +194,22 @@ class GitIntegration:
             logger.error("Failed to configure Git credential helper: %s", str(e))
             return False
 
+    def get_current_credential_helpers(self) -> List[str]:
+        """Get current Git credential helpers.
+
+        Returns:
+            List[str]: List of current credential helper configurations
+        """
+        try:
+            result = run_command(["git", "config", "--global", "--get-all", "credential.helper"])
+            if result and result.returncode == 0 and result.stdout:
+                helpers = [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
+                return helpers
+            return []
+        except Exception as e:
+            logger.debug("Failed to get current credential helpers: %s", str(e))
+            return []
+
     def setup_git_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> bool:
         """Set up Git credential helper with environment variables (simplified version).
 
@@ -228,13 +244,22 @@ class GitIntegration:
                 logger.error("Git credentials not provided via parameters or environment variables")
                 return False
 
+            # Check current credential helpers for debugging
+            current_helpers = self.get_current_credential_helpers()
+            if current_helpers:
+                logger.debug("Current credential helpers found: %s", current_helpers)
+                logger.debug("Will replace all existing credential helpers")
+            else:
+                logger.debug("No existing credential helpers found")
+
             # Create platform-specific credential helper command
             credential_helper = self._create_platform_credential_helper(git_username, git_password)
 
             logger.debug("Using credential helper command: %s", credential_helper)
 
+            # Use --replace-all to handle multiple existing credential.helper values
             result = run_command([
-                "git", "config", "--global", "credential.helper", credential_helper
+                "git", "config", "--global", "--replace-all", "credential.helper", credential_helper
             ])
 
             if not result or result.returncode != 0:

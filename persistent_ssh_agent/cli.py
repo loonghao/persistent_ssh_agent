@@ -26,6 +26,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from loguru import logger
 from persistent_ssh_agent import PersistentSSHAgent
 from persistent_ssh_agent.config import SSHConfig
+from persistent_ssh_agent.utils import run_command
 
 
 # Logger will be configured dynamically in main() based on --debug flag
@@ -1096,6 +1097,89 @@ def git_setup_cmd(ctx, username, password, prompt):
 
     except Exception as e:
         logger.error("Failed to set up Git credentials: %s", str(e))
+        if ctx.obj.get("debug", False):
+            logger.exception("Full traceback:")
+        sys.exit(1)
+
+
+@main.command("git-debug", help="Debug Git credential configuration")
+@click.pass_context
+def git_debug_cmd(ctx):
+    """Debug Git credential helper configuration."""
+    try:
+        ssh_agent = PersistentSSHAgent()
+
+        # Get current credential helpers
+        current_helpers = ssh_agent.git.get_current_credential_helpers()
+
+        logger.info("🔍 Git Credential Configuration Debug")
+        logger.info("=" * 50)
+
+        if current_helpers:
+            logger.info("📋 Current credential helpers:")
+            for i, helper in enumerate(current_helpers, 1):
+                logger.info(f"  {i}. {helper}")
+        else:
+            logger.info("📋 No credential helpers currently configured")
+
+        # Show Git config file locations
+        logger.info("\n📁 Git configuration file locations:")
+
+        # Global config
+        try:
+            result = run_command(["git", "config", "--global", "--list", "--show-origin"])
+            if result and result.returncode == 0:
+                lines = result.stdout.strip().split('\n')
+                global_config_file = None
+                for line in lines:
+                    if 'credential.helper=' in line:
+                        parts = line.split('\t', 1)
+                        if len(parts) == 2:
+                            config_file = parts[0].replace('file:', '')
+                            if global_config_file != config_file:
+                                global_config_file = config_file
+                                logger.info(f"  Global: {config_file}")
+                            logger.info(f"    - {parts[1]}")
+
+                if not global_config_file:
+                    # Try to get global config file location
+                    result = run_command(["git", "config", "--global", "--list", "--show-origin"])
+                    if result and result.returncode == 0 and result.stdout:
+                        first_line = result.stdout.strip().split('\n')[0]
+                        if '\t' in first_line:
+                            config_file = first_line.split('\t')[0].replace('file:', '')
+                            logger.info(f"  Global: {config_file}")
+        except Exception as e:
+            logger.warning(f"Could not determine Git config file location: {e}")
+
+        # Show environment variables
+        logger.info("\n🌍 Environment variables:")
+        git_username = os.environ.get("GIT_USERNAME")
+        git_password = os.environ.get("GIT_PASSWORD")
+
+        if git_username:
+            logger.info(f"  GIT_USERNAME: {git_username}")
+        else:
+            logger.info("  GIT_USERNAME: (not set)")
+
+        if git_password:
+            logger.info("  GIT_PASSWORD: (set, hidden)")
+        else:
+            logger.info("  GIT_PASSWORD: (not set)")
+
+        logger.info("\n💡 Troubleshooting tips:")
+        if len(current_helpers) > 1:
+            logger.info("  - Multiple credential helpers detected")
+            logger.info("  - Use 'git config --global --unset-all credential.helper' to clear all")
+            logger.info("  - Then run 'uvx persistent_ssh_agent git-setup' again")
+        elif not current_helpers:
+            logger.info("  - No credential helpers configured")
+            logger.info("  - Run 'uvx persistent_ssh_agent git-setup --prompt' to configure")
+        else:
+            logger.info("  - Single credential helper configured (normal)")
+
+    except Exception as e:
+        logger.error("Failed to debug Git configuration: %s", str(e))
         if ctx.obj.get("debug", False):
             logger.exception("Full traceback:")
         sys.exit(1)
