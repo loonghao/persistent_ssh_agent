@@ -43,10 +43,7 @@ def test_list_keys_empty(config_manager):
 def test_list_keys_with_keys(config_manager):
     """Test listing keys when there are keys."""
     # Mock keys data
-    keys_data = {
-        "github": "~/.ssh/github_key",
-        "gitlab": "~/.ssh/gitlab_key"
-    }
+    keys_data = {"github": "~/.ssh/github_key", "gitlab": "~/.ssh/gitlab_key"}
 
     # Mock ConfigManager.list_keys to return our test data
     with patch.object(ConfigManager, "list_keys", return_value=keys_data):

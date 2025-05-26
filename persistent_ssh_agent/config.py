@@ -1,4 +1,5 @@
 """Configuration management for SSH agent."""
+
 # Import built-in modules
 from dataclasses import dataclass
 from typing import Dict
@@ -8,6 +9,7 @@ from typing import Optional
 @dataclass
 class SSHConfig:
     """SSH configuration class."""
+
     # Path to identity file
     identity_file: Optional[str] = None
     # Identity file content (for CI environments)

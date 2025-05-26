@@ -76,15 +76,13 @@ def test_get_identity_from_available_keys(monkeypatch):
     ssh_agent = PersistentSSHAgent()
 
     # Test with available keys - mock the ssh_key_manager method directly
-    monkeypatch.setattr(ssh_agent.ssh_key_manager, "get_identity_from_available_keys",
-                       lambda: "/path/to/id_ed25519")
+    monkeypatch.setattr(ssh_agent.ssh_key_manager, "get_identity_from_available_keys", lambda: "/path/to/id_ed25519")
 
     identity_file = ssh_agent._get_identity_from_available_keys()
     assert identity_file == "/path/to/id_ed25519"  # Should return first key
 
     # Test with no available keys
-    monkeypatch.setattr(ssh_agent.ssh_key_manager, "get_identity_from_available_keys",
-                       lambda: None)
+    monkeypatch.setattr(ssh_agent.ssh_key_manager, "get_identity_from_available_keys", lambda: None)
 
     identity_file = ssh_agent._get_identity_from_available_keys()
     assert identity_file is None
@@ -134,6 +132,7 @@ def test_extract_hostname_valid_cases(ssh_agent):
     with patch("persistent_ssh_agent.utils.is_valid_hostname", return_value=True):
         # Import third-party modules
         from persistent_ssh_agent.utils import extract_hostname
+
         hostname = extract_hostname("git@github.com:user/repo.git")
         assert hostname == "github.com"
 
@@ -141,6 +140,7 @@ def test_extract_hostname_valid_cases(ssh_agent):
     with patch("persistent_ssh_agent.utils.is_valid_hostname", return_value=True):
         # Import third-party modules
         from persistent_ssh_agent.utils import extract_hostname
+
         hostname = extract_hostname("git@sub.example.com:user/repo.git")
         assert hostname == "sub.example.com"
 
@@ -180,11 +180,11 @@ def test_get_identity_from_ssh_config(ssh_agent, tmp_path):
     # Create SSH config file
     config_file = ssh_dir / "config"
     config_content = f"""Host github.com
-    IdentityFile {ssh_dir / 'github_key'}
+    IdentityFile {ssh_dir / "github_key"}
     User git
 
 Host *.gitlab.com
-    IdentityFile {ssh_dir / 'gitlab_key'}
+    IdentityFile {ssh_dir / "gitlab_key"}
     User git
 """
     config_file.write_text(config_content)
@@ -199,6 +199,7 @@ Host *.gitlab.com
         # Recreate SSH config parser with the test directory
         # Import third-party modules
         from persistent_ssh_agent.ssh_config_parser import SSHConfigParser
+
         ssh_agent.ssh_config_parser = SSHConfigParser(ssh_dir)
 
         # Test exact hostname match

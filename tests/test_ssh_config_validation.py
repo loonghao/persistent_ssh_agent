@@ -15,6 +15,7 @@ def temp_ssh_dir():
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
 
+
 @pytest.fixture
 def ssh_manager(temp_ssh_dir):
     """Create a PersistentSSHAgent instance for testing."""
@@ -22,10 +23,12 @@ def ssh_manager(temp_ssh_dir):
     agent._ssh_dir = temp_ssh_dir
     return agent
 
+
 def write_ssh_config(ssh_dir: Path, config_content: str):
     """Write SSH config content to a temporary file."""
     config_path = ssh_dir / "config"
     config_path.write_text(config_content)
+
 
 def test_connection_settings_validation(ssh_manager, temp_ssh_dir):
     """Test validation of connection-related settings."""
@@ -44,6 +47,7 @@ def test_connection_settings_validation(ssh_manager, temp_ssh_dir):
     config = ssh_manager._parse_ssh_config()
     assert "port" not in config.get("test", {})
 
+
 def test_security_settings_validation(ssh_manager, temp_ssh_dir):
     """Test validation of security-related settings."""
     # Test valid StrictHostKeyChecking options
@@ -58,6 +62,7 @@ def test_security_settings_validation(ssh_manager, temp_ssh_dir):
     config = ssh_manager._parse_ssh_config()
     assert "stricthostkeychecking" not in config.get("test", {})
 
+
 def test_connection_optimization_validation(ssh_manager, temp_ssh_dir):
     """Test validation of connection optimization settings."""
     # Test valid timeout
@@ -70,6 +75,7 @@ def test_connection_optimization_validation(ssh_manager, temp_ssh_dir):
     config = ssh_manager._parse_ssh_config()
     assert "connecttimeout" not in config.get("test", {})
 
+
 def test_proxy_forwarding_validation(ssh_manager, temp_ssh_dir):
     """Test validation of proxy and forwarding settings."""
     # Test valid ForwardAgent option
@@ -81,6 +87,7 @@ def test_proxy_forwarding_validation(ssh_manager, temp_ssh_dir):
     write_ssh_config(temp_ssh_dir, "Host test\n    ForwardAgent invalid")
     config = ssh_manager._parse_ssh_config()
     assert "forwardagent" not in config.get("test", {})
+
 
 def test_environment_settings_validation(ssh_manager, temp_ssh_dir):
     """Test validation of environment-related settings."""
@@ -96,6 +103,7 @@ def test_environment_settings_validation(ssh_manager, temp_ssh_dir):
     config = ssh_manager._parse_ssh_config()
     assert "requesttty" not in config.get("test", {})
 
+
 def test_multiplexing_settings_validation(ssh_manager, temp_ssh_dir):
     """Test validation of multiplexing-related settings."""
     # Test valid ControlMaster options
@@ -109,6 +117,7 @@ def test_multiplexing_settings_validation(ssh_manager, temp_ssh_dir):
     write_ssh_config(temp_ssh_dir, "Host test\n    ControlMaster invalid")
     config = ssh_manager._parse_ssh_config()
     assert "controlmaster" not in config.get("test", {})
+
 
 def test_canonicalization_settings_validation(ssh_manager, temp_ssh_dir):
     """Test validation of canonicalization settings."""
@@ -129,6 +138,7 @@ def test_canonicalization_settings_validation(ssh_manager, temp_ssh_dir):
     config = ssh_manager._parse_ssh_config()
     assert "canonicalizemaxdots" not in config.get("test", {})
 
+
 def test_multiple_value_options(ssh_manager, temp_ssh_dir):
     """Test handling of options that can have multiple values."""
     # Test multiple IdentityFile entries
@@ -148,6 +158,7 @@ def test_multiple_value_options(ssh_manager, temp_ssh_dir):
     config = ssh_manager._parse_ssh_config()
     assert isinstance(config["test"]["sendenv"], list)
     assert len(config["test"]["sendenv"]) == 2
+
 
 def test_invalid_config_format(ssh_manager, temp_ssh_dir):
     """Test handling of invalid configuration formats."""

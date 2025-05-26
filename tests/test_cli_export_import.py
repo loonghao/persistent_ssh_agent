@@ -31,12 +31,10 @@ def test_export_config_to_console(config_manager):
     # Mock configuration data
     config_data = {
         "identity_file": "~/.ssh/id_rsa",
-        "keys": {
-            "github": "~/.ssh/github_key"
-        },
+        "keys": {"github": "~/.ssh/github_key"},
         "expiration_time": 86400,
         "reuse_agent": True,
-        "passphrase": "encrypted_passphrase"
+        "passphrase": "encrypted_passphrase",
     }
 
     # Mock ConfigManager.export_config to return our test data
@@ -62,11 +60,9 @@ def test_export_config_to_file(config_manager, temp_dir):
     # Mock configuration data
     config_data = {
         "identity_file": "~/.ssh/id_rsa",
-        "keys": {
-            "github": "~/.ssh/github_key"
-        },
+        "keys": {"github": "~/.ssh/github_key"},
         "expiration_time": 86400,
-        "reuse_agent": True
+        "reuse_agent": True,
     }
 
     # Create output file path
@@ -98,10 +94,8 @@ def test_export_config_with_sensitive_data(config_manager):
     # Mock configuration data
     config_data = {
         "identity_file": "~/.ssh/id_rsa",
-        "keys": {
-            "github": "~/.ssh/github_key"
-        },
-        "passphrase": "encrypted_passphrase"
+        "keys": {"github": "~/.ssh/github_key"},
+        "passphrase": "encrypted_passphrase",
     }
 
     # Mock ConfigManager.export_config to return our test data
@@ -125,9 +119,7 @@ def test_export_config_with_sensitive_data(config_manager):
 def test_export_config_file_error(config_manager):
     """Test exporting configuration with file error."""
     # Mock configuration data
-    config_data = {
-        "identity_file": "~/.ssh/id_rsa"
-    }
+    config_data = {"identity_file": "~/.ssh/id_rsa"}
 
     # Mock ConfigManager.export_config to return our test data
     with patch.object(ConfigManager, "export_config", return_value=config_data):
@@ -156,12 +148,7 @@ def test_export_config_file_error(config_manager):
 def test_import_config_success(config_manager, temp_dir):
     """Test importing configuration successfully."""
     # Create test configuration data
-    config_data = {
-        "identity_file": "~/.ssh/id_rsa",
-        "keys": {
-            "github": "~/.ssh/github_key"
-        }
-    }
+    config_data = {"identity_file": "~/.ssh/id_rsa", "keys": {"github": "~/.ssh/github_key"}}
 
     # Create input file path
     input_file = os.path.join(temp_dir, "config_import.json")
@@ -207,8 +194,9 @@ def test_import_config_file_error(config_manager):
                         import_config(args)
 
                         # Verify logger was called with the expected error message
-                        assert any("Failed to import configuration" in call[0][0]
-                                   for call in mock_logger.error.call_args_list)
+                        assert any(
+                            "Failed to import configuration" in call[0][0] for call in mock_logger.error.call_args_list
+                        )
 
                         # Verify sys.exit was called with exit code 1
                         assert mock_exit.call_count >= 1
@@ -236,8 +224,9 @@ def test_import_config_json_error(config_manager):
                         import_config(args)
 
                         # Verify logger was called with the expected error message
-                        assert any("Failed to import configuration" in call[0][0]
-                                   for call in mock_logger.error.call_args_list)
+                        assert any(
+                            "Failed to import configuration" in call[0][0] for call in mock_logger.error.call_args_list
+                        )
 
                         # Verify sys.exit was called with exit code 1
                         assert mock_exit.call_count >= 1
@@ -247,9 +236,7 @@ def test_import_config_json_error(config_manager):
 def test_import_config_import_error(config_manager):
     """Test importing configuration with import error."""
     # Create test configuration data
-    config_data = {
-        "identity_file": "~/.ssh/id_rsa"
-    }
+    config_data = {"identity_file": "~/.ssh/id_rsa"}
 
     # Create mock ConfigManager instance
     with patch("persistent_ssh_agent.cli.ConfigManager", return_value=config_manager):
@@ -270,8 +257,10 @@ def test_import_config_import_error(config_manager):
                             import_config(args)
 
                             # Verify logger was called with the expected error message
-                            assert any(call[0][0] == "Failed to import configuration"
-                                       for call in mock_logger.error.call_args_list)
+                            assert any(
+                                call[0][0] == "Failed to import configuration"
+                                for call in mock_logger.error.call_args_list
+                            )
 
                             # Verify sys.exit was called with exit code 1
                             assert mock_exit.call_count >= 1

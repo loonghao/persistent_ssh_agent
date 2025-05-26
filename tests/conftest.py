@@ -61,14 +61,21 @@ def protected_ssh_key_pair():
     key_path = os.path.join(key_dir, "test_key")
     try:
         # Generate SSH key pair with password protection
-        subprocess.run([
-            "ssh-keygen",
-            "-t", "rsa",
-            "-b", "2048",
-            "-N", "testpass",
-            "-f", key_path,
-            "-q"  # Quiet mode
-        ], check=True)
+        subprocess.run(
+            [
+                "ssh-keygen",
+                "-t",
+                "rsa",
+                "-b",
+                "2048",
+                "-N",
+                "testpass",
+                "-f",
+                key_path,
+                "-q",  # Quiet mode
+            ],
+            check=True,
+        )
 
         # Read private and public key contents
         with open(key_path, "r") as f:
@@ -99,7 +106,4 @@ def mock_ssh_agent(monkeypatch):
     monkeypatch.setenv("SSH_AUTH_SOCK", agent_sock)
     monkeypatch.setenv("SSH_AGENT_PID", agent_pid)
 
-    return {
-        "SSH_AUTH_SOCK": agent_sock,
-        "SSH_AGENT_PID": agent_pid
-    }
+    return {"SSH_AUTH_SOCK": agent_sock, "SSH_AGENT_PID": agent_pid}

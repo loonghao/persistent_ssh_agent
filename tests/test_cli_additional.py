@@ -258,9 +258,7 @@ def test_export_config_to_file():
             mock_manager = MagicMock()
             mock_manager.export_config.return_value = {
                 "identity_file": "~/.ssh/id_rsa",
-                "keys": {
-                    "github": "~/.ssh/github_key"
-                }
+                "keys": {"github": "~/.ssh/github_key"},
             }
             mock_config_manager.return_value = mock_manager
 

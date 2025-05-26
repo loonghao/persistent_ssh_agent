@@ -10,12 +10,12 @@ class SSHAgentConstants:
 
     # SSH key types in order of preference (most secure first)
     SSH_KEY_TYPES: ClassVar[List[str]] = [
-        "id_ed25519",     # Ed25519 (recommended, most secure)
-        "id_ecdsa",       # ECDSA
-        "id_ecdsa_sk",    # ECDSA with security key
+        "id_ed25519",  # Ed25519 (recommended, most secure)
+        "id_ecdsa",  # ECDSA
+        "id_ecdsa_sk",  # ECDSA with security key
         "id_ed25519_sk",  # Ed25519 with security key
-        "id_rsa",         # RSA
-        "id_dsa"          # DSA (legacy, not recommended)
+        "id_rsa",  # RSA
+        "id_dsa",  # DSA (legacy, not recommended)
     ]
 
     # Default SSH key type for fallback
@@ -23,9 +23,12 @@ class SSHAgentConstants:
 
     # SSH command constants
     SSH_DEFAULT_OPTIONS: ClassVar[List[str]] = [
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "UserKnownHostsFile=/dev/null",
-        "-o", "LogLevel=ERROR"
+        "-o",
+        "StrictHostKeyChecking=no",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
+        "-o",
+        "LogLevel=ERROR",
     ]
 
     # SSH agent environment variables
@@ -54,13 +57,7 @@ class GitConstants:
     GIT_SSH_COMMAND_VAR: ClassVar[str] = "GIT_SSH_COMMAND"
 
     # Common Git hosts
-    COMMON_GIT_HOSTS: ClassVar[List[str]] = [
-        "github.com",
-        "gitlab.com",
-        "bitbucket.org",
-        "git.sr.ht",
-        "codeberg.org"
-    ]
+    COMMON_GIT_HOSTS: ClassVar[List[str]] = ["github.com", "gitlab.com", "bitbucket.org", "git.sr.ht", "codeberg.org"]
 
 
 class CLIConstants:
@@ -112,9 +109,4 @@ class AuthStrategyConstants:
 
 
 # Export all constants for easy access
-__all__ = [
-    "AuthStrategyConstants",
-    "CLIConstants",
-    "GitConstants",
-    "SSHAgentConstants"
-]
+__all__ = ["AuthStrategyConstants", "CLIConstants", "GitConstants", "SSHAgentConstants"]

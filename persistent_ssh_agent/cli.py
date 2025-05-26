@@ -355,7 +355,7 @@ class ConfigManager:
                 "hostname": socket.gethostname(),
                 "machine_id": self._get_machine_id(),
                 "username": username,
-                "home": str(Path.home())
+                "home": str(Path.home()),
             }
         except Exception as e:
             # If all else fails, use a default set of values
@@ -364,7 +364,7 @@ class ConfigManager:
                 "hostname": "unknown_host",
                 "machine_id": "unknown_machine",
                 "username": "unknown_user",
-                "home": "/unknown_home"
+                "home": "/unknown_home",
             }
 
         # Create a deterministic salt from system info
@@ -373,11 +373,7 @@ class ConfigManager:
 
         # Derive key using PBKDF2
         kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=KEY_SIZE,
-            salt=salt,
-            iterations=ITERATIONS,
-            backend=default_backend()
+            algorithm=hashes.SHA256(), length=KEY_SIZE, salt=salt, iterations=ITERATIONS, backend=default_backend()
         )
 
         # Use a combination of system info as the password
@@ -424,8 +420,8 @@ class ConfigManager:
             try:
                 # Import built-in modules
                 import winreg
-                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                    r"SOFTWARE\Microsoft\Cryptography") as key:
+
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Cryptography") as key:
                     machine_id = winreg.QueryValueEx(key, "MachineGuid")[0]
             except (ImportError, OSError):
                 pass
@@ -510,8 +506,8 @@ class ConfigManager:
             data = base64.b64decode(encrypted_data)
 
             # Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)
-            iv = data[SALT_SIZE:SALT_SIZE + IV_SIZE]
-            ciphertext = data[SALT_SIZE + IV_SIZE:]
+            iv = data[SALT_SIZE : SALT_SIZE + IV_SIZE]
+            ciphertext = data[SALT_SIZE + IV_SIZE :]
 
             # Get key using the same method as encryption
             key, _ = self._derive_key_from_system()
@@ -693,10 +689,7 @@ def run_ssh_connection_test(args):
             _configure_verbose_logging()
 
         # Create SSH configuration and agent
-        ssh_config = SSHConfig(
-            identity_file=identity_file,
-            identity_passphrase=passphrase
-        )
+        ssh_config = SSHConfig(identity_file=identity_file, identity_passphrase=passphrase)
         ssh_agent = PersistentSSHAgent(config=ssh_config)
 
         # Test connection
@@ -794,7 +787,7 @@ def _configure_verbose_logging():
             "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
             "<level>{message}</level>"
         ),
-        level="DEBUG"
+        level="DEBUG",
     )
 
 
@@ -958,7 +951,7 @@ def _configure_debug_logging():
             "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
             "<level>{message}</level>"
         ),
-        level="DEBUG"
+        level="DEBUG",
     )
 
 
@@ -973,16 +966,13 @@ def _configure_default_logging():
             "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
             "<level>{message}</level>"
         ),
-        level="INFO"
+        level="INFO",
     )
 
 
 @main.command("config", help="Configure SSH agent")
 @click.option("--identity-file", help="Path to SSH identity file")
-@click.option(
-    "--passphrase",
-    help="SSH key passphrase (not recommended, use --prompt-passphrase instead)"
-)
+@click.option("--passphrase", help="SSH key passphrase (not recommended, use --prompt-passphrase instead)")
 @click.option("--prompt-passphrase", is_flag=True, help="Prompt for SSH key passphrase")
 @click.option("--expiration", type=int, help="Expiration time in hours")
 @click.option("--reuse-agent", type=bool, help="Whether to reuse existing SSH agent")
@@ -993,7 +983,7 @@ def config_cmd(identity_file, passphrase, prompt_passphrase, expiration, reuse_a
         passphrase=passphrase,
         prompt_passphrase=prompt_passphrase,
         expiration=expiration,
-        reuse_agent=reuse_agent
+        reuse_agent=reuse_agent,
     )
 
     setup_config(args)
@@ -1003,20 +993,12 @@ def config_cmd(identity_file, passphrase, prompt_passphrase, expiration, reuse_a
 @click.argument("hostname")
 @click.option("--identity-file", help="Path to SSH identity file (overrides config)")
 @click.option("--expiration", type=int, help="Expiration time in hours (overrides config)")
-@click.option(
-    "--reuse-agent",
-    type=bool,
-    help="Whether to reuse existing SSH agent (overrides config)"
-)
+@click.option("--reuse-agent", type=bool, help="Whether to reuse existing SSH agent (overrides config)")
 @click.option("--verbose", is_flag=True, help="Enable verbose output")
 def test_cmd(hostname, identity_file, expiration, reuse_agent, verbose):
     """Test SSH connection to a host."""
     args = Args(
-        hostname=hostname,
-        identity_file=identity_file,
-        expiration=expiration,
-        reuse_agent=reuse_agent,
-        verbose=verbose
+        hostname=hostname, identity_file=identity_file, expiration=expiration, reuse_agent=reuse_agent, verbose=verbose
     )
 
     run_ssh_connection_test(args)

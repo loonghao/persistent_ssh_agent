@@ -31,6 +31,7 @@ from persistent_ssh_agent.utils import run_command
 try:
     # Import third-party modules
     from persistent_ssh_agent.cli import ConfigManager
+
     _has_cli = True
 except ImportError:
     _has_cli = False
@@ -62,9 +63,7 @@ class PersistentSSHAgent:
     authentication for various operations including Git.
     """
 
-    def __init__(self, config: Optional[SSHConfig] = None,
-                 expiration_time: int = 86400,
-                 reuse_agent: bool = True):
+    def __init__(self, config: Optional[SSHConfig] = None, expiration_time: int = 86400, reuse_agent: bool = True):
         """Initialize SSH manager.
 
         Args:
@@ -124,7 +123,7 @@ class PersistentSSHAgent:
             "SSH_AUTH_SOCK": auth_sock,
             "SSH_AGENT_PID": agent_pid,
             "timestamp": time.time(),
-            "platform": os.name
+            "platform": os.name,
         }
 
         try:
@@ -152,21 +151,20 @@ class PersistentSSHAgent:
             # Quick validation of required fields
             required_fields = ("SSH_AUTH_SOCK", "SSH_AGENT_PID", "timestamp", "platform")
             if not all(key in agent_info for key in required_fields):
-                logger.debug("Missing required agent info fields: %s",
-                             [f for f in required_fields if f not in agent_info])
+                logger.debug(
+                    "Missing required agent info fields: %s", [f for f in required_fields if f not in agent_info]
+                )
                 return False
 
             # Validate timestamp and platform
             current_time = time.time()
             if current_time - agent_info["timestamp"] > self._expiration_time:
-                logger.debug("Agent info expired: %d seconds old",
-                             current_time - agent_info["timestamp"])
+                logger.debug("Agent info expired: %d seconds old", current_time - agent_info["timestamp"])
                 return False
 
             # Platform check is only enforced on Windows
             if os.name == "nt" and agent_info["platform"] != "nt":
-                logger.debug("Platform mismatch: expected 'nt', got '%s'",
-                             agent_info["platform"])
+                logger.debug("Platform mismatch: expected 'nt', got '%s'", agent_info["platform"])
                 return False
 
             # Set environment variables
@@ -300,9 +298,7 @@ class PersistentSSHAgent:
         Returns:
             bool: True if connection successful
         """
-        test_result = run_command(
-            ["ssh", "-T", "-o", "StrictHostKeyChecking=no", f"git@{hostname}"]
-        )
+        test_result = run_command(["ssh", "-T", "-o", "StrictHostKeyChecking=no", f"git@{hostname}"])
 
         if test_result is None:
             logger.error("SSH connection test failed")
@@ -329,6 +325,7 @@ class PersistentSSHAgent:
             # Validate hostname
             # Import third-party modules
             from persistent_ssh_agent.utils import is_valid_hostname
+
             if not is_valid_hostname(hostname):
                 logger.error("Invalid hostname: %s", hostname)
                 return False
@@ -585,6 +582,7 @@ class PersistentSSHAgent:
         """
         # Import built-in modules
         import fnmatch
+
         return fnmatch.fnmatch(hostname, pattern)
 
     def _get_identity_from_cli(self) -> Optional[str]:

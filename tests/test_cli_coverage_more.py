@@ -130,9 +130,7 @@ def test_main_list_command():
     with patch("persistent_ssh_agent.cli.ConfigManager") as mock_config_manager:
         mock_manager = MagicMock()
         mock_manager.load_config.return_value = {
-            "keys": {
-                "github": {"path": "~/.ssh/id_rsa", "added_at": "2023-01-01"}
-            }
+            "keys": {"github": {"path": "~/.ssh/id_rsa", "added_at": "2023-01-01"}}
         }
         mock_config_manager.return_value = mock_manager
 

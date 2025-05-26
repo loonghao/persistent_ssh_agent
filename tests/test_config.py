@@ -21,7 +21,7 @@ def test_ssh_config_with_values():
         identity_file="~/.ssh/id_rsa",
         identity_content="test-content",
         identity_passphrase="test-pass",
-        ssh_options={"StrictHostKeyChecking": "no"}
+        ssh_options={"StrictHostKeyChecking": "no"},
     )
     assert config.identity_file == "~/.ssh/id_rsa"
     assert config.identity_content == "test-content"
@@ -45,10 +45,7 @@ def test_ssh_config_with_empty_ssh_options():
 
 def test_ssh_config_with_partial_values():
     """Test SSHConfig with partial values."""
-    config = SSHConfig(
-        identity_file="~/.ssh/id_rsa",
-        ssh_options={"BatchMode": "yes"}
-    )
+    config = SSHConfig(identity_file="~/.ssh/id_rsa", ssh_options={"BatchMode": "yes"})
     assert config.identity_file == "~/.ssh/id_rsa"
     assert config.identity_content is None
     assert config.identity_passphrase is None
