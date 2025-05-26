@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.cli - persistent_ssh_agent 0.8.0 文档</title>
+        <title>persistent_ssh_agent.cli - persistent_ssh_agent 0.9.0 文档</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -174,7 +174,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.8.0 文档</div></a>
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.9.0 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -198,7 +198,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.8.0 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.9.0 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -291,6 +291,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_command</span>
 
 
 <span class="c1"># Logger will be configured dynamically in main() based on --debug flag</span>
@@ -672,7 +673,7 @@
                 <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span>
                 <span class="s2">&quot;machine_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_machine_id</span><span class="p">(),</span>
                 <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
-                <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())</span>
+                <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()),</span>
             <span class="p">}</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="c1"># If all else fails, use a default set of values</span>
@@ -681,7 +682,7 @@
                 <span class="s2">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_host&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;machine_id&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_machine&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_user&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="s2">&quot;/unknown_home&quot;</span>
+                <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="s2">&quot;/unknown_home&quot;</span><span class="p">,</span>
             <span class="p">}</span>
 
         <span class="c1"># Create a deterministic salt from system info</span>
@@ -690,11 +691,7 @@
 
         <span class="c1"># Derive key using PBKDF2</span>
         <span class="n">kdf</span> <span class="o">=</span> <span class="n">PBKDF2HMAC</span><span class="p">(</span>
-            <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">(),</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">KEY_SIZE</span><span class="p">,</span>
-            <span class="n">salt</span><span class="o">=</span><span class="n">salt</span><span class="p">,</span>
-            <span class="n">iterations</span><span class="o">=</span><span class="n">ITERATIONS</span><span class="p">,</span>
-            <span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">()</span>
+            <span class="n">algorithm</span><span class="o">=</span><span class="n">hashes</span><span class="o">.</span><span class="n">SHA256</span><span class="p">(),</span> <span class="n">length</span><span class="o">=</span><span class="n">KEY_SIZE</span><span class="p">,</span> <span class="n">salt</span><span class="o">=</span><span class="n">salt</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">ITERATIONS</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">default_backend</span><span class="p">()</span>
         <span class="p">)</span>
 
         <span class="c1"># Use a combination of system info as the password</span>
@@ -741,8 +738,8 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Import built-in modules</span>
                 <span class="kn">import</span><span class="w"> </span><span class="nn">winreg</span>
-                <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span>
-                                    <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Cryptography&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
+
+                <span class="k">with</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Cryptography&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">key</span><span class="p">:</span>
                     <span class="n">machine_id</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;MachineGuid&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
                 <span class="k">pass</span>
@@ -829,8 +826,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">encrypted_data</span><span class="p">)</span>
 
             <span class="c1"># Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)</span>
-            <span class="n">iv</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">SALT_SIZE</span><span class="p">:</span><span class="n">SALT_SIZE</span> <span class="o">+</span> <span class="n">IV_SIZE</span><span class="p">]</span>
-            <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">SALT_SIZE</span> <span class="o">+</span> <span class="n">IV_SIZE</span><span class="p">:]</span>
+            <span class="n">iv</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">SALT_SIZE</span> <span class="p">:</span> <span class="n">SALT_SIZE</span> <span class="o">+</span> <span class="n">IV_SIZE</span><span class="p">]</span>
+            <span class="n">ciphertext</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">SALT_SIZE</span> <span class="o">+</span> <span class="n">IV_SIZE</span> <span class="p">:]</span>
 
             <span class="c1"># Get key using the same method as encryption</span>
             <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derive_key_from_system</span><span class="p">()</span>
@@ -1022,10 +1019,7 @@
             <span class="n">_configure_verbose_logging</span><span class="p">()</span>
 
         <span class="c1"># Create SSH configuration and agent</span>
-        <span class="n">ssh_config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span>
-            <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
-            <span class="n">identity_passphrase</span><span class="o">=</span><span class="n">passphrase</span>
-        <span class="p">)</span>
+        <span class="n">ssh_config</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">(</span><span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">identity_passphrase</span><span class="o">=</span><span class="n">passphrase</span><span class="p">)</span>
         <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">ssh_config</span><span class="p">)</span>
 
         <span class="c1"># Test connection</span>
@@ -1124,7 +1118,7 @@
             <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
             <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
         <span class="p">),</span>
-        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
+        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
@@ -1303,7 +1297,7 @@
             <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
             <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
         <span class="p">),</span>
-        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span>
+        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
@@ -1318,16 +1312,13 @@
             <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
             <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
         <span class="p">),</span>
-        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span>
+        <span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Configure SSH agent&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--identity-file&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to SSH identity file&quot;</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s2">&quot;--passphrase&quot;</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;SSH key passphrase (not recommended, use --prompt-passphrase instead)&quot;</span>
-<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--passphrase&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;SSH key passphrase (not recommended, use --prompt-passphrase instead)&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--prompt-passphrase&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Prompt for SSH key passphrase&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--expiration&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Expiration time in hours&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--reuse-agent&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to reuse existing SSH agent&quot;</span><span class="p">)</span>
@@ -1338,7 +1329,7 @@
         <span class="n">passphrase</span><span class="o">=</span><span class="n">passphrase</span><span class="p">,</span>
         <span class="n">prompt_passphrase</span><span class="o">=</span><span class="n">prompt_passphrase</span><span class="p">,</span>
         <span class="n">expiration</span><span class="o">=</span><span class="n">expiration</span><span class="p">,</span>
-        <span class="n">reuse_agent</span><span class="o">=</span><span class="n">reuse_agent</span>
+        <span class="n">reuse_agent</span><span class="o">=</span><span class="n">reuse_agent</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">setup_config</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -1348,20 +1339,12 @@
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;hostname&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--identity-file&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to SSH identity file (overrides config)&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--expiration&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Expiration time in hours (overrides config)&quot;</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s2">&quot;--reuse-agent&quot;</span><span class="p">,</span>
-    <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to reuse existing SSH agent (overrides config)&quot;</span>
-<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--reuse-agent&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Whether to reuse existing SSH agent (overrides config)&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Enable verbose output&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">test_cmd</span><span class="p">(</span><span class="n">hostname</span><span class="p">,</span> <span class="n">identity_file</span><span class="p">,</span> <span class="n">expiration</span><span class="p">,</span> <span class="n">reuse_agent</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test SSH connection to a host.&quot;&quot;&quot;</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span>
-        <span class="n">hostname</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span>
-        <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span>
-        <span class="n">expiration</span><span class="o">=</span><span class="n">expiration</span><span class="p">,</span>
-        <span class="n">reuse_agent</span><span class="o">=</span><span class="n">reuse_agent</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+        <span class="n">hostname</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span> <span class="n">identity_file</span><span class="o">=</span><span class="n">identity_file</span><span class="p">,</span> <span class="n">expiration</span><span class="o">=</span><span class="n">expiration</span><span class="p">,</span> <span class="n">reuse_agent</span><span class="o">=</span><span class="n">reuse_agent</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
     <span class="p">)</span>
 
     <span class="n">run_ssh_connection_test</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -1418,7 +1401,11 @@
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--prompt&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Prompt for credentials&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">git_setup_cmd</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">prompt</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up Git credential helper.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up Git credential helper.</span>
+
+<span class="sd">    This command configures Git to use username/password authentication</span>
+<span class="sd">    and is completely independent of SSH keys or SSH agent configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">prompt</span><span class="p">:</span>
             <span class="n">username</span> <span class="o">=</span> <span class="n">click</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="s2">&quot;Git username&quot;</span><span class="p">)</span>
@@ -1442,6 +1429,133 @@
 
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set up Git credentials: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Full traceback:&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;git-debug&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Debug Git credential configuration&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">git_debug_cmd</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Debug Git credential helper configuration.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+        <span class="c1"># Get current credential helpers</span>
+        <span class="n">current_helpers</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">get_current_credential_helpers</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🔍 Git Credential Configuration Debug&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">current_helpers</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📋 Current credential helpers:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">helper</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">current_helpers</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">helper</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📋 No credential helpers currently configured&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Show Git config file locations</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">📁 Git configuration file locations:&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Global config</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;--global&quot;</span><span class="p">,</span> <span class="s2">&quot;--list&quot;</span><span class="p">,</span> <span class="s2">&quot;--show-origin&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">global_config_file</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;credential.helper=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">config_file</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;file:&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">global_config_file</span> <span class="o">!=</span> <span class="n">config_file</span><span class="p">:</span>
+                                <span class="n">global_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Global: </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">global_config_file</span><span class="p">:</span>
+                    <span class="c1"># Try to get global config file location</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;--global&quot;</span><span class="p">,</span> <span class="s2">&quot;--list&quot;</span><span class="p">,</span> <span class="s2">&quot;--show-origin&quot;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+                        <span class="n">first_line</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">first_line</span><span class="p">:</span>
+                            <span class="n">config_file</span> <span class="o">=</span> <span class="n">first_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;file:&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Global: </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not determine Git config file location: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Show environment variables</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">🌍 Environment variables:&quot;</span><span class="p">)</span>
+        <span class="n">git_username</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GIT_USERNAME&quot;</span><span class="p">)</span>
+        <span class="n">git_password</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GIT_PASSWORD&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">git_username</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  GIT_USERNAME: </span><span class="si">{</span><span class="n">git_username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  GIT_USERNAME: (not set)&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">git_password</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  GIT_PASSWORD: (set, hidden)&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  GIT_PASSWORD: (not set)&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">💡 Troubleshooting tips:&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_helpers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  - Multiple credential helpers detected&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  - Use &#39;uvx persistent_ssh_agent git-clear&#39; to clear all&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  - Then run &#39;uvx persistent_ssh_agent git-setup&#39; again&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">current_helpers</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  - No credential helpers configured&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  - Run &#39;uvx persistent_ssh_agent git-setup --prompt&#39; to configure&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  - Single credential helper configured (normal)&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to debug Git configuration: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Full traceback:&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;git-clear&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Clear all Git credential helpers&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--confirm&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Skip confirmation prompt&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">git_clear_cmd</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">confirm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear all Git credential helpers.</span>
+
+<span class="sd">    This command removes Git credential helper configurations</span>
+<span class="sd">    and is completely independent of SSH keys or SSH agent configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ssh_agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+        <span class="c1"># Get current credential helpers</span>
+        <span class="n">current_helpers</span> <span class="o">=</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">get_current_credential_helpers</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_helpers</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;✅ No credential helpers found to clear&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Show what will be cleared</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🔍 Found </span><span class="si">%d</span><span class="s2"> credential helper(s) to clear:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_helpers</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">helper</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">current_helpers</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">helper</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Confirm action unless --confirm flag is used</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">confirm</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">⚠️  Are you sure you want to clear all credential helpers?&quot;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;❌ Operation cancelled&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Clear credential helpers</span>
+        <span class="k">if</span> <span class="n">ssh_agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">clear_credential_helpers</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;✅ Successfully cleared all Git credential helpers&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;💡 You can now run &#39;uvx persistent_ssh_agent git-setup --prompt&#39; to configure new credentials&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;❌ Failed to clear Git credential helpers&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to clear Git credential helpers: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Full traceback:&quot;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -1488,7 +1602,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=e0d922aa"></script>
+</div><script src="../../_static/documentation_options.js?v=1da91dec"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

@@ -6,7 +6,7 @@
 <link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" /><link rel="next" title="Features" href="features.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent 0.8.0 文档</title>
+        <title>persistent_ssh_agent 0.9.0 文档</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">persistent_ssh_agent 0.8.0 文档</div></a>
+      <a href="#"><div class="brand">persistent_ssh_agent 0.9.0 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.8.0 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.9.0 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -319,6 +319,9 @@
 <li><p>🛠️ Modern development toolchain (Poetry, Commitizen, Black)</p></li>
 <li><p>🔑 Git credential helper integration for seamless Git operations</p></li>
 <li><p>💻 Command-line interface with comprehensive configuration options</p></li>
+<li><p>🧠 Smart authentication strategies with automatic fallback mechanisms</p></li>
+<li><p>🔍 Comprehensive health check and diagnostic capabilities</p></li>
+<li><p>🧹 Automatic cleanup of invalid credential configurations</p></li>
 </ul>
 </section>
 <section id="installation">
@@ -549,8 +552,17 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span><span cla
 <span class="c1"># Import configuration from a file</span>
 uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>import<span class="w"> </span>config.json
 
-<span class="c1"># Set up Git credentials (new feature)</span>
+<span class="c1"># Set up Git credentials</span>
 uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup<span class="w"> </span>--username<span class="w"> </span>your-username<span class="w"> </span>--prompt
+
+<span class="c1"># Test Git credentials validity</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>test-credentials<span class="w"> </span>github.com
+
+<span class="c1"># Perform comprehensive health check</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>health-check
+
+<span class="c1"># Smart authentication setup with automatic fallback</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>smart-setup<span class="w"> </span>github.com<span class="w"> </span>--strategy<span class="w"> </span>auto
 </pre></div>
 </div>
 <p>Available commands:</p>
@@ -596,6 +608,28 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
 <li><p><code class="docutils literal notranslate"><span class="pre">--username</span></code>: Git username</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--password</span></code>: Git password (not recommended, use --prompt instead)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--prompt</span></code>: Prompt for Git credentials interactively</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test-credentials</span></code>: Test Git credentials validity</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hostname</span></code>: Git host to test (optional, tests all common hosts if not specified)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--username</span></code>: Git username for testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--password</span></code>: Git password for testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--timeout</span></code>: Timeout in seconds for each test</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">health-check</span></code>: Perform comprehensive authentication health check</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">--format</span></code>: Output format (text or json)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--verbose</span></code>: Show detailed diagnostic information</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">smart-setup</span></code>: Intelligent authentication setup with automatic fallback</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hostname</span></code>: Target Git host</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--strategy</span></code>: Authentication strategy (auto, ssh_first, credentials_first, ssh_only)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--username</span></code>: Git username (for credential-based authentication)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--password</span></code>: Git password (for credential-based authentication)</p></li>
 </ul>
 </li>
 </ul>
@@ -701,6 +735,97 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
 </section>
 <section id="advanced-features">
 <h3>🌟 Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading">¶</a></h3>
+<section id="smart-authentication-strategies">
+<h4>Smart Authentication Strategies<a class="headerlink" href="#smart-authentication-strategies" title="Link to this heading">¶</a></h4>
+<p>The library now includes intelligent authentication strategies that automatically select the best authentication method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="c1"># Create agent instance</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+<span class="c1"># Smart authentication with automatic fallback</span>
+<span class="c1"># Tries Git credentials first, falls back to SSH if needed</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">setup_smart_credentials</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+
+<span class="c1"># Force SSH-only authentication</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">setup_smart_credentials</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;ssh_only&#39;</span><span class="p">)</span>
+
+<span class="c1"># Prefer SSH, fallback to credentials</span>
+<span class="n">success</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">setup_smart_credentials</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;ssh_first&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Available Authentication Strategies:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">auto</span></code> (default): Intelligent selection based on environment and cached preferences</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ssh_first</span></code>: Try SSH authentication first, fallback to credentials</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">credentials_first</span></code>: Try Git credentials first, fallback to SSH</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ssh_only</span></code>: Use only SSH key authentication</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">credentials_only</span></code>: Use only Git credential authentication</p></li>
+</ul>
+<p><strong>Environment Variable Control:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Force SSH authentication for all operations</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">FORCE_SSH_AUTH</span><span class="o">=</span><span class="nb">true</span>
+
+<span class="c1"># Prefer SSH authentication (with fallback)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PREFER_SSH_AUTH</span><span class="o">=</span><span class="nb">true</span>
+
+<span class="c1"># Set specific authentication strategy</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AUTH_STRATEGY</span><span class="o">=</span>ssh_first
+</pre></div>
+</div>
+</section>
+<section id="health-check-and-diagnostics">
+<h4>Health Check and Diagnostics<a class="headerlink" href="#health-check-and-diagnostics" title="Link to this heading">¶</a></h4>
+<p>Comprehensive health checking capabilities for authentication systems:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+<span class="c1"># Perform comprehensive health check</span>
+<span class="n">health_status</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">health_check</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overall status: </span><span class="si">{</span><span class="n">health_status</span><span class="p">[</span><span class="s1">&#39;overall&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># healthy, warning, or error</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Git credentials: </span><span class="si">{</span><span class="n">health_status</span><span class="p">[</span><span class="s1">&#39;git_credentials&#39;</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SSH keys: </span><span class="si">{</span><span class="n">health_status</span><span class="p">[</span><span class="s1">&#39;ssh_keys&#39;</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Network connectivity: </span><span class="si">{</span><span class="n">health_status</span><span class="p">[</span><span class="s1">&#39;network&#39;</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get recommendations for improvement</span>
+<span class="k">for</span> <span class="n">recommendation</span> <span class="ow">in</span> <span class="n">health_status</span><span class="p">[</span><span class="s1">&#39;recommendations&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;💡 </span><span class="si">{</span><span class="n">recommendation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Health Check Features:</strong></p>
+<ul class="simple">
+<li><p>Git credential validation and testing</p></li>
+<li><p>SSH key availability and functionality testing</p></li>
+<li><p>Network connectivity verification to Git hosts</p></li>
+<li><p>Automatic recommendation generation</p></li>
+<li><p>Detailed diagnostic information</p></li>
+</ul>
+</section>
+<section id="credential-management">
+<h4>Credential Management<a class="headerlink" href="#credential-management" title="Link to this heading">¶</a></h4>
+<p>Advanced credential management with automatic cleanup:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+<span class="c1"># Test credential validity for specific hosts</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">test_credentials</span><span class="p">(</span><span class="s1">&#39;github.com&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;token&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GitHub credentials valid: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;github.com&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test all common Git hosts</span>
+<span class="n">all_results</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">test_credentials</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">valid</span> <span class="ow">in</span> <span class="n">all_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">&#39;✅&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">valid</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;❌&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Clean up invalid credential helpers</span>
+<span class="n">cleanup_success</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">clear_invalid_credentials</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">cleanup_success</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Invalid credentials cleaned up successfully&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="custom-configuration">
 <h4>Custom Configuration<a class="headerlink" href="#custom-configuration" title="Link to this heading">¶</a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
@@ -1031,6 +1156,9 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
 </ul>
 </li>
 <li><a class="reference internal" href="#advanced-features">🌟 Advanced Features</a><ul>
+<li><a class="reference internal" href="#smart-authentication-strategies">Smart Authentication Strategies</a></li>
+<li><a class="reference internal" href="#health-check-and-diagnostics">Health Check and Diagnostics</a></li>
+<li><a class="reference internal" href="#credential-management">Credential Management</a></li>
 <li><a class="reference internal" href="#custom-configuration">Custom Configuration</a></li>
 <li><a class="reference internal" href="#key-management">Key Management</a></li>
 <li><a class="reference internal" href="#ssh-configuration-validation">SSH Configuration Validation</a></li>
@@ -1055,7 +1183,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=e0d922aa"></script>
+</div><script src="_static/documentation_options.js?v=1da91dec"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
