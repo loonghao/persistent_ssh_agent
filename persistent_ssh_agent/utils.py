@@ -119,13 +119,6 @@ def run_command(
             # Add batch mode and non-interactive flags
             git_flags = []
 
-            # Check if this is a submodule command
-            if len(command) > 1 and command[1] == "submodule":
-                git_flags.extend(["-c", "core.askpass=true"])  # Prevent password prompts
-
-            # Check if this is a credential-related command
-            if any(arg.startswith("credential.helper=") for arg in command):
-                git_flags.extend(["-c", "core.askpass=true"])  # Prevent password prompts
 
             # Insert flags after 'git' but before subcommand
             if git_flags:

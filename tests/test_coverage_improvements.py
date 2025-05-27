@@ -46,7 +46,7 @@ class TestCoverageImprovements:
             mock_process.kill.assert_called_once()
 
     def test_run_command_git_submodule_enhancement(self):
-        """Test run_command adds special flags for git submodule commands."""
+        """Test run_command handles git submodule commands properly."""
         with patch("subprocess.run") as mock_run:
             mock_result = MagicMock()
             mock_result.stdout = b"output"
@@ -55,14 +55,15 @@ class TestCoverageImprovements:
 
             run_command(["git", "submodule", "update", "--init"])
 
-            # Check that the command was enhanced with askpass flag
+            # Check that the command was called correctly
             called_args = mock_run.call_args[0][0]
             assert "git" in called_args
-            assert "-c" in called_args
-            assert "core.askpass=true" in called_args
+            assert "submodule" in called_args
+            assert "update" in called_args
+            assert "--init" in called_args
 
     def test_run_command_git_credential_enhancement(self):
-        """Test run_command adds special flags for git credential commands."""
+        """Test run_command handles git credential commands properly."""
         with patch("subprocess.run") as mock_run:
             mock_result = MagicMock()
             mock_result.stdout = b"output"
@@ -71,9 +72,13 @@ class TestCoverageImprovements:
 
             run_command(["git", "-c", "credential.helper=test", "clone", "repo"])
 
-            # Check that the command was enhanced with askpass flag
+            # Check that the command was called correctly
             called_args = mock_run.call_args[0][0]
-            assert "core.askpass=true" in called_args
+            assert "git" in called_args
+            assert "-c" in called_args
+            assert "credential.helper=test" in called_args
+            assert "clone" in called_args
+            assert "repo" in called_args
 
     def test_is_valid_hostname_ipv6_edge_cases(self):
         """Test is_valid_hostname with IPv6 edge cases."""

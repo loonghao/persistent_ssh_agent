@@ -1215,5 +1215,80 @@ def git_clear_cmd(ctx, confirm):
         sys.exit(1)
 
 
+@main.command("git-run", help="Run Git command with automatic passwordless authentication")
+@click.argument("git_args", nargs=-1, required=True)
+@click.option("--username", "-u", help="Git username (overrides GIT_USERNAME env var)")
+@click.option("--password", "-p", help="Git password/token (overrides GIT_PASSWORD env var)")
+@click.option("--prefer-credentials", is_flag=True, help="Prefer credential helper over SSH")
+@click.option("--prompt", is_flag=True, help="Prompt for credentials if not provided")
+@click.pass_context
+def git_run_cmd(ctx, git_args, username, password, prefer_credentials, prompt):
+    """Run Git command with automatic passwordless authentication.
+
+    This command intelligently chooses between SSH and credential helper authentication
+    to execute Git commands without requiring manual password input.
+
+    Examples:
+        uvx persistent_ssh_agent git-run clone git@github.com:user/repo.git
+        uvx persistent_ssh_agent git-run pull origin main
+        uvx persistent_ssh_agent git-run --prefer-credentials push origin main
+        uvx persistent_ssh_agent git-run --prompt submodule update --init --recursive
+    """
+    try:
+        if prompt and not username:
+            username = click.prompt("Git username", default=os.environ.get("GIT_USERNAME", ""))
+        if prompt and not password:
+            password = click.prompt("Git password/token", hide_input=True,
+                                   default=os.environ.get("GIT_PASSWORD", ""))
+
+        # Get debug flag from context
+        debug_mode = ctx.obj.get("debug", False)
+
+        if debug_mode:
+            logger.debug("Debug mode enabled for git-run command")
+            logger.debug("Git arguments: %s", git_args)
+            logger.debug("Username provided: %s", bool(username))
+            logger.debug("Password provided: %s", bool(password))
+            logger.debug("Prefer credentials: %s", prefer_credentials)
+
+        # Build Git command
+        git_command = ["git"] + list(git_args)
+
+        logger.info("🚀 Running Git command: %s", " ".join(git_command))
+
+        # Create SSH agent instance
+        ssh_agent = PersistentSSHAgent()
+
+        # Run Git command with passwordless authentication
+        result = ssh_agent.run_git_command_passwordless(
+            git_command,
+            username=username,
+            password=password,
+            prefer_ssh=not prefer_credentials
+        )
+
+        if result is None:
+            logger.error("❌ Git command failed to execute")
+            sys.exit(1)
+        elif result.returncode == 0:
+            logger.info("✅ Git command completed successfully")
+            if result.stdout:
+                print(result.stdout)
+        else:
+            logger.error("❌ Git command failed with return code: %d", result.returncode)
+            if result.stderr:
+                print(result.stderr, file=sys.stderr)
+            sys.exit(result.returncode)
+
+    except KeyboardInterrupt:
+        logger.info("❌ Operation cancelled by user")
+        sys.exit(1)
+    except Exception as e:
+        logger.error("Failed to run Git command: %s", str(e))
+        if ctx.obj.get("debug", False):
+            logger.exception("Full traceback:")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main(obj={})
