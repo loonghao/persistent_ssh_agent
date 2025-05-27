@@ -1,3 +1,10 @@
+## v0.10.1 (2025-05-27)
+
+### Fix
+
+- improve Git command reliability and prevent hanging
+- improve run_command encoding handling for cross-platform compatibility
+
 ## v0.10.0 (2025-05-26)
 
 ### Feat
