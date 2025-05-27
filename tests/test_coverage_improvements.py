@@ -3,21 +3,18 @@
 # Import built-in modules
 import os
 import subprocess
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from persistent_ssh_agent import PersistentSSHAgent
-from persistent_ssh_agent.git import GitIntegration
-from persistent_ssh_agent.utils import (
-    _decode_subprocess_output,
-    run_command,
-    is_valid_hostname,
-    extract_hostname,
-    create_temp_key_file,
-    resolve_path,
-    ensure_home_env
-)
+from persistent_ssh_agent.utils import _decode_subprocess_output
+from persistent_ssh_agent.utils import create_temp_key_file
+from persistent_ssh_agent.utils import ensure_home_env
+from persistent_ssh_agent.utils import extract_hostname
+from persistent_ssh_agent.utils import is_valid_hostname
+from persistent_ssh_agent.utils import resolve_path
+from persistent_ssh_agent.utils import run_command
 
 
 class TestCoverageImprovements:
@@ -36,7 +33,7 @@ class TestCoverageImprovements:
 
     def test_run_command_timeout_process_cleanup(self):
         """Test run_command timeout with process cleanup."""
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             # Create a mock process for cleanup
             mock_process = MagicMock()
             timeout_error = subprocess.TimeoutExpired(["test"], 30)
@@ -50,7 +47,7 @@ class TestCoverageImprovements:
 
     def test_run_command_git_submodule_enhancement(self):
         """Test run_command adds special flags for git submodule commands."""
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             mock_result = MagicMock()
             mock_result.stdout = b"output"
             mock_result.stderr = b"error"
@@ -66,7 +63,7 @@ class TestCoverageImprovements:
 
     def test_run_command_git_credential_enhancement(self):
         """Test run_command adds special flags for git credential commands."""
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             mock_result = MagicMock()
             mock_result.stdout = b"output"
             mock_result.stderr = b"error"
@@ -81,15 +78,15 @@ class TestCoverageImprovements:
     def test_is_valid_hostname_ipv6_edge_cases(self):
         """Test is_valid_hostname with IPv6 edge cases."""
         # Test IPv6 with brackets
-        with patch('socket.inet_pton', return_value=True):
+        with patch("socket.inet_pton", return_value=True):
             assert is_valid_hostname("[::1]") is True
 
         # Test IPv6 without brackets
-        with patch('socket.inet_pton', return_value=True):
+        with patch("socket.inet_pton", return_value=True):
             assert is_valid_hostname("::1") is True
 
         # Test invalid IPv6
-        with patch('socket.inet_pton', side_effect=ValueError("Invalid")):
+        with patch("socket.inet_pton", side_effect=ValueError("Invalid")):
             assert is_valid_hostname("invalid::ipv6") is False
 
     def test_is_valid_hostname_edge_cases(self):
@@ -128,7 +125,7 @@ class TestCoverageImprovements:
         assert extract_hostname("git@host:/") is None  # Root path only
 
         # Test with invalid hostname
-        with patch('persistent_ssh_agent.utils.is_valid_hostname', return_value=False):
+        with patch("persistent_ssh_agent.utils.is_valid_hostname", return_value=False):
             assert extract_hostname("git@invalid..host:user/repo.git") is None
 
     def test_create_temp_key_file_edge_cases(self):
@@ -138,29 +135,29 @@ class TestCoverageImprovements:
         assert create_temp_key_file(None) is None
 
         # Test permission error
-        with patch('tempfile.NamedTemporaryFile', side_effect=PermissionError("Permission denied")):
+        with patch("tempfile.NamedTemporaryFile", side_effect=PermissionError("Permission denied")):
             result = create_temp_key_file("test key")
             assert result is None
 
         # Test OS error
-        with patch('tempfile.NamedTemporaryFile', side_effect=OSError("OS error")):
+        with patch("tempfile.NamedTemporaryFile", side_effect=OSError("OS error")):
             result = create_temp_key_file("test key")
             assert result is None
 
     def test_resolve_path_edge_cases(self):
         """Test resolve_path with edge cases."""
         # Test type error
-        with patch('os.path.expanduser', side_effect=TypeError("Type error")):
+        with patch("os.path.expanduser", side_effect=TypeError("Type error")):
             assert resolve_path("~/test") is None
 
         # Test value error
-        with patch('os.path.expanduser', side_effect=ValueError("Value error")):
+        with patch("os.path.expanduser", side_effect=ValueError("Value error")):
             assert resolve_path("~/test") is None
 
     def test_ensure_home_env_not_set(self):
         """Test ensure_home_env when HOME is not set."""
         with patch.dict(os.environ, {}, clear=True):
-            with patch('os.path.expanduser', return_value="/home/user"):
+            with patch("os.path.expanduser", return_value="/home/user"):
                 ensure_home_env()
                 assert os.environ.get("HOME") == "/home/user"
 
@@ -209,25 +206,25 @@ class TestCoverageImprovements:
 
         # Test run_git_command_with_credentials without credentials
         with patch.dict(os.environ, {}, clear=True):
-            with patch('persistent_ssh_agent.git.run_command') as mock_run:
+            with patch("persistent_ssh_agent.git.run_command") as mock_run:
                 mock_run.return_value = MagicMock()
                 agent.git.run_git_command_with_credentials(["git", "status"])
                 mock_run.assert_called_once_with(["git", "status"])
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_git_integration_clear_helpers_errors(self, mock_run_command):
         """Test GitIntegration clear_credential_helpers error paths."""
         agent = PersistentSSHAgent()
 
         # Test when git config fails
-        with patch.object(agent.git, 'get_current_credential_helpers', return_value=["helper1"]):
+        with patch.object(agent.git, "get_current_credential_helpers", return_value=["helper1"]):
             mock_run_command.return_value = MagicMock(returncode=1, stderr=b"Error message")
 
             result = agent.git.clear_credential_helpers()
             assert result is False
 
         # Test when run_command returns None
-        with patch.object(agent.git, 'get_current_credential_helpers', return_value=["helper1"]):
+        with patch.object(agent.git, "get_current_credential_helpers", return_value=["helper1"]):
             mock_run_command.return_value = None
 
             result = agent.git.clear_credential_helpers()
@@ -244,18 +241,18 @@ class TestCoverageImprovements:
 
         # Test when helper creation fails
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(agent.git, '_create_credential_helper_file', return_value=None):
+            with patch.object(agent.git, "_create_credential_helper_file", return_value=None):
                 result = agent.git._test_single_host_credentials("github.com", 30)
                 assert result is False
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_git_integration_test_credentials_command_errors(self, mock_run_command):
         """Test GitIntegration test_credentials command error paths."""
         agent = PersistentSSHAgent()
 
         # Test when git command fails
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(agent.git, '_create_credential_helper_file', return_value="/path/to/helper"):
+            with patch.object(agent.git, "_create_credential_helper_file", return_value="/path/to/helper"):
                 mock_run_command.return_value = MagicMock(returncode=1, stderr="Auth failed")
 
                 result = agent.git._test_single_host_credentials("github.com", 30)
@@ -263,7 +260,7 @@ class TestCoverageImprovements:
 
         # Test when git command times out
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(agent.git, '_create_credential_helper_file', return_value="/path/to/helper"):
+            with patch.object(agent.git, "_create_credential_helper_file", return_value="/path/to/helper"):
                 mock_run_command.return_value = None  # Timeout
 
                 result = agent.git._test_single_host_credentials("github.com", 30)
@@ -287,18 +284,18 @@ class TestCoverageImprovements:
         assert result is None
 
         # Test when no identity file found
-        with patch.object(agent, '_get_identity_file', return_value=None):
+        with patch.object(agent, "_get_identity_file", return_value=None):
             result = agent.git.get_git_ssh_command("github.com")
             assert result is None
 
         # Test when identity file doesn't exist
-        with patch.object(agent, '_get_identity_file', return_value="/non/existent/key"):
+        with patch.object(agent, "_get_identity_file", return_value="/non/existent/key"):
             result = agent.git.get_git_ssh_command("github.com")
             assert result is None
 
         # Test when SSH setup fails
-        with patch.object(agent, '_get_identity_file', return_value="/path/to/key"):
-            with patch('os.path.exists', return_value=True):
-                with patch.object(agent, 'setup_ssh', return_value=False):
+        with patch.object(agent, "_get_identity_file", return_value="/path/to/key"):
+            with patch("os.path.exists", return_value=True):
+                with patch.object(agent, "setup_ssh", return_value=False):
                     result = agent.git.get_git_ssh_command("github.com")
                     assert result is None

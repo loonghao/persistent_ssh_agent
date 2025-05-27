@@ -2,14 +2,12 @@
 
 # Import built-in modules
 import os
-import tempfile
-from unittest.mock import MagicMock, patch, mock_open
-from pathlib import Path
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 # Import third-party modules
-import pytest
 from persistent_ssh_agent.git import GitIntegration
-from persistent_ssh_agent.utils import run_command
+import pytest
 
 
 class TestGitIntegrationErrorHandling:
@@ -76,16 +74,16 @@ class TestGitIntegrationErrorHandling:
         # Test with non-existent path
         assert git_integration.get_git_credential_command("/non/existent/path") is None
 
-    @patch('os.path.exists')
-    @patch('os.access')
-    @patch('os.chmod')
+    @patch("os.path.exists")
+    @patch("os.access")
+    @patch("os.chmod")
     def test_get_git_credential_command_chmod_failure(self, mock_chmod, mock_access, mock_exists, git_integration):
         """Test get_git_credential_command when chmod fails."""
         mock_exists.return_value = True
         mock_access.return_value = False  # Not executable
         mock_chmod.side_effect = PermissionError("Permission denied")
 
-        with patch('os.name', 'posix'):
+        with patch("os.name", "posix"):
             result = git_integration.get_git_credential_command("/path/to/script")
             assert result is None
 
@@ -112,30 +110,30 @@ class TestGitIntegrationErrorHandling:
         """Test get_git_ssh_command when SSH setup fails."""
         git_integration._ssh_agent.setup_ssh.return_value = False
 
-        with patch('os.path.exists', return_value=True):
+        with patch("os.path.exists", return_value=True):
             result = git_integration.get_git_ssh_command("github.com")
             assert result is None
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_configure_git_with_credential_helper_failure(self, mock_run_command, git_integration):
         """Test configure_git_with_credential_helper when git config fails."""
         # Mock successful credential helper creation but failed git config
-        with patch.object(git_integration, 'get_git_credential_command', return_value="/path/to/helper"):
+        with patch.object(git_integration, "get_git_credential_command", return_value="/path/to/helper"):
             mock_run_command.return_value = MagicMock(returncode=1)
 
             result = git_integration.configure_git_with_credential_helper("/path/to/helper")
             assert result is False
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_configure_git_with_credential_helper_no_result(self, mock_run_command, git_integration):
         """Test configure_git_with_credential_helper when run_command returns None."""
-        with patch.object(git_integration, 'get_git_credential_command', return_value="/path/to/helper"):
+        with patch.object(git_integration, "get_git_credential_command", return_value="/path/to/helper"):
             mock_run_command.return_value = None
 
             result = git_integration.configure_git_with_credential_helper("/path/to/helper")
             assert result is False
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_get_current_credential_helpers_exception(self, mock_run_command, git_integration):
         """Test get_current_credential_helpers when exception occurs."""
         mock_run_command.side_effect = Exception("Command failed")
@@ -143,20 +141,20 @@ class TestGitIntegrationErrorHandling:
         result = git_integration.get_current_credential_helpers()
         assert result == []
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_clear_credential_helpers_failure(self, mock_run_command, git_integration):
         """Test clear_credential_helpers when git config fails."""
         # Mock existing helpers
-        with patch.object(git_integration, 'get_current_credential_helpers', return_value=["helper1"]):
+        with patch.object(git_integration, "get_current_credential_helpers", return_value=["helper1"]):
             mock_run_command.return_value = MagicMock(returncode=1, stderr="Error message")
 
             result = git_integration.clear_credential_helpers()
             assert result is False
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_clear_credential_helpers_no_result(self, mock_run_command, git_integration):
         """Test clear_credential_helpers when run_command returns None."""
-        with patch.object(git_integration, 'get_current_credential_helpers', return_value=["helper1"]):
+        with patch.object(git_integration, "get_current_credential_helpers", return_value=["helper1"]):
             mock_run_command.return_value = None
 
             result = git_integration.clear_credential_helpers()
@@ -165,16 +163,16 @@ class TestGitIntegrationErrorHandling:
     def test_run_git_command_with_credentials_no_credentials(self, git_integration):
         """Test run_git_command_with_credentials without credentials."""
         with patch.dict(os.environ, {}, clear=True):
-            with patch('persistent_ssh_agent.git.run_command') as mock_run:
+            with patch("persistent_ssh_agent.git.run_command") as mock_run:
                 mock_run.return_value = MagicMock()
 
-                result = git_integration.run_git_command_with_credentials(["git", "status"])
+                git_integration.run_git_command_with_credentials(["git", "status"])
                 mock_run.assert_called_once_with(["git", "status"])
 
     def test_run_git_command_with_credentials_helper_creation_fails(self, git_integration):
         """Test run_git_command_with_credentials when helper creation fails."""
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(git_integration, '_create_credential_helper_file', return_value=None):
+            with patch.object(git_integration, "_create_credential_helper_file", return_value=None):
                 result = git_integration.run_git_command_with_credentials(["git", "status"])
                 assert result is None
 
@@ -193,26 +191,26 @@ class TestGitIntegrationErrorHandling:
     def test_test_single_host_credentials_helper_creation_fails(self, git_integration):
         """Test _test_single_host_credentials when helper creation fails."""
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(git_integration, '_create_credential_helper_file', return_value=None):
+            with patch.object(git_integration, "_create_credential_helper_file", return_value=None):
                 result = git_integration._test_single_host_credentials("github.com", 30)
                 assert result is False
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_test_single_host_credentials_command_fails(self, mock_run_command, git_integration):
         """Test _test_single_host_credentials when git command fails."""
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(git_integration, '_create_credential_helper_file', return_value="/path/to/helper"):
+            with patch.object(git_integration, "_create_credential_helper_file", return_value="/path/to/helper"):
                 # Mock all git ls-remote calls to fail
                 mock_run_command.return_value = MagicMock(returncode=1, stderr="Auth failed")
 
                 result = git_integration._test_single_host_credentials("github.com", 30)
                 assert result is False
 
-    @patch('persistent_ssh_agent.git.run_command')
+    @patch("persistent_ssh_agent.git.run_command")
     def test_test_single_host_credentials_command_timeout(self, mock_run_command, git_integration):
         """Test _test_single_host_credentials when git command times out."""
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(git_integration, '_create_credential_helper_file', return_value="/path/to/helper"):
+            with patch.object(git_integration, "_create_credential_helper_file", return_value="/path/to/helper"):
                 # Mock git ls-remote to timeout (return None)
                 mock_run_command.return_value = None  # Timeout
 
@@ -222,7 +220,7 @@ class TestGitIntegrationErrorHandling:
     def test_test_single_host_credentials_exception(self, git_integration):
         """Test _test_single_host_credentials when exception occurs."""
         with patch.dict(os.environ, {"GIT_USERNAME": "user", "GIT_PASSWORD": "pass"}):
-            with patch.object(git_integration, '_create_credential_helper_file', side_effect=Exception("Error")):
+            with patch.object(git_integration, "_create_credential_helper_file", side_effect=Exception("Error")):
                 result = git_integration._test_single_host_credentials("github.com", 30)
                 assert result is False
 
