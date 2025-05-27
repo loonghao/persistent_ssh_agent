@@ -1,3 +1,9 @@
+## v0.11.0 (2025-05-27)
+
+### Feat
+
+- implement passwordless Git operations with intelligent authentication
+
 ## v0.10.1 (2025-05-27)
 
 ### Fix
