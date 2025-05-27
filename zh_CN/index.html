@@ -6,7 +6,7 @@
 <link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" /><link rel="next" title="Features" href="features.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent 0.9.0 文档</title>
+        <title>persistent_ssh_agent 0.10.1 文档</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">persistent_ssh_agent 0.9.0 文档</div></a>
+      <a href="#"><div class="brand">persistent_ssh_agent 0.10.1 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.9.0 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.10.1 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -563,6 +563,10 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>health-ch
 
 <span class="c1"># Smart authentication setup with automatic fallback</span>
 uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>smart-setup<span class="w"> </span>github.com<span class="w"> </span>--strategy<span class="w"> </span>auto
+
+<span class="c1"># Run Git commands with automatic passwordless authentication</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>clone<span class="w"> </span>git@github.com:user/repo.git
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>--prefer-credentials<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
 </pre></div>
 </div>
 <p>Available commands:</p>
@@ -632,6 +636,15 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>smart-set
 <li><p><code class="docutils literal notranslate"><span class="pre">--password</span></code>: Git password (for credential-based authentication)</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git-run</span></code>: Run Git commands with automatic passwordless authentication</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">git_args</span></code>: Git command arguments (e.g., clone, pull, push, etc.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--username</span></code>: Git username (overrides GIT_USERNAME env var)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--password</span></code>: Git password/token (overrides GIT_PASSWORD env var)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--prefer-credentials</span></code>: Prefer credential helper over SSH authentication</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--prompt</span></code>: Prompt for credentials if not provided</p></li>
+</ul>
+</li>
 </ul>
 </section>
 <section id="ci-cd-pipeline-integration">
@@ -688,6 +701,57 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>smart-set
     <span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="passwordless-git-operations">
+<h4>Passwordless Git Operations<a class="headerlink" href="#passwordless-git-operations" title="Link to this heading">¶</a></h4>
+<p>The library provides intelligent passwordless Git command execution that automatically chooses between SSH and credential helper authentication:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+
+<span class="c1"># Create agent instance</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+<span class="c1"># Run any Git command with automatic authentication</span>
+<span class="c1"># Prefers SSH if available, falls back to credentials</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_git_command_passwordless</span><span class="p">([</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;clone&#39;</span><span class="p">,</span> <span class="s1">&#39;git@github.com:user/repo.git&#39;</span><span class="p">])</span>
+
+<span class="c1"># Force credential helper authentication</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_git_command_passwordless</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;pull&#39;</span><span class="p">,</span> <span class="s1">&#39;origin&#39;</span><span class="p">,</span> <span class="s1">&#39;main&#39;</span><span class="p">],</span>
+    <span class="n">username</span><span class="o">=</span><span class="s1">&#39;your-username&#39;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s1">&#39;your-token&#39;</span><span class="p">,</span>
+    <span class="n">prefer_ssh</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="c1"># Run with environment variables</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GIT_USERNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your-username&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GIT_PASSWORD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your-token&#39;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_git_command_passwordless</span><span class="p">([</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;push&#39;</span><span class="p">,</span> <span class="s1">&#39;origin&#39;</span><span class="p">,</span> <span class="s1">&#39;main&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><strong>CLI Usage:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run Git commands with automatic authentication</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>clone<span class="w"> </span>git@github.com:user/repo.git
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+
+<span class="c1"># Force credential helper over SSH</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>--prefer-credentials<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+
+<span class="c1"># Interactive credential input</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>--prompt<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
+
+<span class="c1"># With explicit credentials</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>--username<span class="w"> </span>user<span class="w"> </span>--password<span class="w"> </span>token<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git
+</pre></div>
+</div>
+<p><strong>Authentication Strategy:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>SSH Preferred (default)</strong>: Try SSH first, fall back to credentials if SSH fails</p></li>
+<li><p><strong>Credentials Preferred</strong>: Try credentials first, fall back to SSH if credentials fail</p></li>
+<li><p><strong>Automatic Detection</strong>: Intelligently detect available authentication methods</p></li>
+<li><p><strong>Fallback Support</strong>: Seamless fallback between authentication methods</p></li>
+</ol>
 </section>
 <section id="git-credential-helper-support-simplified">
 <h4>Git Credential Helper Support (Simplified)<a class="headerlink" href="#git-credential-helper-support-simplified" title="Link to this heading">¶</a></h4>
@@ -1152,6 +1216,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
 <li><a class="reference internal" href="#command-line-interface-cli">Command Line Interface (CLI)</a></li>
 <li><a class="reference internal" href="#ci-cd-pipeline-integration">CI/CD Pipeline Integration</a></li>
 <li><a class="reference internal" href="#git-integration">Git Integration</a></li>
+<li><a class="reference internal" href="#passwordless-git-operations">Passwordless Git Operations</a></li>
 <li><a class="reference internal" href="#git-credential-helper-support-simplified">Git Credential Helper Support (Simplified)</a></li>
 </ul>
 </li>
@@ -1183,7 +1248,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=1da91dec"></script>
+</div><script src="_static/documentation_options.js?v=387e6d4c"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

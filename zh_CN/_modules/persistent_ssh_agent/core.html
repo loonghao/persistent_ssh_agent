@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.core - persistent_ssh_agent 0.9.0 文档</title>
+        <title>persistent_ssh_agent.core - persistent_ssh_agent 0.10.1 文档</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -174,7 +174,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.9.0 文档</div></a>
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.10.1 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -198,7 +198,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.9.0 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.10.1 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -1010,7 +1010,205 @@
 <span class="sd">            str: Hostname if valid URL, None otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">extract_hostname</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
-</div>
+
+
+<div class="viewcode-block" id="PersistentSSHAgent.run_git_command_passwordless">
+<a class="viewcode-back" href="../../persistent_ssh_agent.core.html#persistent_ssh_agent.PersistentSSHAgent.run_git_command_passwordless">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_git_command_passwordless</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">command</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefer_ssh</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run any Git command with automatic passwordless authentication.</span>
+
+<span class="sd">        This method intelligently chooses between SSH and credential helper authentication</span>
+<span class="sd">        to execute Git commands without requiring manual password input.</span>
+
+<span class="sd">        Authentication Strategy:</span>
+<span class="sd">        1. If prefer_ssh=True (default):</span>
+<span class="sd">           - Try SSH authentication first (if SSH is set up for the detected host)</span>
+<span class="sd">           - Fall back to credential helper if SSH fails</span>
+<span class="sd">        2. If prefer_ssh=False:</span>
+<span class="sd">           - Try credential helper first (if credentials are available)</span>
+<span class="sd">           - Fall back to SSH if credential helper fails</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            command: Git command as list (e.g., [&#39;git&#39;, &#39;clone&#39;, &#39;repo_url&#39;])</span>
+<span class="sd">            username: Git username (optional, uses GIT_USERNAME env var if not provided)</span>
+<span class="sd">            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)</span>
+<span class="sd">            prefer_ssh: Whether to prefer SSH over credential helper (default: True)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Command result object or None if failed</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; agent = PersistentSSHAgent()</span>
+<span class="sd">            &gt;&gt;&gt; # Clone with SSH (if available) or credentials</span>
+<span class="sd">            &gt;&gt;&gt; result = agent.run_git_command_passwordless([&#39;git&#39;, &#39;clone&#39;, &#39;git@github.com:user/repo.git&#39;])</span>
+<span class="sd">            &gt;&gt;&gt; # Force credential helper first</span>
+<span class="sd">            &gt;&gt;&gt; result = agent.run_git_command_passwordless(</span>
+<span class="sd">            ...     [&#39;git&#39;, &#39;pull&#39;], username=&#39;user&#39;, password=&#39;token&#39;, prefer_ssh=False</span>
+<span class="sd">            ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Extract hostname from Git command if possible</span>
+            <span class="n">hostname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_hostname_from_git_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+            <span class="c1"># Determine authentication methods availability</span>
+            <span class="n">ssh_available</span> <span class="o">=</span> <span class="n">hostname</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_ssh_available_for_host</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+            <span class="n">credentials_available</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_are_credentials_available</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Authentication options - SSH available: </span><span class="si">%s</span><span class="s2">, Credentials available: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">ssh_available</span><span class="p">,</span> <span class="n">credentials_available</span><span class="p">)</span>
+
+            <span class="c1"># Choose authentication strategy based on preference and availability</span>
+            <span class="k">if</span> <span class="n">prefer_ssh</span> <span class="ow">and</span> <span class="n">ssh_available</span><span class="p">:</span>
+                <span class="c1"># Try SSH first</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_git_command_with_ssh</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Git command succeeded with SSH authentication&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">result</span>
+                <span class="k">elif</span> <span class="n">credentials_available</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;SSH authentication failed, trying credential helper&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">run_git_command_with_credentials</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;SSH authentication failed and no credentials available&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">result</span>
+            <span class="k">elif</span> <span class="n">credentials_available</span><span class="p">:</span>
+                <span class="c1"># Try credentials first</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">run_git_command_with_credentials</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Git command succeeded with credential helper&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">result</span>
+                <span class="k">elif</span> <span class="n">ssh_available</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Credential helper failed, trying SSH authentication&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_git_command_with_ssh</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Credential helper failed and SSH not available&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">result</span>
+            <span class="k">elif</span> <span class="n">ssh_available</span><span class="p">:</span>
+                <span class="c1"># Only SSH available</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Only SSH authentication available&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_git_command_with_ssh</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">credentials_available</span><span class="p">:</span>
+                <span class="c1"># Only credentials available</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Only credential helper available&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">run_git_command_with_credentials</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No authentication available, run command as-is</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No authentication methods available, running command without authentication&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to run Git command with passwordless authentication: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_hostname_from_git_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract hostname from Git command arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            command: Git command as list</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Optional[str]: Hostname if found, None otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Look for URLs in command arguments</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">command</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;@&quot;</span> <span class="ow">in</span> <span class="n">arg</span> <span class="ow">and</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
+                    <span class="c1"># SSH URL format: git@hostname:path</span>
+                    <span class="n">hostname</span> <span class="o">=</span> <span class="n">extract_hostname</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">hostname</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">hostname</span>
+                <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">):</span>
+                    <span class="c1"># HTTPS URL format: https://hostname/path</span>
+                    <span class="c1"># Import built-in modules</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span>
+                    <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">hostname</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">parsed</span><span class="o">.</span><span class="n">hostname</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to extract hostname from Git command: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_ssh_available_for_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if SSH authentication is available for a host.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hostname: Hostname to check</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if SSH is available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Check if we have an identity file for this host</span>
+            <span class="n">identity_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_identity_file</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">identity_file</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="c1"># Check if SSH agent is running and key is loaded</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_agent_started</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_loaded_key</span><span class="p">(</span><span class="n">identity_file</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+            <span class="c1"># Try to set up SSH for this host</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Failed to check SSH availability for </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_are_credentials_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if Git credentials are available.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            username: Git username (optional)</span>
+<span class="sd">            password: Git password/token (optional)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if credentials are available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use provided credentials or fall back to environment variables</span>
+        <span class="n">git_username</span> <span class="o">=</span> <span class="n">username</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GIT_USERNAME&quot;</span><span class="p">)</span>
+        <span class="n">git_password</span> <span class="o">=</span> <span class="n">password</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GIT_PASSWORD&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">git_username</span> <span class="ow">and</span> <span class="n">git_password</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_git_command_with_ssh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">hostname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run Git command with SSH authentication.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            command: Git command as list</span>
+<span class="sd">            hostname: Target hostname</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Command result object or None if failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Ensure SSH is set up for the host</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_ssh</span><span class="p">(</span><span class="n">hostname</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to set up SSH for </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="c1"># Get SSH command for Git</span>
+            <span class="n">ssh_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">get_git_ssh_command</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ssh_command</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to get SSH command for </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="c1"># Set GIT_SSH_COMMAND environment variable</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">env</span><span class="p">[</span><span class="s2">&quot;GIT_SSH_COMMAND&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssh_command</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running Git command with SSH: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">run_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to run Git command with SSH: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 </pre></div>
         </article>
@@ -1051,7 +1249,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1da91dec"></script>
+</div><script src="../../_static/documentation_options.js?v=387e6d4c"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

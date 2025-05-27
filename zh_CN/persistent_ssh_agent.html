@@ -6,7 +6,7 @@
 <link rel="index" title="索引" href="genindex.html" /><link rel="search" title="搜索" href="search.html" /><link rel="next" title="persistent_ssh_agent.core module" href="persistent_ssh_agent.core.html" /><link rel="prev" title="Contributing" href="contributing.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent package - persistent_ssh_agent 0.9.0 文档</title>
+        <title>persistent_ssh_agent package - persistent_ssh_agent 0.10.1 文档</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">persistent_ssh_agent 0.9.0 文档</div></a>
+      <a href="index.html"><div class="brand">persistent_ssh_agent 0.10.1 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.9.0 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.10.1 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -302,6 +302,50 @@ authentication for various operations including Git.</p>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="persistent_ssh_agent.PersistentSSHAgent.run_git_command_passwordless">
+<span class="sig-name descname"><span class="pre">run_git_command_passwordless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_ssh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/persistent_ssh_agent/core.html#PersistentSSHAgent.run_git_command_passwordless"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#persistent_ssh_agent.PersistentSSHAgent.run_git_command_passwordless" title="Link to this definition">¶</a></dt>
+<dd><p>Run any Git command with automatic passwordless authentication.</p>
+<p>This method intelligently chooses between SSH and credential helper authentication
+to execute Git commands without requiring manual password input.</p>
+<p>Authentication Strategy:
+1. If prefer_ssh=True (default):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Try SSH authentication first (if SSH is set up for the detected host)</p></li>
+<li><p>Fall back to credential helper if SSH fails</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>If prefer_ssh=False:
+- Try credential helper first (if credentials are available)
+- Fall back to SSH if credential helper fails</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> -- Git command as list (e.g., ['git', 'clone', 'repo_url'])</p></li>
+<li><p><strong>username</strong> -- Git username (optional, uses GIT_USERNAME env var if not provided)</p></li>
+<li><p><strong>password</strong> -- Git password/token (optional, uses GIT_PASSWORD env var if not provided)</p></li>
+<li><p><strong>prefer_ssh</strong> -- Whether to prefer SSH over credential helper (default: True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command result object or None if failed</p>
+</dd>
+</dl>
+<p class="rubric">示例</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Clone with SSH (if available) or credentials</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_git_command_passwordless</span><span class="p">([</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;clone&#39;</span><span class="p">,</span> <span class="s1">&#39;git@github.com:user/repo.git&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Force credential helper first</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_git_command_passwordless</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;pull&#39;</span><span class="p">],</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;token&#39;</span><span class="p">,</span> <span class="n">prefer_ssh</span><span class="o">=</span><span class="kc">False</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -481,6 +525,7 @@ authentication for various operations including Git.</p>
 <li><a class="reference internal" href="#module-persistent_ssh_agent">Module contents</a><ul>
 <li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent</span></code></a><ul>
 <li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.extract_hostname"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.extract_hostname()</span></code></a></li>
+<li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.run_git_command_passwordless"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.run_git_command_passwordless()</span></code></a></li>
 <li><a class="reference internal" href="#persistent_ssh_agent.PersistentSSHAgent.setup_ssh"><code class="docutils literal notranslate"><span class="pre">PersistentSSHAgent.setup_ssh()</span></code></a></li>
 </ul>
 </li>
@@ -517,7 +562,7 @@ authentication for various operations including Git.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=1da91dec"></script>
+</div><script src="_static/documentation_options.js?v=387e6d4c"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
