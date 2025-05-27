@@ -272,6 +272,10 @@ uvx persistent_ssh_agent health-check
 
 # Smart authentication setup with automatic fallback
 uvx persistent_ssh_agent smart-setup github.com --strategy auto
+
+# Run Git commands with automatic passwordless authentication
+uvx persistent_ssh_agent git-run clone git@github.com:user/repo.git
+uvx persistent_ssh_agent git-run --prefer-credentials push origin main
 ```
 
 Available commands:
@@ -323,6 +327,13 @@ Available commands:
   - `--strategy`: Authentication strategy (auto, ssh_first, credentials_first, ssh_only)
   - `--username`: Git username (for credential-based authentication)
   - `--password`: Git password (for credential-based authentication)
+
+- `git-run`: Run Git commands with automatic passwordless authentication
+  - `git_args`: Git command arguments (e.g., clone, pull, push, etc.)
+  - `--username`: Git username (overrides GIT_USERNAME env var)
+  - `--password`: Git password/token (overrides GIT_PASSWORD env var)
+  - `--prefer-credentials`: Prefer credential helper over SSH authentication
+  - `--prompt`: Prompt for credentials if not provided
 
 ### CI/CD Pipeline Integration
 
@@ -378,6 +389,60 @@ def clone_repo(repo_url: str, local_path: str) -> Repo:
         env=env
     )
 ```
+
+### Passwordless Git Operations
+
+The library provides intelligent passwordless Git command execution that automatically chooses between SSH and credential helper authentication:
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+
+# Create agent instance
+agent = PersistentSSHAgent()
+
+# Run any Git command with automatic authentication
+# Prefers SSH if available, falls back to credentials
+result = agent.run_git_command_passwordless(['git', 'clone', 'git@github.com:user/repo.git'])
+
+# Force credential helper authentication
+result = agent.run_git_command_passwordless(
+    ['git', 'pull', 'origin', 'main'],
+    username='your-username',
+    password='your-token',
+    prefer_ssh=False
+)
+
+# Run with environment variables
+import os
+os.environ['GIT_USERNAME'] = 'your-username'
+os.environ['GIT_PASSWORD'] = 'your-token'
+result = agent.run_git_command_passwordless(['git', 'push', 'origin', 'main'])
+```
+
+**CLI Usage:**
+
+```bash
+# Run Git commands with automatic authentication
+uvx persistent_ssh_agent git-run clone git@github.com:user/repo.git
+uvx persistent_ssh_agent git-run pull origin main
+uvx persistent_ssh_agent git-run push origin main
+
+# Force credential helper over SSH
+uvx persistent_ssh_agent git-run --prefer-credentials push origin main
+
+# Interactive credential input
+uvx persistent_ssh_agent git-run --prompt submodule update --init --recursive
+
+# With explicit credentials
+uvx persistent_ssh_agent git-run --username user --password token clone https://github.com/user/repo.git
+```
+
+**Authentication Strategy:**
+
+1. **SSH Preferred (default)**: Try SSH first, fall back to credentials if SSH fails
+2. **Credentials Preferred**: Try credentials first, fall back to SSH if credentials fail
+3. **Automatic Detection**: Intelligently detect available authentication methods
+4. **Fallback Support**: Seamless fallback between authentication methods
 
 ### Git Credential Helper Support (Simplified)
 

@@ -735,3 +735,198 @@ class PersistentSSHAgent:
             str: Hostname if valid URL, None otherwise
         """
         return extract_hostname(url)
+
+    def run_git_command_passwordless(
+        self,
+        command: List[str],
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        prefer_ssh: bool = True
+    ) -> Optional[object]:
+        """Run any Git command with automatic passwordless authentication.
+
+        This method intelligently chooses between SSH and credential helper authentication
+        to execute Git commands without requiring manual password input.
+
+        Authentication Strategy:
+        1. If prefer_ssh=True (default):
+           - Try SSH authentication first (if SSH is set up for the detected host)
+           - Fall back to credential helper if SSH fails
+        2. If prefer_ssh=False:
+           - Try credential helper first (if credentials are available)
+           - Fall back to SSH if credential helper fails
+
+        Args:
+            command: Git command as list (e.g., ['git', 'clone', 'repo_url'])
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+            prefer_ssh: Whether to prefer SSH over credential helper (default: True)
+
+        Returns:
+            Command result object or None if failed
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> # Clone with SSH (if available) or credentials
+            >>> result = agent.run_git_command_passwordless(['git', 'clone', 'git@github.com:user/repo.git'])
+            >>> # Force credential helper first
+            >>> result = agent.run_git_command_passwordless(
+            ...     ['git', 'pull'], username='user', password='token', prefer_ssh=False
+            ... )
+        """
+        try:
+            # Extract hostname from Git command if possible
+            hostname = self._extract_hostname_from_git_command(command)
+
+            # Determine authentication methods availability
+            ssh_available = hostname and self._is_ssh_available_for_host(hostname)
+            credentials_available = self._are_credentials_available(username, password)
+
+            logger.debug("Authentication options - SSH available: %s, Credentials available: %s",
+                        ssh_available, credentials_available)
+
+            # Choose authentication strategy based on preference and availability
+            if prefer_ssh and ssh_available:
+                # Try SSH first
+                result = self._run_git_command_with_ssh(command, hostname)
+                if result and result.returncode == 0:
+                    logger.debug("Git command succeeded with SSH authentication")
+                    return result
+                elif credentials_available:
+                    logger.debug("SSH authentication failed, trying credential helper")
+                    return self.git.run_git_command_with_credentials(command, username, password)
+                else:
+                    logger.warning("SSH authentication failed and no credentials available")
+                    return result
+            elif credentials_available:
+                # Try credentials first
+                result = self.git.run_git_command_with_credentials(command, username, password)
+                if result and result.returncode == 0:
+                    logger.debug("Git command succeeded with credential helper")
+                    return result
+                elif ssh_available:
+                    logger.debug("Credential helper failed, trying SSH authentication")
+                    return self._run_git_command_with_ssh(command, hostname)
+                else:
+                    logger.warning("Credential helper failed and SSH not available")
+                    return result
+            elif ssh_available:
+                # Only SSH available
+                logger.debug("Only SSH authentication available")
+                return self._run_git_command_with_ssh(command, hostname)
+            elif credentials_available:
+                # Only credentials available
+                logger.debug("Only credential helper available")
+                return self.git.run_git_command_with_credentials(command, username, password)
+            else:
+                # No authentication available, run command as-is
+                logger.warning("No authentication methods available, running command without authentication")
+                return run_command(command)
+
+        except Exception as e:
+            logger.error("Failed to run Git command with passwordless authentication: %s", str(e))
+            return None
+
+    def _extract_hostname_from_git_command(self, command: List[str]) -> Optional[str]:
+        """Extract hostname from Git command arguments.
+
+        Args:
+            command: Git command as list
+
+        Returns:
+            Optional[str]: Hostname if found, None otherwise
+        """
+        try:
+            # Look for URLs in command arguments
+            for arg in command:
+                if "@" in arg and ":" in arg:
+                    # SSH URL format: git@hostname:path
+                    hostname = extract_hostname(arg)
+                    if hostname:
+                        return hostname
+                elif arg.startswith("https://") or arg.startswith("http://"):
+                    # HTTPS URL format: https://hostname/path
+                    # Import built-in modules
+                    from urllib.parse import urlparse
+                    parsed = urlparse(arg)
+                    if parsed.hostname:
+                        return parsed.hostname
+            return None
+        except Exception as e:
+            logger.debug("Failed to extract hostname from Git command: %s", e)
+            return None
+
+    def _is_ssh_available_for_host(self, hostname: str) -> bool:
+        """Check if SSH authentication is available for a host.
+
+        Args:
+            hostname: Hostname to check
+
+        Returns:
+            bool: True if SSH is available
+        """
+        try:
+            # Check if we have an identity file for this host
+            identity_file = self._get_identity_file(hostname)
+            if not identity_file or not os.path.exists(identity_file):
+                return False
+
+            # Check if SSH agent is running and key is loaded
+            if self._ssh_agent_started and self._verify_loaded_key(identity_file):
+                return True
+
+            # Try to set up SSH for this host
+            return self.setup_ssh(hostname)
+
+        except Exception as e:
+            logger.debug("Failed to check SSH availability for %s: %s", hostname, e)
+            return False
+
+    def _are_credentials_available(self, username: Optional[str] = None, password: Optional[str] = None) -> bool:
+        """Check if Git credentials are available.
+
+        Args:
+            username: Git username (optional)
+            password: Git password/token (optional)
+
+        Returns:
+            bool: True if credentials are available
+        """
+        # Use provided credentials or fall back to environment variables
+        git_username = username or os.environ.get("GIT_USERNAME")
+        git_password = password or os.environ.get("GIT_PASSWORD")
+
+        return bool(git_username and git_password)
+
+    def _run_git_command_with_ssh(self, command: List[str], hostname: str) -> Optional[object]:
+        """Run Git command with SSH authentication.
+
+        Args:
+            command: Git command as list
+            hostname: Target hostname
+
+        Returns:
+            Command result object or None if failed
+        """
+        try:
+            # Ensure SSH is set up for the host
+            if not self.setup_ssh(hostname):
+                logger.error("Failed to set up SSH for %s", hostname)
+                return None
+
+            # Get SSH command for Git
+            ssh_command = self.git.get_git_ssh_command(hostname)
+            if not ssh_command:
+                logger.error("Failed to get SSH command for %s", hostname)
+                return None
+
+            # Set GIT_SSH_COMMAND environment variable
+            env = os.environ.copy()
+            env["GIT_SSH_COMMAND"] = ssh_command
+
+            logger.debug("Running Git command with SSH: %s", command)
+            return run_command(command, env=env)
+
+        except Exception as e:
+            logger.error("Failed to run Git command with SSH: %s", str(e))
+            return None
