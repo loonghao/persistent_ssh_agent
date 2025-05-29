@@ -1,3 +1,20 @@
+## v0.12.0 (2025-05-29)
+
+### Feat
+
+- improve test coverage and extract hardcoded values to constants
+- enhance CI credential helper with forced credential clearing
+
+### Fix
+
+- replace tuple[...] with Tuple[...] for Python 3.8 compatibility
+- update test to handle actual decryption error messages
+
+### Refactor
+
+- centralize Git constants in constants.py
+- optimize GitIntegration class for better maintainability
+
 ## v0.11.0 (2025-05-27)
 
 ### Feat
