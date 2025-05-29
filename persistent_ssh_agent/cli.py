@@ -1290,5 +1290,6 @@ def git_run_cmd(ctx, git_args, username, password, prefer_credentials, prompt):
         sys.exit(1)
 
 
+
 if __name__ == "__main__":
     main(obj={})

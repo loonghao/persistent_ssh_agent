@@ -335,7 +335,111 @@ Available commands:
   - `--prefer-credentials`: Prefer credential helper over SSH authentication
   - `--prompt`: Prompt for credentials if not provided
 
+
+
 ### CI/CD Pipeline Integration
+
+The library provides specialized support for CI/CD environments with automatic credential setup and submodule management.
+
+#### Python API for CI
+
+```python
+from persistent_ssh_agent import PersistentSSHAgent
+import os
+
+# Set up credentials from environment variables
+os.environ['GIT_USERNAME'] = 'your-username'
+os.environ['GIT_PASSWORD'] = 'your-token'
+
+agent = PersistentSSHAgent()
+
+# Set up Git credentials (automatically uses forced credential helper)
+agent.git.setup_git_credentials()
+
+# Run Git commands with automatic passwordless authentication
+# This will use forced credential helper that clears existing helpers
+result = agent.run_git_command_passwordless([
+    'git', 'submodule', 'update', '--init', '--recursive'
+], prefer_ssh=False)  # Prefer credentials in CI
+
+# Or use git-run CLI command
+# uvx persistent_ssh_agent git-run submodule update --init --recursive
+```
+
+#### CLI for CI Environments
+
+```bash
+# Set up credentials using environment variables
+export GIT_USERNAME=your-username
+export GIT_PASSWORD=your-token
+
+# Set up Git credentials (uses forced credential helper)
+uvx persistent_ssh_agent git-setup
+
+# Run Git commands with automatic passwordless authentication
+uvx persistent_ssh_agent git-run submodule update --init --recursive
+uvx persistent_ssh_agent git-run --prefer-credentials pull origin main
+uvx persistent_ssh_agent git-run clone https://github.com/user/repo.git
+
+# All git-run commands automatically use forced credential helper:
+# git -c "credential.helper=" -c "credential.helper=script" -c "credential.useHttpPath=true" ...
+```
+
+#### GitHub Actions Integration
+
+```yaml
+name: Update Submodules
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+
+jobs:
+  update-submodules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install persistent-ssh-agent
+        run: pip install persistent-ssh-agent
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Git credentials and update submodules
+        env:
+          GIT_USERNAME: ${{ github.actor }}
+          GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Set up Git credentials
+          uvx persistent_ssh_agent git-setup
+
+          # Update submodules using forced credential helper
+          uvx persistent_ssh_agent git-run submodule update --init --recursive --prefer-credentials
+
+      - name: Create PR if changes
+        # Add your PR creation logic here
+```
+
+#### Features for CI/CD
+
+- **Environment Variable Support**: Automatic detection of `GIT_USERNAME` and `GIT_PASSWORD`
+- **Credential Verification**: Optional verification of credentials before operations
+- **Submodule Management**: Multiple strategies for updating submodules
+- **Quiet Mode**: Reduced output for cleaner CI logs
+- **Status Reporting**: Comprehensive environment status and recommendations
+- **Error Handling**: Proper exit codes and error messages for CI systems
+- **Forced Credential Helper**: Automatically clears existing credential helpers and uses our own
+- **Path-Specific Credentials**: Enables `credential.useHttpPath=true` for better credential isolation
 
 ```python
 from persistent_ssh_agent import PersistentSSHAgent
