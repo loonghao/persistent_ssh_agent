@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Features" href="features.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent 0.10.1 documentation</title>
+        <title>persistent_ssh_agent 0.11.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -175,7 +175,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">persistent_ssh_agent 0.10.1 documentation</div></a>
+      <a href="#"><div class="brand">persistent_ssh_agent 0.11.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -199,7 +199,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.10.1 documentation</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.11.0 documentation</span>
   
 </a>
 <div class="language-switcher">
@@ -649,6 +649,108 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<s
 </section>
 <section id="ci-cd-pipeline-integration">
 <h4>CI/CD Pipeline Integration<a class="headerlink" href="#ci-cd-pipeline-integration" title="Link to this heading">¶</a></h4>
+<p>The library provides specialized support for CI/CD environments with automatic credential setup and submodule management.</p>
+<section id="python-api-for-ci">
+<h5>Python API for CI<a class="headerlink" href="#python-api-for-ci" title="Link to this heading">¶</a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="c1"># Set up credentials from environment variables</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GIT_USERNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your-username&#39;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GIT_PASSWORD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;your-token&#39;</span>
+
+<span class="n">agent</span> <span class="o">=</span> <span class="n">PersistentSSHAgent</span><span class="p">()</span>
+
+<span class="c1"># Set up Git credentials (automatically uses forced credential helper)</span>
+<span class="n">agent</span><span class="o">.</span><span class="n">git</span><span class="o">.</span><span class="n">setup_git_credentials</span><span class="p">()</span>
+
+<span class="c1"># Run Git commands with automatic passwordless authentication</span>
+<span class="c1"># This will use forced credential helper that clears existing helpers</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_git_command_passwordless</span><span class="p">([</span>
+    <span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;submodule&#39;</span><span class="p">,</span> <span class="s1">&#39;update&#39;</span><span class="p">,</span> <span class="s1">&#39;--init&#39;</span><span class="p">,</span> <span class="s1">&#39;--recursive&#39;</span>
+<span class="p">],</span> <span class="n">prefer_ssh</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Prefer credentials in CI</span>
+
+<span class="c1"># Or use git-run CLI command</span>
+<span class="c1"># uvx persistent_ssh_agent git-run submodule update --init --recursive</span>
+</pre></div>
+</div>
+</section>
+<section id="cli-for-ci-environments">
+<h5>CLI for CI Environments<a class="headerlink" href="#cli-for-ci-environments" title="Link to this heading">¶</a></h5>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up credentials using environment variables</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GIT_USERNAME</span><span class="o">=</span>your-username
+<span class="nb">export</span><span class="w"> </span><span class="nv">GIT_PASSWORD</span><span class="o">=</span>your-token
+
+<span class="c1"># Set up Git credentials (uses forced credential helper)</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
+
+<span class="c1"># Run Git commands with automatic passwordless authentication</span>
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>--prefer-credentials<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git
+
+<span class="c1"># All git-run commands automatically use forced credential helper:</span>
+<span class="c1"># git -c &quot;credential.helper=&quot; -c &quot;credential.helper=script&quot; -c &quot;credential.useHttpPath=true&quot; ...</span>
+</pre></div>
+</div>
+</section>
+<section id="github-actions-integration">
+<h5>GitHub Actions Integration<a class="headerlink" href="#github-actions-integration" title="Link to this heading">¶</a></h5>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Update Submodules</span>
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&#39;</span><span class="w">  </span><span class="c1"># Daily at 2 AM UTC</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">update-submodules</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.GITHUB_TOKEN }}</span>
+<span class="w">          </span><span class="nt">submodules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v5</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.11&#39;</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install persistent-ssh-agent</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip install persistent-ssh-agent</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure Git</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">git config --global user.name &quot;github-actions[bot]&quot;</span>
+<span class="w">          </span><span class="no">git config --global user.email &quot;github-actions[bot]@users.noreply.github.com&quot;</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Git credentials and update submodules</span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">GIT_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.actor }}</span>
+<span class="w">          </span><span class="nt">GIT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.GITHUB_TOKEN }}</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no"># Set up Git credentials</span>
+<span class="w">          </span><span class="no">uvx persistent_ssh_agent git-setup</span>
+
+<span class="w">          </span><span class="no"># Update submodules using forced credential helper</span>
+<span class="w">          </span><span class="no">uvx persistent_ssh_agent git-run submodule update --init --recursive --prefer-credentials</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create PR if changes</span>
+<span class="w">        </span><span class="c1"># Add your PR creation logic here</span>
+</pre></div>
+</div>
+</section>
+<section id="features-for-ci-cd">
+<h5>Features for CI/CD<a class="headerlink" href="#features-for-ci-cd" title="Link to this heading">¶</a></h5>
+<ul class="simple">
+<li><p><strong>Environment Variable Support</strong>: Automatic detection of <code class="docutils literal notranslate"><span class="pre">GIT_USERNAME</span></code> and <code class="docutils literal notranslate"><span class="pre">GIT_PASSWORD</span></code></p></li>
+<li><p><strong>Credential Verification</strong>: Optional verification of credentials before operations</p></li>
+<li><p><strong>Submodule Management</strong>: Multiple strategies for updating submodules</p></li>
+<li><p><strong>Quiet Mode</strong>: Reduced output for cleaner CI logs</p></li>
+<li><p><strong>Status Reporting</strong>: Comprehensive environment status and recommendations</p></li>
+<li><p><strong>Error Handling</strong>: Proper exit codes and error messages for CI systems</p></li>
+<li><p><strong>Forced Credential Helper</strong>: Automatically clears existing credential helpers and uses our own</p></li>
+<li><p><strong>Path-Specific Credentials</strong>: Enables <code class="docutils literal notranslate"><span class="pre">credential.useHttpPath=true</span></code> for better credential isolation</p></li>
+</ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">PersistentSSHAgent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
 
@@ -669,6 +771,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-run<s
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to start SSH agent&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
 </section>
 <section id="git-integration">
 <h4>Git Integration<a class="headerlink" href="#git-integration" title="Link to this heading">¶</a></h4>
@@ -1214,7 +1317,13 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
 </li>
 <li><a class="reference internal" href="#common-use-cases">🔧 Common Use Cases</a><ul>
 <li><a class="reference internal" href="#command-line-interface-cli">Command Line Interface (CLI)</a></li>
-<li><a class="reference internal" href="#ci-cd-pipeline-integration">CI/CD Pipeline Integration</a></li>
+<li><a class="reference internal" href="#ci-cd-pipeline-integration">CI/CD Pipeline Integration</a><ul>
+<li><a class="reference internal" href="#python-api-for-ci">Python API for CI</a></li>
+<li><a class="reference internal" href="#cli-for-ci-environments">CLI for CI Environments</a></li>
+<li><a class="reference internal" href="#github-actions-integration">GitHub Actions Integration</a></li>
+<li><a class="reference internal" href="#features-for-ci-cd">Features for CI/CD</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#git-integration">Git Integration</a></li>
 <li><a class="reference internal" href="#passwordless-git-operations">Passwordless Git Operations</a></li>
 <li><a class="reference internal" href="#git-credential-helper-support-simplified">Git Credential Helper Support (Simplified)</a></li>
@@ -1248,7 +1357,7 @@ uvx<span class="w"> </span>persistent_ssh_agent<span class="w"> </span>git-setup
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=64d54a77"></script>
+</div><script src="_static/documentation_options.js?v=e8703f68"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

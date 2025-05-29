@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.core - persistent_ssh_agent 0.10.1 documentation</title>
+        <title>persistent_ssh_agent.core - persistent_ssh_agent 0.11.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -174,7 +174,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.10.1 documentation</div></a>
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.11.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -198,7 +198,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.10.1 documentation</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.11.0 documentation</span>
   
 </a>
 <div class="language-switcher">
@@ -283,7 +283,9 @@
 
 <span class="c1"># Import third-party modules</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CLIConstants</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHAgentConstants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SystemConstants</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.git</span><span class="w"> </span><span class="kn">import</span> <span class="n">GitIntegration</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.ssh_config_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfigParser</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">persistent_ssh_agent.ssh_key_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHKeyManager</span>
@@ -344,8 +346,8 @@
         <span class="n">ensure_home_env</span><span class="p">()</span>
 
         <span class="c1"># Initialize paths and state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.ssh&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span> <span class="o">/</span> <span class="s2">&quot;agent_info.json&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="n">SSHAgentConstants</span><span class="o">.</span><span class="n">SSH_DIR_NAME</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agent_info_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_dir</span> <span class="o">/</span> <span class="n">SSHAgentConstants</span><span class="o">.</span><span class="n">AGENT_INFO_FILE</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_config_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_agent_started</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expiration_time</span> <span class="o">=</span> <span class="n">expiration_time</span>
@@ -679,8 +681,8 @@
                 <span class="n">temp_key</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">temp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">key_content</span><span class="p">)</span>
             <span class="c1"># Set proper permissions for SSH key</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;nt&quot;</span><span class="p">:</span>  <span class="c1"># Skip on Windows</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">temp_key</span><span class="p">,</span> <span class="mo">0o600</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">SystemConstants</span><span class="o">.</span><span class="n">WINDOWS_PLATFORM</span><span class="p">:</span>  <span class="c1"># Skip on Windows</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">temp_key</span><span class="p">,</span> <span class="n">CLIConstants</span><span class="o">.</span><span class="n">CONFIG_FILE_PERMISSIONS</span><span class="p">)</span>
             <span class="c1"># Convert Windows path to Unix-style for consistency</span>
             <span class="k">return</span> <span class="n">temp_key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
 
@@ -1249,7 +1251,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=64d54a77"></script>
+</div><script src="../../_static/documentation_options.js?v=e8703f68"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

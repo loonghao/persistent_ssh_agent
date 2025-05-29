@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../../genindex.html" /><link rel="search" title="搜索" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
-        <title>persistent_ssh_agent.constants - persistent_ssh_agent 0.10.1 文档</title>
+        <title>persistent_ssh_agent.constants - persistent_ssh_agent 0.11.0 文档</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -174,7 +174,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.10.1 文档</div></a>
+      <a href="../../index.html"><div class="brand">persistent_ssh_agent 0.11.0 文档</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -198,7 +198,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">persistent_ssh_agent 0.10.1 文档</span>
+  <span class="sidebar-brand-text">persistent_ssh_agent 0.11.0 文档</span>
   
 </a>
 <div class="language-switcher">
@@ -327,16 +327,50 @@
     <span class="c1"># Common Git hosts</span>
     <span class="n">COMMON_GIT_HOSTS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;github.com&quot;</span><span class="p">,</span> <span class="s2">&quot;gitlab.com&quot;</span><span class="p">,</span> <span class="s2">&quot;bitbucket.org&quot;</span><span class="p">,</span> <span class="s2">&quot;git.sr.ht&quot;</span><span class="p">,</span> <span class="s2">&quot;codeberg.org&quot;</span><span class="p">]</span>
 
+    <span class="c1"># Credential helper configuration</span>
+    <span class="n">CREDENTIAL_HELPER_CLEAR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;credential.helper=&quot;</span>
+    <span class="n">CREDENTIAL_USE_HTTP_PATH</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;credential.useHttpPath=true&quot;</span>
+
+    <span class="c1"># Default timeouts and limits</span>
+    <span class="n">DEFAULT_CREDENTIAL_TEST_TIMEOUT</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">DEFAULT_NETWORK_TEST_TIMEOUT</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1"># Test repositories for credential validation</span>
+    <span class="n">TEST_REPOSITORIES</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;github.com&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://github.com/octocat/Hello-World.git&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;gitlab.com&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://gitlab.com/gitlab-org/gitlab.git&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;bitbucket.org&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://bitbucket.org/atlassian/atlassian-frontend.git&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="c1"># System credential helpers (built into Git or OS)</span>
+    <span class="n">SYSTEM_CREDENTIAL_HELPERS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;manager&quot;</span><span class="p">,</span> <span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="s2">&quot;osxkeychain&quot;</span><span class="p">,</span> <span class="s2">&quot;wincred&quot;</span>
+    <span class="p">]</span>
+
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CLIConstants</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Constants for CLI operations.&quot;&quot;&quot;</span>
 
-    <span class="c1"># Configuration file names</span>
-    <span class="n">CONFIG_FILE_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;persistent_ssh_agent_config.json&quot;</span>
+    <span class="c1"># Configuration directory and file names</span>
+    <span class="n">CONFIG_DIR_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;.persistent_ssh_agent&quot;</span>
+    <span class="n">CONFIG_FILE_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;config.json&quot;</span>
+    <span class="n">LEGACY_CONFIG_FILE_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;persistent_ssh_agent_config.json&quot;</span>
 
     <span class="c1"># Encryption constants</span>
     <span class="n">ENCRYPTION_ALGORITHM</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AES-256-GCM&quot;</span>
     <span class="n">KEY_DERIVATION_ITERATIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100000</span>
+    <span class="n">SALT_SIZE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">IV_SIZE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">KEY_SIZE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># 256 bits</span>
+    <span class="n">AES_BLOCK_SIZE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="c1"># Time conversion constants</span>
+    <span class="n">SECONDS_PER_HOUR</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3600</span>
+    <span class="n">HOURS_PER_DAY</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">24</span>
+
+    <span class="c1"># File permissions (Unix/Linux)</span>
+    <span class="n">CONFIG_DIR_PERMISSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mo">0o700</span>
+    <span class="n">CONFIG_FILE_PERMISSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mo">0o600</span>
 
     <span class="c1"># CLI command names</span>
     <span class="n">SETUP_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;setup&quot;</span>
@@ -345,6 +379,96 @@
     <span class="n">EXPORT_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;export&quot;</span>
     <span class="n">IMPORT_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;import&quot;</span>
     <span class="n">TEST_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+    <span class="n">CONFIG_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;config&quot;</span>
+    <span class="n">GIT_SETUP_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;git-setup&quot;</span>
+    <span class="n">GIT_DEBUG_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;git-debug&quot;</span>
+    <span class="n">GIT_CLEAR_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;git-clear&quot;</span>
+    <span class="n">GIT_RUN_COMMAND</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;git-run&quot;</span>
+
+    <span class="c1"># Configuration keys</span>
+    <span class="n">CONFIG_KEY_PASSPHRASE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;passphrase&quot;</span>
+    <span class="n">CONFIG_KEY_IDENTITY_FILE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;identity_file&quot;</span>
+    <span class="n">CONFIG_KEY_EXPIRATION_TIME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;expiration_time&quot;</span>
+    <span class="n">CONFIG_KEY_REUSE_AGENT</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;reuse_agent&quot;</span>
+    <span class="n">CONFIG_KEY_KEYS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;keys&quot;</span>
+
+    <span class="c1"># Default key name</span>
+    <span class="n">DEFAULT_KEY_NAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+
+    <span class="c1"># Non-sensitive configuration keys for export</span>
+    <span class="n">NON_SENSITIVE_KEYS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;identity_file&quot;</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="s2">&quot;expiration_time&quot;</span><span class="p">,</span> <span class="s2">&quot;reuse_agent&quot;</span>
+    <span class="p">]</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SystemConstants</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constants for system-specific operations.&quot;&quot;&quot;</span>
+
+    <span class="c1"># File extensions</span>
+    <span class="n">SSH_PUBLIC_KEY_EXTENSION</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;.pub&quot;</span>
+    <span class="n">SSH_PRIVATE_KEY_EXTENSION</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">JSON_EXTENSION</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;.json&quot;</span>
+
+    <span class="c1"># System paths</span>
+    <span class="n">LINUX_MACHINE_ID_PATH</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/etc/machine-id&quot;</span>
+    <span class="n">WINDOWS_MACHINE_GUID_REGISTRY_PATH</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Cryptography&quot;</span>
+    <span class="n">WINDOWS_MACHINE_GUID_KEY</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;MachineGuid&quot;</span>
+
+    <span class="c1"># Platform identifiers</span>
+    <span class="n">WINDOWS_PLATFORM</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nt&quot;</span>
+    <span class="n">POSIX_PLATFORM</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;posix&quot;</span>
+
+    <span class="c1"># Default fallback values</span>
+    <span class="n">UNKNOWN_HOST</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown_host&quot;</span>
+    <span class="n">UNKNOWN_MACHINE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown_machine&quot;</span>
+    <span class="n">UNKNOWN_USER</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown_user&quot;</span>
+    <span class="n">UNKNOWN_HOME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/unknown_home&quot;</span>
+
+    <span class="c1"># Environment variable names</span>
+    <span class="n">ENV_USER</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;USER&quot;</span>
+    <span class="n">ENV_USERNAME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;USERNAME&quot;</span>
+    <span class="n">ENV_HOME</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;HOME&quot;</span>
+
+    <span class="c1"># Encoding constants</span>
+    <span class="n">DEFAULT_ENCODING</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span>
+    <span class="n">FALLBACK_ENCODING</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latin1&quot;</span>
+    <span class="n">WINDOWS_ENCODING</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gbk&quot;</span>
+    <span class="n">WINDOWS_CODEPAGE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cp936&quot;</span>
+
+    <span class="c1"># Numeric patterns for SSH keys</span>
+    <span class="n">SSH_KEY_NUMERIC_PATTERN</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;[0-9]*&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LoggingConstants</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constants for logging configuration.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Log levels</span>
+    <span class="n">DEBUG_LEVEL</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span>
+    <span class="n">INFO_LEVEL</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span>
+    <span class="n">WARNING_LEVEL</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;WARNING&quot;</span>
+    <span class="n">ERROR_LEVEL</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span>
+
+    <span class="c1"># Log format templates</span>
+    <span class="n">DEBUG_LOG_FORMAT</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss.SSS}&lt;/green&gt; | &quot;</span>
+        <span class="s2">&quot;&lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt; | &quot;</span>
+        <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
+        <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
+    <span class="p">)</span>
+    <span class="n">DEFAULT_LOG_FORMAT</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;&lt;green&gt;{time:YYYY-MM-DD HH:mm:ss}&lt;/green&gt; | &quot;</span>
+        <span class="s2">&quot;&lt;level&gt;</span><span class="si">{level: &lt;8}</span><span class="s2">&lt;/level&gt; | &quot;</span>
+        <span class="s2">&quot;&lt;cyan&gt;</span><span class="si">{name}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{function}</span><span class="s2">&lt;/cyan&gt;:&lt;cyan&gt;</span><span class="si">{line}</span><span class="s2">&lt;/cyan&gt; - &quot;</span>
+        <span class="s2">&quot;&lt;level&gt;</span><span class="si">{message}</span><span class="s2">&lt;/level&gt;&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Log message prefixes</span>
+    <span class="n">SUCCESS_PREFIX</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;✅&quot;</span>
+    <span class="n">ERROR_PREFIX</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;❌&quot;</span>
+    <span class="n">WARNING_PREFIX</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;⚠️&quot;</span>
+    <span class="n">INFO_PREFIX</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;💡&quot;</span>
+    <span class="n">DEBUG_PREFIX</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;🔍&quot;</span>
+    <span class="n">ROCKET_PREFIX</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;🚀&quot;</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthStrategyConstants</span><span class="p">:</span>
@@ -377,7 +501,14 @@
 
 
 <span class="c1"># Export all constants for easy access</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;AuthStrategyConstants&quot;</span><span class="p">,</span> <span class="s2">&quot;CLIConstants&quot;</span><span class="p">,</span> <span class="s2">&quot;GitConstants&quot;</span><span class="p">,</span> <span class="s2">&quot;SSHAgentConstants&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;AuthStrategyConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CLIConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GitConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LoggingConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SSHAgentConstants&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SystemConstants&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
         </article>
       </div>
@@ -417,7 +548,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=387e6d4c"></script>
+</div><script src="../../_static/documentation_options.js?v=b4db1853"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
