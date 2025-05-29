@@ -20,6 +20,11 @@ from persistent_ssh_agent.utils import run_command
 # Set up logger
 logger = logging.getLogger(__name__)
 
+# Constants for credential helper configuration
+CREDENTIAL_HELPER_CLEAR = "credential.helper="
+CREDENTIAL_USE_HTTP_PATH = "credential.useHttpPath=true"
+DEFAULT_CREDENTIAL_TEST_TIMEOUT = 30
+
 
 class GitIntegration:
     """Git integration for SSH agent management.
@@ -39,6 +44,55 @@ class GitIntegration:
             ssh_agent: PersistentSSHAgent instance
         """
         self._ssh_agent = ssh_agent
+
+    def _get_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> tuple[Optional[str], Optional[str]]:
+        """Get Git credentials from parameters or environment variables.
+
+        Args:
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            tuple[Optional[str], Optional[str]]: (username, password) or (None, None) if not available
+        """
+        git_username = username or os.environ.get("GIT_USERNAME")
+        git_password = password or os.environ.get("GIT_PASSWORD")
+        return git_username, git_password
+
+    def _build_forced_credential_args(self, credential_helper_path: str) -> List[str]:
+        """Build Git command arguments for forced credential helper.
+
+        Args:
+            credential_helper_path: Path to credential helper script
+
+        Returns:
+            List[str]: Git command arguments for forced credential helper
+        """
+        return [
+            "-c", CREDENTIAL_HELPER_CLEAR,  # Clear existing credential helpers
+            "-c", f"credential.helper={credential_helper_path}",  # Set our credential helper
+            "-c", CREDENTIAL_USE_HTTP_PATH,  # Enable path-specific credentials
+        ]
+
+    def _handle_git_config_error(self, result, operation: str) -> None:
+        """Handle Git config command errors with helpful suggestions.
+
+        Args:
+            result: Command result object
+            operation: Description of the operation that failed
+        """
+        if result and result.stderr:
+            # Handle both string and bytes stderr output
+            stderr_msg = result.stderr
+            if isinstance(stderr_msg, bytes):
+                stderr_msg = stderr_msg.decode("utf-8", errors="replace")
+            logger.error("Git config error during %s: %s", operation, stderr_msg.strip())
+
+            # Provide helpful suggestions for common errors
+            if "multiple values" in stderr_msg.lower():
+                logger.info("💡 Suggestion: Try clearing existing credential helpers first:")
+                logger.info("   uvx persistent_ssh_agent git-clear")
+                logger.info("   Then run git-setup again")
 
     def extract_hostname(self, url: str) -> Optional[str]:
         """Extract hostname from SSH URL (public method).
@@ -288,9 +342,8 @@ class GitIntegration:
             ...     username='user', password='pass'
             ... )
         """
-        # Use provided credentials or fall back to environment variables
-        git_username = username or os.environ.get("GIT_USERNAME")
-        git_password = password or os.environ.get("GIT_PASSWORD")
+        # Get credentials using helper method
+        git_username, git_password = self._get_credentials(username, password)
 
         if not git_username or not git_password:
             logger.warning("No Git credentials provided, running command without authentication")
@@ -303,17 +356,10 @@ class GitIntegration:
             return None
 
         # Add credential helper to the git command using -c option
-        # First clear any existing credential helpers, then set our own
         if command[0] == "git":
-            # Insert the credential helper config before the git subcommand
-            # Use multiple -c options to first clear existing helpers, then set our own
-            enhanced_command = [
-                command[0],  # 'git'
-                "-c", "credential.helper=",  # Clear existing credential helpers
-                "-c", f"credential.helper={credential_helper_path}",  # Set our credential helper
-                "-c", "credential.useHttpPath=true",  # Enable path-specific credentials
-                *command[1:],  # rest of the command
-            ]
+            # Build enhanced command with forced credential helper
+            credential_args = self._build_forced_credential_args(credential_helper_path)
+            enhanced_command = [command[0]] + credential_args + command[1:]
         else:
             enhanced_command = command
 
@@ -340,9 +386,8 @@ class GitIntegration:
             >>> helper = agent.git.get_credential_helper_command('user', 'pass')
             >>> # Use with: git -c credential.helper="{helper}" clone repo_url
         """
-        # Use provided credentials or fall back to environment variables
-        git_username = username or os.environ.get("GIT_USERNAME")
-        git_password = password or os.environ.get("GIT_PASSWORD")
+        # Get credentials using helper method
+        git_username, git_password = self._get_credentials(username, password)
 
         if not git_username or not git_password:
             logger.debug("No Git credentials provided for credential helper")
