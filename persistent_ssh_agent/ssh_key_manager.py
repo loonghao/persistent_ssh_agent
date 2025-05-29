@@ -11,6 +11,7 @@ from typing import Optional
 from typing import Tuple
 
 # Import third-party modules
+from persistent_ssh_agent.constants import SystemConstants
 from persistent_ssh_agent.utils import run_command
 
 
@@ -42,16 +43,16 @@ class SSHKeyManager:
             for key_type in self.ssh_key_types:
                 # Check for base key type (e.g., id_rsa)
                 key_path = os.path.join(str(self.ssh_dir), key_type)
-                pub_key_path = key_path + ".pub"
+                pub_key_path = key_path + SystemConstants.SSH_PUBLIC_KEY_EXTENSION
                 if os.path.exists(key_path) and os.path.exists(pub_key_path):
                     normalized_path = str(Path(key_path)).replace("\\", "/")
                     if normalized_path not in available_keys:  # Avoid duplicates
                         available_keys.append(normalized_path)
 
                 # Check for keys with numeric suffixes (e.g., id_rsa2)
-                pattern = os.path.join(str(self.ssh_dir), f"{key_type}[0-9]*")
+                pattern = os.path.join(str(self.ssh_dir), f"{key_type}{SystemConstants.SSH_KEY_NUMERIC_PATTERN}")
                 for numbered_key_path in sorted(glob.glob(pattern)):  # Sort numbered keys
-                    pub_key_path = numbered_key_path + ".pub"
+                    pub_key_path = numbered_key_path + SystemConstants.SSH_PUBLIC_KEY_EXTENSION
                     if os.path.exists(numbered_key_path) and os.path.exists(pub_key_path):
                         normalized_path = str(Path(numbered_key_path)).replace("\\", "/")
                         if normalized_path not in available_keys:  # Avoid duplicates
