@@ -26,16 +26,13 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from loguru import logger
 from persistent_ssh_agent import PersistentSSHAgent
 from persistent_ssh_agent.config import SSHConfig
+from persistent_ssh_agent.constants import CLIConstants
+from persistent_ssh_agent.constants import LoggingConstants
+from persistent_ssh_agent.constants import SystemConstants
 from persistent_ssh_agent.utils import run_command
 
 
 # Logger will be configured dynamically in main() based on --debug flag
-
-# Constants for encryption
-SALT_SIZE = 16
-IV_SIZE = 16
-KEY_SIZE = 32  # 256 bits
-ITERATIONS = 100000
 
 
 class Args:
@@ -56,16 +53,16 @@ class ConfigManager:
 
     def __init__(self):
         """Initialize configuration manager."""
-        self.config_dir = Path.home() / ".persistent_ssh_agent"
-        self.config_file = self.config_dir / "config.json"
+        self.config_dir = Path.home() / CLIConstants.CONFIG_DIR_NAME
+        self.config_file = self.config_dir / CLIConstants.CONFIG_FILE_NAME
         self._ensure_config_dir()
 
     def _ensure_config_dir(self) -> None:
         """Ensure configuration directory exists."""
         self.config_dir.mkdir(parents=True, exist_ok=True)
         # Set proper permissions for config directory
-        if os.name != "nt":  # Skip on Windows
-            os.chmod(self.config_dir, 0o700)
+        if os.name != SystemConstants.WINDOWS_PLATFORM:  # Skip on Windows
+            os.chmod(self.config_dir, CLIConstants.CONFIG_DIR_PERMISSIONS)
 
     def load_config(self) -> Dict:
         """Load configuration from file.
@@ -77,7 +74,7 @@ class ConfigManager:
             return {}
 
         try:
-            with open(self.config_file, "r", encoding="utf-8") as f:
+            with open(self.config_file, "r", encoding=SystemConstants.DEFAULT_ENCODING) as f:
                 return json.load(f)
         except (json.JSONDecodeError, IOError) as e:
             logger.error(f"Failed to load configuration: {e}")
@@ -93,12 +90,12 @@ class ConfigManager:
             bool: True if successful
         """
         try:
-            with open(self.config_file, "w", encoding="utf-8") as f:
+            with open(self.config_file, "w", encoding=SystemConstants.DEFAULT_ENCODING) as f:
                 json.dump(config, f, indent=2)
 
             # Set proper permissions for config file
-            if os.name != "nt":  # Skip on Windows
-                os.chmod(self.config_file, 0o600)
+            if os.name != SystemConstants.WINDOWS_PLATFORM:  # Skip on Windows
+                os.chmod(self.config_file, CLIConstants.CONFIG_FILE_PERMISSIONS)
 
             return True
         except IOError as e:
@@ -189,8 +186,8 @@ class ConfigManager:
         Returns:
             bool: True if successful
         """
-        seconds = hours * 3600  # Convert to seconds
-        return self._set_config_value("expiration_time", seconds)
+        seconds = hours * CLIConstants.SECONDS_PER_HOUR  # Convert to seconds
+        return self._set_config_value(CLIConstants.CONFIG_KEY_EXPIRATION_TIME, seconds)
 
     def get_reuse_agent(self) -> Optional[bool]:
         """Get stored reuse agent setting.
@@ -361,19 +358,23 @@ class ConfigManager:
             # If all else fails, use a default set of values
             logger.warning(f"Failed to get system info: {e}, using fallback values")
             system_info = {
-                "hostname": "unknown_host",
-                "machine_id": "unknown_machine",
-                "username": "unknown_user",
-                "home": "/unknown_home",
+                "hostname": SystemConstants.UNKNOWN_HOST,
+                "machine_id": SystemConstants.UNKNOWN_MACHINE,
+                "username": SystemConstants.UNKNOWN_USER,
+                "home": SystemConstants.UNKNOWN_HOME,
             }
 
         # Create a deterministic salt from system info
         salt_base = f"{system_info['hostname']}:{system_info['machine_id']}:{system_info['username']}"
-        salt = hashlib.sha256(salt_base.encode()).digest()[:SALT_SIZE]
+        salt = hashlib.sha256(salt_base.encode()).digest()[:CLIConstants.SALT_SIZE]
 
         # Derive key using PBKDF2
         kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(), length=KEY_SIZE, salt=salt, iterations=ITERATIONS, backend=default_backend()
+            algorithm=hashes.SHA256(),
+            length=CLIConstants.KEY_SIZE,
+            salt=salt,
+            iterations=CLIConstants.KEY_DERIVATION_ITERATIONS,
+            backend=default_backend()
         )
 
         # Use a combination of system info as the password
@@ -395,8 +396,8 @@ class ConfigManager:
                 return getpass.getuser()
             except Exception:
                 # Last resort fallback for CI environments
-                user = os.environ.get("USER", "")
-                return user or os.environ.get("USERNAME", "unknown_user")
+                user = os.environ.get(SystemConstants.ENV_USER, "")
+                return user or os.environ.get(SystemConstants.ENV_USERNAME, SystemConstants.UNKNOWN_USER)
 
     def _get_machine_id(self) -> str:
         """Get a unique machine identifier.
@@ -408,21 +409,21 @@ class ConfigManager:
         machine_id = ""
 
         # Linux
-        if os.path.exists("/etc/machine-id"):
+        if os.path.exists(SystemConstants.LINUX_MACHINE_ID_PATH):
             try:
-                with open("/etc/machine-id", "r", encoding="utf-8") as f:
+                with open(SystemConstants.LINUX_MACHINE_ID_PATH, "r", encoding=SystemConstants.DEFAULT_ENCODING) as f:
                     machine_id = f.read().strip()
             except (IOError, OSError):
                 pass
 
         # Windows
-        elif os.name == "nt":
+        elif os.name == SystemConstants.WINDOWS_PLATFORM:
             try:
                 # Import built-in modules
                 import winreg
 
-                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Cryptography") as key:
-                    machine_id = winreg.QueryValueEx(key, "MachineGuid")[0]
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, SystemConstants.WINDOWS_MACHINE_GUID_REGISTRY_PATH) as key:
+                    machine_id = winreg.QueryValueEx(key, SystemConstants.WINDOWS_MACHINE_GUID_KEY)[0]
             except (ImportError, OSError):
                 pass
 
@@ -446,7 +447,7 @@ class ConfigManager:
             key, salt = self._derive_key_from_system()
 
             # Generate a random IV
-            iv = os.urandom(IV_SIZE)
+            iv = os.urandom(CLIConstants.IV_SIZE)
 
             # Create an encryptor
             cipher = Cipher(AES(key), CBC(iv), backend=default_backend())
@@ -477,7 +478,7 @@ class ConfigManager:
         Returns:
             bytes: Padded data
         """
-        padding_length = 16 - (len(data) % 16)
+        padding_length = CLIConstants.AES_BLOCK_SIZE - (len(data) % CLIConstants.AES_BLOCK_SIZE)
         return data + bytes([padding_length]) * padding_length
 
     def _unpad_data(self, padded_data: bytes) -> bytes:
@@ -506,8 +507,8 @@ class ConfigManager:
             data = base64.b64decode(encrypted_data)
 
             # Extract IV and ciphertext (salt is not used as we get it from _derive_key_from_system)
-            iv = data[SALT_SIZE : SALT_SIZE + IV_SIZE]
-            ciphertext = data[SALT_SIZE + IV_SIZE :]
+            iv = data[CLIConstants.SALT_SIZE : CLIConstants.SALT_SIZE + CLIConstants.IV_SIZE]
+            ciphertext = data[CLIConstants.SALT_SIZE + CLIConstants.IV_SIZE :]
 
             # Get key using the same method as encryption
             key, _ = self._derive_key_from_system()
@@ -945,13 +946,8 @@ def _configure_debug_logging():
     logger.remove()
     logger.add(
         sys.stderr,
-        format=(
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-            "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-            "<level>{message}</level>"
-        ),
-        level="DEBUG",
+        format=LoggingConstants.DEBUG_LOG_FORMAT,
+        level=LoggingConstants.DEBUG_LEVEL,
     )
 
 
@@ -960,13 +956,8 @@ def _configure_default_logging():
     logger.remove()
     logger.add(
         sys.stderr,
-        format=(
-            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-            "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-            "<level>{message}</level>"
-        ),
-        level="INFO",
+        format=LoggingConstants.DEFAULT_LOG_FORMAT,
+        level=LoggingConstants.INFO_LEVEL,
     )
 
 

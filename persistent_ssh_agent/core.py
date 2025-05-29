@@ -18,7 +18,9 @@ from typing import Union
 
 # Import third-party modules
 from persistent_ssh_agent.config import SSHConfig
+from persistent_ssh_agent.constants import CLIConstants
 from persistent_ssh_agent.constants import SSHAgentConstants
+from persistent_ssh_agent.constants import SystemConstants
 from persistent_ssh_agent.git import GitIntegration
 from persistent_ssh_agent.ssh_config_parser import SSHConfigParser
 from persistent_ssh_agent.ssh_key_manager import SSHKeyManager
@@ -74,8 +76,8 @@ class PersistentSSHAgent:
         ensure_home_env()
 
         # Initialize paths and state
-        self._ssh_dir = Path.home() / ".ssh"
-        self._agent_info_file = self._ssh_dir / "agent_info.json"
+        self._ssh_dir = Path.home() / SSHAgentConstants.SSH_DIR_NAME
+        self._agent_info_file = self._ssh_dir / SSHAgentConstants.AGENT_INFO_FILE
         self._ssh_config_cache: Dict[str, Dict[str, str]] = {}
         self._ssh_agent_started = False
         self._expiration_time = expiration_time
@@ -406,8 +408,8 @@ class PersistentSSHAgent:
                 temp_key = temp_file.name
                 temp_file.write(key_content)
             # Set proper permissions for SSH key
-            if os.name != "nt":  # Skip on Windows
-                os.chmod(temp_key, 0o600)
+            if os.name != SystemConstants.WINDOWS_PLATFORM:  # Skip on Windows
+                os.chmod(temp_key, CLIConstants.CONFIG_FILE_PERMISSIONS)
             # Convert Windows path to Unix-style for consistency
             return temp_key.replace("\\", "/")
 
@@ -930,5 +932,3 @@ class PersistentSSHAgent:
         except Exception as e:
             logger.error("Failed to run Git command with SSH: %s", str(e))
             return None
-
-
