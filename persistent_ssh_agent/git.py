@@ -8,6 +8,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 
 # Import third-party modules
 from persistent_ssh_agent.constants import GitConstants
@@ -40,7 +41,7 @@ class GitIntegration:
         """
         self._ssh_agent = ssh_agent
 
-    def _get_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> tuple[Optional[str], Optional[str]]:
+    def _get_credentials(self, username: Optional[str] = None, password: Optional[str] = None) -> Tuple[Optional[str], Optional[str]]:
         """Get Git credentials from parameters or environment variables.
 
         Args:
@@ -48,7 +49,7 @@ class GitIntegration:
             password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
 
         Returns:
-            tuple[Optional[str], Optional[str]]: (username, password) or (None, None) if not available
+            Tuple[Optional[str], Optional[str]]: (username, password) or (None, None) if not available
         """
         git_username = username or os.environ.get(GitConstants.GIT_USERNAME_VAR)
         git_password = password or os.environ.get(GitConstants.GIT_PASSWORD_VAR)
