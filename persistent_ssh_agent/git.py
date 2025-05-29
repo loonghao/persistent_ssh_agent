@@ -303,12 +303,15 @@ class GitIntegration:
             return None
 
         # Add credential helper to the git command using -c option
+        # First clear any existing credential helpers, then set our own
         if command[0] == "git":
             # Insert the credential helper config before the git subcommand
+            # Use multiple -c options to first clear existing helpers, then set our own
             enhanced_command = [
                 command[0],  # 'git'
-                "-c",
-                f"credential.helper={credential_helper_path}",
+                "-c", "credential.helper=",  # Clear existing credential helpers
+                "-c", f"credential.helper={credential_helper_path}",  # Set our credential helper
+                "-c", "credential.useHttpPath=true",  # Enable path-specific credentials
                 *command[1:],  # rest of the command
             ]
         else:
@@ -349,6 +352,64 @@ class GitIntegration:
         credential_helper_path = self._create_credential_helper_file(git_username, git_password)
         logger.debug("Generated credential helper script: %s", credential_helper_path)
         return credential_helper_path
+
+    def build_git_command_with_forced_credentials(
+        self, base_command: List[str], username: Optional[str] = None, password: Optional[str] = None
+    ) -> Optional[List[str]]:
+        """Build Git command with forced credential helper that clears existing helpers.
+
+        This method builds a Git command that forces the use of our credential helper
+        by first clearing any existing credential helpers, then setting our own.
+
+        Args:
+            base_command: Base Git command (e.g., ['git', 'clone', 'repo_url'])
+            username: Git username (optional, uses GIT_USERNAME env var if not provided)
+            password: Git password/token (optional, uses GIT_PASSWORD env var if not provided)
+
+        Returns:
+            List[str]: Enhanced Git command with forced credentials, or None if failed
+
+        Example:
+            >>> agent = PersistentSSHAgent()
+            >>> cmd = agent.git.build_git_command_with_forced_credentials(
+            ...     ['git', 'submodule', 'update', '--remote'], 'user', 'pass'
+            ... )
+            >>> # Returns: ['git', '-c', 'credential.helper=', '-c', 'credential.helper=script',
+            >>> #           '-c', 'credential.useHttpPath=true', 'submodule', 'update', '--remote']
+        """
+        try:
+            # Use provided credentials or fall back to environment variables
+            git_username = username or os.environ.get("GIT_USERNAME")
+            git_password = password or os.environ.get("GIT_PASSWORD")
+
+            if not git_username or not git_password:
+                logger.debug("No Git credentials provided for forced credential command")
+                return base_command
+
+            # Create credential helper script file
+            credential_helper_path = self._create_credential_helper_file(git_username, git_password)
+            if not credential_helper_path:
+                logger.error("Failed to create credential helper script")
+                return None
+
+            # Build enhanced command with forced credential helper
+            if base_command[0] == "git":
+                enhanced_command = [
+                    base_command[0],  # 'git'
+                    "-c", "credential.helper=",  # Clear existing credential helpers
+                    "-c", f"credential.helper={credential_helper_path}",  # Set our credential helper
+                    "-c", "credential.useHttpPath=true",  # Enable path-specific credentials
+                    *base_command[1:],  # rest of the command
+                ]
+            else:
+                enhanced_command = base_command
+
+            logger.debug("Built Git command with forced credentials: %s", enhanced_command)
+            return enhanced_command
+
+        except Exception as e:
+            logger.error("Failed to build Git command with forced credentials: %s", str(e))
+            return None
 
     def test_credentials(
         self,
@@ -417,9 +478,15 @@ class GitIntegration:
                     return False
 
                 # Run git ls-remote with credentials
-                result = run_command(
-                    ["git", "-c", f"credential.helper={credential_helper_path}", "ls-remote", test_url], timeout=timeout
-                )
+                # Clear existing credential helpers and use our own
+                result = run_command([
+                    "git",
+                    "-c", "credential.helper=",  # Clear existing credential helpers
+                    "-c", f"credential.helper={credential_helper_path}",  # Set our credential helper
+                    "-c", "credential.useHttpPath=true",  # Enable path-specific credentials
+                    "ls-remote",
+                    test_url
+                ], timeout=timeout)
 
                 if result and result.returncode == 0:
                     logger.debug("Credentials test successful for %s", host)
