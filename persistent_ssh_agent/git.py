@@ -20,11 +20,6 @@ from persistent_ssh_agent.utils import run_command
 # Set up logger
 logger = logging.getLogger(__name__)
 
-# Constants for credential helper configuration
-CREDENTIAL_HELPER_CLEAR = "credential.helper="
-CREDENTIAL_USE_HTTP_PATH = "credential.useHttpPath=true"
-DEFAULT_CREDENTIAL_TEST_TIMEOUT = 30
-
 
 class GitIntegration:
     """Git integration for SSH agent management.
@@ -55,8 +50,8 @@ class GitIntegration:
         Returns:
             tuple[Optional[str], Optional[str]]: (username, password) or (None, None) if not available
         """
-        git_username = username or os.environ.get("GIT_USERNAME")
-        git_password = password or os.environ.get("GIT_PASSWORD")
+        git_username = username or os.environ.get(GitConstants.GIT_USERNAME_VAR)
+        git_password = password or os.environ.get(GitConstants.GIT_PASSWORD_VAR)
         return git_username, git_password
 
     def _build_forced_credential_args(self, credential_helper_path: str) -> List[str]:
@@ -69,9 +64,9 @@ class GitIntegration:
             List[str]: Git command arguments for forced credential helper
         """
         return [
-            "-c", CREDENTIAL_HELPER_CLEAR,  # Clear existing credential helpers
+            "-c", GitConstants.CREDENTIAL_HELPER_CLEAR,  # Clear existing credential helpers
             "-c", f"credential.helper={credential_helper_path}",  # Set our credential helper
-            "-c", CREDENTIAL_USE_HTTP_PATH,  # Enable path-specific credentials
+            "-c", GitConstants.CREDENTIAL_USE_HTTP_PATH,  # Enable path-specific credentials
         ]
 
     def _handle_git_config_error(self, result, operation: str) -> None:
@@ -305,13 +300,12 @@ class GitIntegration:
         env = os.environ.copy()
 
         # Use provided credentials or fall back to environment variables
-        git_username = username or os.environ.get("GIT_USERNAME")
-        git_password = password or os.environ.get("GIT_PASSWORD")
+        git_username, git_password = self._get_credentials(username, password)
 
         if git_username and git_password:
             # Set the credentials in environment variables for temporary use
-            env["GIT_USERNAME"] = git_username
-            env["GIT_PASSWORD"] = git_password
+            env[GitConstants.GIT_USERNAME_VAR] = git_username
+            env[GitConstants.GIT_PASSWORD_VAR] = git_password
 
             logger.debug("Created Git environment with temporary credentials")
         else:
@@ -459,7 +453,7 @@ class GitIntegration:
     def test_credentials(
         self,
         host: Optional[str] = None,
-        timeout: int = 30,
+        timeout: int = GitConstants.DEFAULT_CREDENTIAL_TEST_TIMEOUT,
         username: Optional[str] = None,
         password: Optional[str] = None,
     ) -> Dict[str, bool]:
@@ -577,16 +571,9 @@ class GitIntegration:
         Returns:
             List[str]: List of test URLs to try
         """
-        # Map of hosts to their test repositories
-        test_repos = {
-            "github.com": ["https://github.com/octocat/Hello-World.git"],
-            "gitlab.com": ["https://gitlab.com/gitlab-org/gitlab.git"],
-            "bitbucket.org": ["https://bitbucket.org/atlassian/atlassian-frontend.git"],
-        }
-
         # Return specific test URLs for known hosts, or create a generic one
-        if host in test_repos:
-            return test_repos[host]
+        if host in GitConstants.TEST_REPOSITORIES:
+            return GitConstants.TEST_REPOSITORIES[host]
         else:
             # For unknown hosts, try a generic test URL
             return [f"https://{host}/test/repo.git"]
@@ -1046,7 +1033,8 @@ class GitIntegration:
             for host in common_hosts:
                 try:
                     # Simple connectivity test using git ls-remote
-                    result = run_command(["git", "ls-remote", f"https://{host}/test/test.git"], timeout=10)
+                    result = run_command(["git", "ls-remote", f"https://{host}/test/test.git"],
+                                       timeout=GitConstants.DEFAULT_NETWORK_TEST_TIMEOUT)
 
                     # Even if authentication fails, we can reach the host if we get a response
                     connectivity_results[host] = result is not None
@@ -1140,8 +1128,7 @@ class GitIntegration:
 
             # For system helpers (like 'manager', 'store'), assume they're valid
             # These are typically built into Git or the system
-            system_helpers = ["manager", "store", "cache", "osxkeychain", "wincred"]
-            return any(helper.endswith(sh) for sh in system_helpers)
+            return any(helper.endswith(sh) for sh in GitConstants.SYSTEM_CREDENTIAL_HELPERS)
 
         except Exception as e:
             logger.debug("Error checking credential helper validity: %s", str(e))

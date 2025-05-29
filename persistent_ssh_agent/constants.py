@@ -59,6 +59,26 @@ class GitConstants:
     # Common Git hosts
     COMMON_GIT_HOSTS: ClassVar[List[str]] = ["github.com", "gitlab.com", "bitbucket.org", "git.sr.ht", "codeberg.org"]
 
+    # Credential helper configuration
+    CREDENTIAL_HELPER_CLEAR: ClassVar[str] = "credential.helper="
+    CREDENTIAL_USE_HTTP_PATH: ClassVar[str] = "credential.useHttpPath=true"
+
+    # Default timeouts and limits
+    DEFAULT_CREDENTIAL_TEST_TIMEOUT: ClassVar[int] = 30
+    DEFAULT_NETWORK_TEST_TIMEOUT: ClassVar[int] = 10
+
+    # Test repositories for credential validation
+    TEST_REPOSITORIES: ClassVar[dict] = {
+        "github.com": ["https://github.com/octocat/Hello-World.git"],
+        "gitlab.com": ["https://gitlab.com/gitlab-org/gitlab.git"],
+        "bitbucket.org": ["https://bitbucket.org/atlassian/atlassian-frontend.git"],
+    }
+
+    # System credential helpers (built into Git or OS)
+    SYSTEM_CREDENTIAL_HELPERS: ClassVar[List[str]] = [
+        "manager", "store", "cache", "osxkeychain", "wincred"
+    ]
+
 
 class CLIConstants:
     """Constants for CLI operations."""
