@@ -36,15 +36,6 @@ pytest-timeout = "*"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.12.0"
-tag_format = "v$version"
-version_files = [
-    "pyproject.toml:version",
-    "persistent_ssh_agent/__version__.py"
-]
-
 [tool.black]
 line-length = 120
 target-version = ['py38', 'py39', 'py310', 'py311', 'py312', "py313"]
