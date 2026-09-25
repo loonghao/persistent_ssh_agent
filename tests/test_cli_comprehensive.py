@@ -466,7 +466,7 @@ class TestConfigManagerEncryption:
     def test_decrypt_passphrase_error_handling(self, config_manager):
         """Test decryption error handling."""
         # Test with invalid base64 data that will cause decryption to fail
-        with pytest.raises(Exception, match="Incorrect padding|Invalid base64|Key error"):
+        with pytest.raises(Exception, match=r"Incorrect padding|Invalid base64|Key error"):
             config_manager.deobfuscate_passphrase("invalid_data")
 
     def test_pad_unpad_data(self, config_manager):
